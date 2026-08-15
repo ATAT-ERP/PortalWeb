@@ -1,14 +1,23 @@
 <template>
-  <main class="home-page">
+  <div class="home-page">
     <h1>A.T.A.T. ERP</h1>
     <p>Portal Web</p>
-    <p class="status">Proyecto inicializado correctamente.</p>
-  </main>
+    <p class="status">Bienvenido.</p>
+  </div>
 </template>
 
+<script setup></script>
+
 <style scoped>
-.home-page { display: grid; place-content: center; min-height: 100vh; padding: 2rem; text-align: center; }
-h1, p { margin: 0; }
-p { margin-top: 0.5rem; }
-.status { color: #4b5563; margin-top: 1.5rem; }
+.home-page h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #12233d;
+}
+
+.home-page p {
+  margin: 0.4rem 0 0;
+  color: #5b6b81;
+  font-size: 0.92rem;
+}
 </style>
