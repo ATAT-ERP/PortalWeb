@@ -2,6 +2,15 @@
   font-family: Arial, sans-serif;
   color: #1f2937;
   background: #f8fafc;
+
+  --ink: #12233d;
+  --ink-soft: #5b6b81;
+  --accent: #4f7a6b;
+  --brass: #b8935b;
+  --border: #e4e7e5;
+  --surface: #f4f5f3;
+  --brick: #c0402a;
+  --brick-bg: #fdf1ee;
 }
 
 * { box-sizing: border-box; }
