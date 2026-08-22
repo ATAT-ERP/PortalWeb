@@ -4,6 +4,11 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/',
+      name: 'index',
+      component: () => import('../pages/IndexPage.vue')
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('../pages/auth/LoginPage.vue')
@@ -13,7 +18,7 @@ const router = createRouter({
       component: () => import('../components/layout/AppLayout.vue'),
       children: [
         {
-          path: '',
+          path: 'home',
           name: 'home',
           component: () => import('../pages/home/HomePage.vue')
         },
