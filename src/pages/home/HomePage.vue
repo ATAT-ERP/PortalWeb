@@ -43,85 +43,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import '../../assets/css/HomePage.css'
 
 const userName = ref('')
 </script>
 
-<style scoped>
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.welcome-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.5rem 1.75rem;
-  box-shadow: 0 1px 3px rgba(18, 35, 61, 0.04);
-}
-
-.welcome-text h1 {
-  margin: 0 0 0.35rem;
-  font-size: 1.4rem;
-  font-weight: 650;
-  color: var(--ink);
-}
-
-.welcome-text p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-  line-height: 1.4;
-}
-
-.panel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-.panel {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.4rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  box-shadow: 0 1px 3px rgba(18, 35, 61, 0.04);
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.panel-icon {
-  color: var(--accent);
-  flex-shrink: 0;
-}
-
-.panel h2 {
-  margin: 0;
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.panel-content {
-  background: #f8fafc;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-}
-
-.panel-empty {
-  margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-</style>
