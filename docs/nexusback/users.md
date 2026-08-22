@@ -63,6 +63,17 @@ Respuesta exitosa (`200 OK`):
 
 Login no devuelve el perfil completo. El campo `id` permite consultar posteriormente `/users/<id>/`. NexusBack no tiene endpoint de refresh. La existencia de `refresh_token` no determina todavía cómo debe persistirlo PortalWeb.
 
+### Estado en PortalWeb
+
+La única integración users conectada a UI es el login:
+
+```text
+LoginPage → userService.login(email, password) → POST /api/users/login/
+          → sessionService.saveSession(response) → /home
+```
+
+PortalWeb guarda la respuesta de sesión sin perfil en `sessionStorage`. No ejecuta `GET /users/<id>/` como parte del login.
+
 ### Logout
 
 `POST /users/logout/` requiere Bearer, no tiene body y responde `204 No Content`. NexusBack usa alcance local (`scope=local`). Tras el éxito PortalWeb debe dejar de usar su sesión local; no debe asumir que un JWT emitido queda inutilizable inmediatamente.
@@ -201,16 +212,15 @@ La UI debe guiarse principalmente por `code`, `status` y `errors`, no por compar
 | `NEX-USR-013` | 502 | Auth no pudo cerrar la sesión. | Logout | No esperado |
 | `NEX-USR-014` | 502 | Auth no pudo actualizar la contraseña. | Password change | No esperado |
 
-## Services futuros
+## Service actual y operaciones pendientes de UI
 
-La organización prevista, sin implementarla todavía, es:
+`src/services/user.service.js` concentra las operaciones del dominio users:
 
 | Service | Operaciones |
 | --- | --- |
-| `auth.service.js` | `register`, `login`, `logout`, `changePassword` |
-| `users.service.js` | `list`, `getById`, `update`, `search`, `activate`, `deactivate`, `setSystemAdmin` |
+| `user.service.js` | `login`, `getById`, `logout`, `changePassword`, `update`, `register` |
 
-No agregar mappers. Las respuestas deben usarse con el contrato original en `snake_case`.
+Solo `login` tiene un consumidor de UI actualmente. `getById`, `update`, `register`, `logout` y `changePassword` están preparados, pero sus flujos visuales pertenecen a otras issues. No agregar mappers: las respuestas deben usarse con el contrato original en `snake_case`.
 
 ## Ejemplos conceptuales
 

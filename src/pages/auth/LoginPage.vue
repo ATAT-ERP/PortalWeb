@@ -6,6 +6,11 @@
     <div class="bg-blob bg-blob-c" aria-hidden="true"></div>
 
     <div class="card">
+      <RouterLink to="/" class="back-link">
+        <ArrowLeft :size="16" aria-hidden="true" />
+        Volver al inicio
+      </RouterLink>
+
       <div class="brand-row">
         <span class="logo-mark">AT</span>
         <div class="brand-text">
@@ -19,24 +24,29 @@
       </header>
 
       <form class="login-form" @submit.prevent="handleSubmit" novalidate>
-        <!-- Campo Email -->
         <div class="field" :class="{ invalid: touched.email && emailError }">
-          <label for="email">Email</label>
+          <label for="email" class="field-label">
+            <UserRound :size="16" aria-hidden="true" />
+            Email
+          </label>
           <input
             id="email"
             v-model="email"
             type="email"
-            placeholder="nombre@estudio.com"
-            autocomplete="username"
+            placeholder="Ingresá tu email"
+            autocomplete="email"
+            required
             :disabled="loading"
             @blur="touched.email = true"
           />
           <span v-if="touched.email && emailError" class="field-error">{{ emailError }}</span>
         </div>
 
-        <!-- Campo Contraseña con Toggle -->
         <div class="field" :class="{ invalid: touched.password && passwordError }">
-          <label for="password">Contraseña</label>
+          <label for="password" class="field-label">
+            <LockKeyhole :size="16" aria-hidden="true" />
+            Contraseña
+          </label>
           <div class="input-wrapper">
             <input
               id="password"
@@ -44,6 +54,7 @@
               :type="showPassword ? 'text' : 'password'"
               placeholder="••••••••"
               autocomplete="current-password"
+              required
               :disabled="loading"
               @blur="touched.password = true"
             />
@@ -54,14 +65,8 @@
               :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
               @click="showPassword = !showPassword"
             >
-              <svg v-if="showPassword" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
-              <svg v-else viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
+              <EyeOff v-if="showPassword" :size="18" aria-hidden="true" />
+              <Eye v-else :size="18" aria-hidden="true" />
             </button>
           </div>
           <span v-if="touched.password && passwordError" class="field-error">{{ passwordError }}</span>
@@ -70,8 +75,8 @@
         <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
 
         <button type="submit" class="submit-btn" :disabled="loading">
-          <span v-if="loading" class="spinner" aria-hidden="true"></span>
-          <span>{{ loading ? 'Ingresando…' : 'Iniciar sesión' }}</span>
+          <LogIn :size="18" aria-hidden="true" />
+          <span>Ingresar</span>
         </button>
 
         <a href="#" class="forgot-link" @click.prevent>
@@ -85,7 +90,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { login } from '../../services/auth.service'
+import { ArrowLeft, Eye, EyeOff, LockKeyhole, LogIn, UserRound } from '@lucide/vue'
+import { login } from '../../services/user.service'
+import { clearSession, saveSession } from '../../services/session.service'
 
 const router = useRouter()
 
@@ -97,9 +104,8 @@ const formError = ref('')
 const touched = ref({ email: false, password: false })
 
 const emailError = computed(() => {
-  if (!email.value) return 'Ingresá tu email.'
-  const validFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)
-  if (!validFormat) return 'El email no tiene un formato válido.'
+  if (!email.value.trim()) return 'Ingresá tu email.'
+  if (!/^\S+@\S+\.\S+$/.test(email.value)) return 'Ingresá un email válido.'
   return ''
 })
 
@@ -118,11 +124,14 @@ async function handleSubmit() {
   if (!isFormValid.value) return
 
   loading.value = true
+
   try {
-    await login(email.value, password.value)
-    router.push('/') // TODO: confirmar ruta de destino post-login
-  } catch (err) {
-    formError.value = err.message || 'No se pudo iniciar sesión. Intentá nuevamente.'
+    const session = await login(email.value.trim(), password.value)
+    saveSession(session)
+    router.push('/home')
+  } catch (error) {
+    clearSession()
+    formError.value = error instanceof Error ? error.message : 'No se pudo iniciar sesión. Intentá nuevamente.'
   } finally {
     loading.value = false
   }
@@ -206,6 +215,25 @@ async function handleSubmit() {
   animation: card-in 0.4s ease both;
 }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--ink);
+}
+
+.back-link:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
 .brand-row {
   display: flex;
   align-items: center;
@@ -268,6 +296,12 @@ async function handleSubmit() {
   font-size: 0.82rem;
   font-weight: 550;
   color: var(--ink);
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .input-wrapper {
