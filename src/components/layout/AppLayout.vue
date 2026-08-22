@@ -23,9 +23,9 @@
 
       <nav class="nav-list">
         <router-link
-          to="/"
+          to="/home"
           class="nav-link"
-          :class="{ active: route.path === '/' }"
+          :class="{ active: route.path === '/home' }"
           @click="sidebarOpen = false"
         >
           <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
