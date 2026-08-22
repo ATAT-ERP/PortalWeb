@@ -24,22 +24,22 @@
       </header>
 
       <form class="login-form" @submit.prevent="handleSubmit" novalidate>
-        <div class="field" :class="{ invalid: touched.username && usernameError }">
-          <label for="username" class="field-label">
+        <div class="field" :class="{ invalid: touched.email && emailError }">
+          <label for="email" class="field-label">
             <UserRound :size="16" aria-hidden="true" />
-            Usuario
+            Email
           </label>
           <input
-            id="username"
-            v-model="username"
-            type="text"
-            placeholder="Ingresá tu usuario"
-            autocomplete="username"
+            id="email"
+            v-model="email"
+            type="email"
+            placeholder="Ingresá tu email"
+            autocomplete="email"
             required
             :disabled="loading"
-            @blur="touched.username = true"
+            @blur="touched.email = true"
           />
-          <span v-if="touched.username && usernameError" class="field-error">{{ usernameError }}</span>
+          <span v-if="touched.email && emailError" class="field-error">{{ emailError }}</span>
         </div>
 
         <div class="field" :class="{ invalid: touched.password && passwordError }">
@@ -91,18 +91,21 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, Eye, EyeOff, LockKeyhole, LogIn, UserRound } from '@lucide/vue'
+import { login } from '../../services/user.service'
+import { clearSession, saveSession } from '../../services/session.service'
 
 const router = useRouter()
 
-const username = ref('')
+const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const loading = ref(false)
 const formError = ref('')
-const touched = ref({ username: false, password: false })
+const touched = ref({ email: false, password: false })
 
-const usernameError = computed(() => {
-  if (!username.value.trim()) return 'Ingresá tu usuario.'
+const emailError = computed(() => {
+  if (!email.value.trim()) return 'Ingresá tu email.'
+  if (!/^\S+@\S+\.\S+$/.test(email.value)) return 'Ingresá un email válido.'
   return ''
 })
 
@@ -111,17 +114,27 @@ const passwordError = computed(() => {
   return ''
 })
 
-const isFormValid = computed(() => !usernameError.value && !passwordError.value)
+const isFormValid = computed(() => !emailError.value && !passwordError.value)
 
 async function handleSubmit() {
-  touched.value.username = true
+  touched.value.email = true
   touched.value.password = true
   formError.value = ''
 
   if (!isFormValid.value) return
 
-  // TODO: reemplazar por autenticación real cuando se conecte el backend.
-  router.push('/home')
+  loading.value = true
+
+  try {
+    const session = await login(email.value.trim(), password.value)
+    saveSession(session)
+    router.push('/home')
+  } catch (error) {
+    clearSession()
+    formError.value = error instanceof Error ? error.message : 'No se pudo iniciar sesión. Intentá nuevamente.'
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

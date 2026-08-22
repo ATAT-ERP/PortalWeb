@@ -21,11 +21,11 @@
       <dl class="profile-fields">
         <div class="field-row">
           <dt>NOMBRE</dt>
-          <dd>{{ profile.firstName }}</dd>
+          <dd>{{ profile.first_name }}</dd>
         </div>
         <div class="field-row">
           <dt>APELLIDO</dt>
-          <dd>{{ profile.lastName }}</dd>
+          <dd>{{ profile.last_name }}</dd>
         </div>
         <div class="field-row">
           <dt>EMAIL</dt>
@@ -34,7 +34,7 @@
         <div class="field-row">
           <dt>ESTADO DE LA CUENTA</dt>
           <dd class="status-value">
-            <span class="status-badge">{{ profile.status }}</span>
+            <span class="status-badge">{{ status }}</span>
           </dd>
         </div>
       </dl>
@@ -102,17 +102,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-// TODO: reemplazar por los datos reales del usuario autenticado vía account.service.js
-// cuando el endpoint esté confirmado con Agus.
 const profile = ref({
-  firstName: 'Nombre',
-  lastName: 'Apellido',
+  first_name: 'Nombre',
+  last_name: 'Apellido',
   email: 'usuario@ejemplo.com',
-  status: 'Activa'
+  is_active: true
 })
 
-// Nota: v-model solo captura los valores escritos para la maqueta, no realiza
-// ninguna validación (longitud, fortaleza ni coincidencia).
 const passwordForm = ref({
   current: '',
   newPass: '',
@@ -120,11 +116,13 @@ const passwordForm = ref({
 })
 
 const initials = computed(() =>
-  `${profile.value.firstName[0] ?? ''}${profile.value.lastName[0] ?? ''}`.toUpperCase()
+  `${profile.value.first_name[0] ?? ''}${profile.value.last_name[0] ?? ''}`.toUpperCase()
 )
 
+const status = computed(() => (profile.value.is_active ? 'Activa' : 'Inactiva'))
+
 function handleChangePassword() {
-  // TODO: Integración pendiente con NexusBack previa confirmación con Agus.
+  // TODO: conectar el cambio de contraseña con el backend en una iteración posterior.
 }
 </script>
 

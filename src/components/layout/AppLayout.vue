@@ -14,7 +14,7 @@
         </div>
 
         <!-- TODO: reemplazar por selector real de empresa activa cuando se
-             implemente soporte de múltiples empresas por usuario. -->
+            implemente soporte de múltiples empresas por usuario. -->
         <div class="company-chip">
           <span class="company-dot"></span>
           <span class="company-label">Empresa activa</span>
@@ -94,14 +94,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { clearSession } from '../../services/session.service'
 
 const route = useRoute()
 const router = useRouter()
 
 const sidebarOpen = ref(false)
 
-// TODO: reemplazar por los datos reales del usuario autenticado
-// cuando la sesión esté conectada con NexusBack.
 const user = ref({ name: 'Usuario' })
 
 const userInitials = computed(() =>
@@ -114,8 +113,7 @@ const userInitials = computed(() =>
 )
 
 function handleLogout() {
-  // TODO: confirmar con Agus el endpoint/flujo real de cierre de sesión
-  // (invalidar token, limpiar store de sesión, etc.) cuando esté disponible.
+  clearSession()
   router.push('/login')
 }
 </script>
