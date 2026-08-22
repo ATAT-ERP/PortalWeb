@@ -26,7 +26,7 @@ export function getClients() {
 }
 ```
 
-No llames a `fetch('http://localhost:8000/api/v1/clients/')` desde una página. La configuración HTTP y la URL base están centralizadas en `api.js`.
+No llames a `fetch('http://localhost:8000/api/clients/')` desde una página. La configuración HTTP y la URL base están centralizadas en `api.js`.
 
 ### 3. Usar el service desde la página
 

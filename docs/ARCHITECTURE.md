@@ -10,7 +10,7 @@ Mantener Portal fácil de entender y de ampliar, sin añadir capas ni carpetas a
 Router → Page → Service → api.js → NexusBack
 ```
 
-NexusBack expone una API REST versionada bajo `/api/v1/`. La URL base se configura mediante `VITE_API_URL`.
+NexusBack expone una API REST versionada bajo `/api/`. La URL base se configura mediante `VITE_API_URL`.
 
 ## Estructura
 

@@ -55,7 +55,7 @@ npm install nombre-paquete
 La variable `VITE_API_URL` define la base de la API versionada, por ejemplo:
 
 ```env
-VITE_API_URL=http://localhost:8000/api/v1
+VITE_API_URL=http://localhost:8000/api/
 ```
 
 No se versiona el archivo `.env`; sí se incluye `.env.example` como referencia.
