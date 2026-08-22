@@ -43,8 +43,7 @@
 
 <script setup>
 import { ref } from 'vue'
-// TODO: Reemplazar por el nombre real del usuario autenticado.
-// Consultar con Agus el endpoint correspondiente antes de definir el contrato de datos.
+
 const userName = ref('')
 </script>
 
