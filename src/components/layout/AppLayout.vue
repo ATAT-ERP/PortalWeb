@@ -52,14 +52,14 @@
              sin tocar el resto del layout. -->
       </nav>
 
-      <button type="button" class="logout-btn" @click="handleLogout">
+      <button type="button" class="logout-btn" @click="handleLogout" :disabled="loggingOut">
         <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
           <path d="M7.5 3H5a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 5 17h2.5"
             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           <path d="M12.5 13.5 16 10l-3.5-3.5M16 10H7.5"
             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        Cerrar sesión
+        {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
       </button>
     </aside>
 
@@ -94,13 +94,15 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { clearSession } from '../../services/session.service'
+import { logout } from '../../services/user.service'
+import { clearSession, getAccessToken } from '../../services/session.service'
 import '../../assets/css/AppLayout.css'
 
 const route = useRoute()
 const router = useRouter()
 
 const sidebarOpen = ref(false)
+const loggingOut = ref(false)
 
 const user = ref({ name: 'Usuario' })
 
@@ -113,8 +115,23 @@ const userInitials = computed(() =>
     .toUpperCase()
 )
 
-function handleLogout() {
-  clearSession()
-  router.push('/login')
+async function handleLogout() {
+  loggingOut.value = true
+  const token = getAccessToken()
+
+  try {
+    if (token) {
+      await logout(token)
+    }
+  } catch (error) {
+    // Si la llamada remota falla (red caída, token ya vencido, etc.),
+    // igual limpiamos la sesión local: el objetivo del issue #7 es que
+    // una sesión inválida no pueda seguir usando el Portal, con o sin
+    // respuesta exitosa del backend.
+  } finally {
+    clearSession()
+    loggingOut.value = false
+    router.push('/login')
+  }
 }
 </script>
