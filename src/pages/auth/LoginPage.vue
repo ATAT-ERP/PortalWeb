@@ -1,31 +1,28 @@
 <template>
   <div class="login-screen">
-    <div class="bg-grid" aria-hidden="true"></div>
-    <div class="bg-blob bg-blob-a" aria-hidden="true"></div>
-    <div class="bg-blob bg-blob-b" aria-hidden="true"></div>
-    <div class="bg-blob bg-blob-c" aria-hidden="true"></div>
+    <div class="login-bg-grid" aria-hidden="true"></div>
 
-    <div class="card">
-      <RouterLink to="/" class="back-link">
+    <div class="login-card">
+      <RouterLink to="/" class="login-back-link">
         <ArrowLeft :size="16" aria-hidden="true" />
         Volver al inicio
       </RouterLink>
 
-      <div class="brand-row">
-        <span class="logo-mark">AT</span>
-        <div class="brand-text">
-          <span class="brand-name">A.T.A.T. ERP</span>
+      <div class="login-brand-row">
+        <span class="login-logo-mark">AT</span>
+        <div class="login-brand-text">
+          <span class="login-brand-name">A.T.A.T. ERP</span>
         </div>
       </div>
 
-      <header class="form-header">
+      <header class="login-form-header">
         <h1>Iniciar sesión</h1>
         <p>Ingresá tus credenciales para acceder al sistema.</p>
       </header>
 
       <form class="login-form" @submit.prevent="handleSubmit" novalidate>
-        <div class="field" :class="{ invalid: touched.email && emailError }">
-          <label for="email" class="field-label">
+        <div class="login-field" :class="{ 'login-field-invalid': touched.email && emailError }">
+          <label for="email" class="login-field-label">
             <UserRound :size="16" aria-hidden="true" />
             Email
           </label>
@@ -39,15 +36,15 @@
             :disabled="loading"
             @blur="touched.email = true"
           />
-          <span v-if="touched.email && emailError" class="field-error">{{ emailError }}</span>
+          <span v-if="touched.email && emailError" class="login-field-error">{{ emailError }}</span>
         </div>
 
-        <div class="field" :class="{ invalid: touched.password && passwordError }">
-          <label for="password" class="field-label">
+        <div class="login-field" :class="{ 'login-field-invalid': touched.password && passwordError }">
+          <label for="password" class="login-field-label">
             <LockKeyhole :size="16" aria-hidden="true" />
             Contraseña
           </label>
-          <div class="input-wrapper">
+          <div class="login-input-wrapper">
             <input
               id="password"
               v-model="password"
@@ -60,7 +57,7 @@
             />
             <button
               type="button"
-              class="toggle-password"
+              class="login-toggle-password"
               :disabled="loading"
               :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
               @click="showPassword = !showPassword"
@@ -69,17 +66,17 @@
               <Eye v-else :size="18" aria-hidden="true" />
             </button>
           </div>
-          <span v-if="touched.password && passwordError" class="field-error">{{ passwordError }}</span>
+          <span v-if="touched.password && passwordError" class="login-field-error">{{ passwordError }}</span>
         </div>
 
-        <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
+        <p v-if="formError" class="login-form-error" role="alert">{{ formError }}</p>
 
-        <button type="submit" class="submit-btn" :disabled="loading">
+        <button type="submit" class="login-submit-button" :disabled="loading">
           <LogIn :size="18" aria-hidden="true" />
           <span>Ingresar</span>
         </button>
 
-        <a href="#" class="forgot-link" @click.prevent>
+        <a href="#" class="login-forgot-link" @click.prevent>
           ¿Olvidaste tu contraseña?
         </a>
       </form>

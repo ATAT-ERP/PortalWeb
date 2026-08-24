@@ -19,8 +19,8 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
   flex-shrink: 0;
 }
 
@@ -28,23 +28,23 @@
   margin: 0 0 0.2rem;
   font-size: 1.4rem;
   font-weight: 650;
-  color: var(--ink);
+  color: var(--color-text-primary);
 }
 
 .header-text p {
   margin: 0;
   font-size: 0.88rem;
-  color: var(--ink-soft);
+  color: var(--color-text-secondary);
 }
 
 /* Tarjetas base */
 .profile-card,
 .security-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 1.6rem;
-  box-shadow: 0 1px 3px rgba(18, 35, 61, 0.04);
+  box-shadow: var(--shadow-card);
 }
 
 /* Específicos de Perfil */
@@ -62,8 +62,8 @@
   height: 96px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
   font-size: 2rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -86,7 +86,7 @@
 .field-row dt {
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--ink-soft);
+  color: var(--color-text-secondary);
   letter-spacing: 0.06em;
 }
 
@@ -95,7 +95,7 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--color-text-primary);
 }
 
 .field-row dd.email-value {
@@ -112,8 +112,8 @@
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  background: rgba(79, 122, 107, 0.12);
-  color: var(--accent);
+  background: var(--color-accent-background);
+  color: var(--color-accent);
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -134,13 +134,13 @@
   flex: 1;
   margin: 0;
   font-size: 0.9rem;
-  color: var(--ink-soft);
+  color: var(--color-text-secondary);
 }
 
 .state-error {
   margin: 0;
   font-size: 0.85rem;
-  color: var(--brick);
+  color: var(--color-danger);
 }
 
 .state-retry {
@@ -148,8 +148,8 @@
   padding: 0.55rem 1.1rem;
   border: none;
   border-radius: 10px;
-  background: var(--ink);
-  color: #ffffff;
+  background: var(--color-text-primary);
+  color: var(--color-surface-raised);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -157,7 +157,13 @@
 }
 
 .state-retry:hover {
-  background: #1b3352;
+  background: var(--color-text-primary-hover);
+}
+
+.state-retry:focus-visible,
+.account-submit-button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
 }
 
 /* Específicos de Seguridad */
@@ -175,8 +181,8 @@
   width: 42px;
   height: 42px;
   border-radius: 10px;
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
   flex-shrink: 0;
 }
 
@@ -184,13 +190,13 @@
   margin: 0 0 0.2rem;
   font-size: 1.15rem;
   font-weight: 650;
-  color: var(--ink);
+  color: var(--color-text-primary);
 }
 
 .security-text p {
   margin: 0;
   font-size: 0.86rem;
-  color: var(--ink-soft);
+  color: var(--color-text-secondary);
 }
 
 /* Formulario */
@@ -207,47 +213,47 @@
   gap: 1.1rem;
 }
 
-.field {
+.account-field {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
 
-.field label {
+.account-field label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--color-text-primary);
 }
 
-.field input {
-  border: 1.5px solid var(--border);
+.account-field input {
+  border: 1.5px solid var(--color-border);
   border-radius: 10px;
   padding: 0.65rem 0.85rem;
   font-size: 0.92rem;
-  color: var(--ink);
-  background: #fbfbfa;
+  color: var(--color-text-primary);
+  background: var(--color-surface-input);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.field input:focus {
+.account-field input:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79, 122, 107, 0.14);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-focus);
 }
 
-.field.invalid input {
-  border-color: var(--brick);
+.account-field-invalid input {
+  border-color: var(--color-danger);
 }
 
-.field input:disabled {
-  background: #f4f5f7;
+.account-field input:disabled {
+  background: var(--color-surface-disabled);
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-.field-error {
+.account-field-error {
   font-size: 0.78rem;
-  color: var(--brick);
+  color: var(--color-danger);
 }
 
 .form-message {
@@ -258,34 +264,34 @@
 }
 
 .form-message-error {
-  background: var(--brick-bg);
-  color: var(--brick);
+  background: var(--color-danger-background);
+  color: var(--color-danger);
 }
 
 .form-message-success {
-  background: rgba(79, 122, 107, 0.12);
-  color: var(--accent);
+  background: var(--color-accent-background);
+  color: var(--color-accent);
 }
 
-.submit-btn {
+.account-submit-button {
   align-self: flex-start;
   margin-top: 0.4rem;
   padding: 0.7rem 1.4rem;
   border: none;
   border-radius: 10px;
-  background: var(--ink);
-  color: #ffffff;
+  background: var(--color-text-primary);
+  color: var(--color-surface-raised);
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.submit-btn:hover:not(:disabled) {
-  background: #1b3352;
+.account-submit-button:hover:not(:disabled) {
+  background: var(--color-text-primary-hover);
 }
 
-.submit-btn:disabled {
+.account-submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -301,7 +307,7 @@
     max-width: 100%;
   }
 
-  .submit-btn {
+  .account-submit-button {
     width: 100%;
   }
 }

@@ -8,9 +8,9 @@
 
     <aside class="sidebar" :class="{ open: sidebarOpen }">
       <div class="sidebar-top">
-        <div class="brand-row">
-          <span class="logo-mark">AT</span>
-          <span class="brand-name">A.T.A.T. ERP</span>
+        <div class="layout-brand-row">
+          <span class="layout-logo-mark">AT</span>
+          <span class="layout-brand-name">A.T.A.T. ERP</span>
         </div>
 
         <!-- TODO: reemplazar por selector real de empresa activa cuando se
@@ -43,7 +43,7 @@
         </router-link>
 
         <!-- Los módulos futuros se agregan acá como nuevos router-link,
-             sin tocar el resto del layout. -->
+            sin tocar el resto del layout. -->
       </nav>
 
       <button type="button" class="logout-btn" @click="handleLogout" :disabled="loggingOut">

@@ -1,15 +1,7 @@
 .app-shell {
-  --ink: #12233d;
-  --ink-soft: #5b6b81;
-  --border: #e4e7e5;
-  --accent: #4f7a6b;
-  --brass: #b8935b;
-  --surface: #f4f5f3;
-
   display: flex;
   min-height: 100vh;
-  background: var(--surface);
-  font-family: -apple-system, 'Segoe UI', Roboto, ui-sans-serif, system-ui, sans-serif;
+  background: var(--color-surface);
 }
 
 /* Sidebar */
@@ -18,8 +10,8 @@
   flex-direction: column;
   width: 240px;
   flex-shrink: 0;
-  background: var(--ink);
-  color: #f4f2ec;
+  background: var(--color-text-primary);
+  color: var(--color-text-on-dark);
   padding: 1.5rem 1.1rem;
 }
 
@@ -30,26 +22,26 @@
   margin-bottom: 1.75rem;
 }
 
-.brand-row {
+.layout-brand-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
 }
 
-.logo-mark {
+.layout-logo-mark {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: #f4f2ec;
-  color: var(--ink);
+  background: var(--color-text-on-dark);
+  color: var(--color-text-primary);
   font-size: 0.72rem;
   font-weight: 700;
 }
 
-.brand-name {
+.layout-brand-name {
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -60,16 +52,16 @@
   gap: 0.5rem;
   padding: 0.5rem 0.7rem;
   border-radius: 8px;
-  background: rgba(244, 242, 236, 0.08);
+  background: var(--color-navigation-surface);
   font-size: 0.78rem;
-  color: #cfd6de;
+  color: var(--color-navigation-text-muted);
 }
 
 .company-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-accent);
   flex-shrink: 0;
 }
 
@@ -87,19 +79,19 @@
   padding: 0.6rem 0.75rem;
   border-radius: 8px;
   font-size: 0.88rem;
-  color: #dfe4e9;
+  color: var(--color-navigation-text);
   text-decoration: none;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
 .nav-link:hover {
-  background: rgba(244, 242, 236, 0.08);
-  color: #ffffff;
+  background: var(--color-navigation-surface);
+  color: var(--color-surface-raised);
 }
 
 .nav-link.active {
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
 }
 
 .nav-icon {
@@ -116,15 +108,23 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #cfd6de;
+  color: var(--color-navigation-text-muted);
   font-size: 0.86rem;
   cursor: pointer;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
 .logout-btn:hover {
-  background: rgba(192, 64, 42, 0.16);
-  color: #f3b9ab;
+  background: var(--color-navigation-danger-background);
+  color: var(--color-navigation-text-danger);
+}
+
+.nav-link:focus-visible,
+.logout-btn:focus-visible,
+.menu-toggle:focus-visible,
+.user-info:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
 }
 
 /* Main column */
@@ -140,8 +140,8 @@
   align-items: center;
   height: 60px;
   padding: 0 1.5rem;
-  background: #ffffff;
-  border-bottom: 1px solid var(--border);
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .menu-toggle {
@@ -153,7 +153,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--ink);
+  color: var(--color-text-primary);
   cursor: pointer;
 }
 
@@ -177,7 +177,7 @@
 }
 
 .user-info:hover {
-  background: var(--surface);
+  background: var(--color-surface);
 }
 
 .user-avatar {
@@ -187,8 +187,8 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -196,7 +196,7 @@
 .user-name {
   font-size: 0.85rem;
   font-weight: 550;
-  color: var(--ink);
+  color: var(--color-text-primary);
 }
 
 .content-area {

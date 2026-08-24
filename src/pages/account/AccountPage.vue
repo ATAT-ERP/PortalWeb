@@ -63,7 +63,7 @@
       </header>
 
       <form class="password-form" @submit.prevent="handleChangePassword">
-        <div class="field" :class="{ invalid: touched.current && currentError }">
+          <div class="account-field" :class="{ 'account-field-invalid': touched.current && currentError }">
           <label for="current-password">Contraseña actual</label>
           <input
             id="current-password"
@@ -74,11 +74,11 @@
             :disabled="isSaving"
             @blur="touched.current = true"
           />
-          <span v-if="touched.current && currentError" class="field-error">{{ currentError }}</span>
+            <span v-if="touched.current && currentError" class="account-field-error">{{ currentError }}</span>
         </div>
 
         <div class="form-row">
-          <div class="field" :class="{ invalid: touched.newPass && newPassError }">
+          <div class="account-field" :class="{ 'account-field-invalid': touched.newPass && newPassError }">
             <label for="new-password">Nueva contraseña</label>
             <input
               id="new-password"
@@ -89,10 +89,10 @@
               :disabled="isSaving"
               @blur="touched.newPass = true"
             />
-            <span v-if="touched.newPass && newPassError" class="field-error">{{ newPassError }}</span>
+            <span v-if="touched.newPass && newPassError" class="account-field-error">{{ newPassError }}</span>
           </div>
 
-          <div class="field" :class="{ invalid: touched.confirmPass && confirmError }">
+          <div class="account-field" :class="{ 'account-field-invalid': touched.confirmPass && confirmError }">
             <label for="confirm-password">Confirmar nueva contraseña</label>
             <input
               id="confirm-password"
@@ -103,14 +103,14 @@
               :disabled="isSaving"
               @blur="touched.confirmPass = true"
             />
-            <span v-if="touched.confirmPass && confirmError" class="field-error">{{ confirmError }}</span>
+            <span v-if="touched.confirmPass && confirmError" class="account-field-error">{{ confirmError }}</span>
           </div>
         </div>
 
         <p v-if="formError" class="form-message form-message-error" role="alert">{{ formError }}</p>
         <p v-if="formSuccess" class="form-message form-message-success">{{ formSuccess }}</p>
 
-        <button type="submit" class="submit-btn" :disabled="isSaving">
+        <button type="submit" class="account-submit-button" :disabled="isSaving">
           {{ isSaving ? 'Guardando...' : 'Cambiar contraseña' }}
         </button>
       </form>
