@@ -1,12 +1,8 @@
 <template>
   <div class="account-page">
-    <!-- Header con ícono -->
     <header class="page-header">
       <div class="header-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
+        <UserRound :size="24" />
       </div>
       <div class="header-text">
         <h1>Mi cuenta</h1>
@@ -14,7 +10,6 @@
       </div>
     </header>
 
-    <!-- Tarjeta de Perfil -->
     <section class="profile-card">
       <div class="profile-avatar" aria-hidden="true">{{ initials }}</div>
 
@@ -56,14 +51,10 @@
       </div>
     </section>
 
-    <!-- Tarjeta de Seguridad -->
     <section class="security-card">
       <header class="security-header">
         <div class="security-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
+          <LockKeyhole :size="22" />
         </div>
         <div class="security-text">
           <h2>Seguridad</h2>
@@ -130,6 +121,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { UserRound, LockKeyhole } from '@lucide/vue'
 import { changePassword, getById } from '../../services/user.service'
 import { clearSession, getAccessToken, getProfile, getSession, setProfile } from '../../services/session.service'
 import '../../assets/css/AccountPage.css'

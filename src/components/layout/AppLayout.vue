@@ -28,10 +28,7 @@
           :class="{ active: route.path === '/home' }"
           @click="sidebarOpen = false"
         >
-          <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-            <path d="M3 9.5 10 4l7 5.5V16a1 1 0 0 1-1 1h-4v-5H8v5H4a1 1 0 0 1-1-1V9.5Z"
-              stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
-          </svg>
+          <Home class="nav-icon" aria-hidden="true" />
           Inicio
         </router-link>
 
@@ -41,10 +38,7 @@
           :class="{ active: route.path === '/cuenta' }"
           @click="sidebarOpen = false"
         >
-          <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5" />
-            <path d="M3.5 17c0-3 3-5 6.5-5s6.5 2 6.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-          </svg>
+          <UserRound class="nav-icon" aria-hidden="true" />
           Mi cuenta
         </router-link>
 
@@ -53,12 +47,7 @@
       </nav>
 
       <button type="button" class="logout-btn" @click="handleLogout" :disabled="loggingOut">
-        <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-          <path d="M7.5 3H5a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 5 17h2.5"
-            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-          <path d="M12.5 13.5 16 10l-3.5-3.5M16 10H7.5"
-            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+        <LogOut class="nav-icon" aria-hidden="true" />
         {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
       </button>
     </aside>
@@ -71,9 +60,7 @@
           aria-label="Abrir navegación"
           @click="sidebarOpen = true"
         >
-          <svg viewBox="0 0 20 20" fill="none">
-            <path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-          </svg>
+          <Menu aria-hidden="true" />
         </button>
 
         <div class="topbar-spacer"></div>
@@ -94,6 +81,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Home, UserRound, LogOut, Menu } from '@lucide/vue'
 import { logout } from '../../services/user.service'
 import { clearSession, getAccessToken } from '../../services/session.service'
 import '../../assets/css/AppLayout.css'
