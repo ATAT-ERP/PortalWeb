@@ -10,9 +10,7 @@
     <section class="panel-grid">
       <article class="panel">
         <header class="panel-header">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" class="panel-icon" aria-hidden="true">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
+          <Zap :size="20" class="panel-icon" aria-hidden="true" />
           <h2>Accesos rápidos</h2>
         </header>
         <div class="panel-content">
@@ -24,11 +22,7 @@
 
       <article class="panel">
         <header class="panel-header">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" class="panel-icon" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
+          <Info :size="20" class="panel-icon" aria-hidden="true" />
           <h2>Información</h2>
         </header>
         <div class="panel-content">
@@ -43,8 +37,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import { Zap, Info } from '@lucide/vue'
 import '../../assets/css/HomePage.css'
 
 const userName = ref('')
 </script>
-
