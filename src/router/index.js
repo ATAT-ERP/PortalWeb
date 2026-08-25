@@ -17,6 +17,11 @@ const router = createRouter({
       component: () => import('../pages/auth/LoginPage.vue')
     },
     {
+      path: '/register',
+      name: 'register',
+      component: () => import('../pages/auth/RegisterPage.vue')
+    },
+    {
       // Contenedor de TODO lo privado. El meta va acá, en el padre,
       // y Vue Router lo hereda automáticamente a todas sus rutas hijas.
       path: '/',
