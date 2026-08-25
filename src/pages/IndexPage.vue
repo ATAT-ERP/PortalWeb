@@ -7,7 +7,10 @@
       <nav class="index-nav" aria-label="Navegación principal">
         <a href="#funciones">Funciones</a><a href="#publico">Para quién</a><a href="#objetivo">Objetivo</a>
       </nav>
-      <RouterLink to="/login" class="index-header-login">Iniciar sesión <LogIn :size="16" aria-hidden="true" /></RouterLink>
+      <div class="index-header-actions">
+        <RouterLink to="/register" class="index-header-register">Crear cuenta</RouterLink>
+        <RouterLink to="/login" class="index-header-login">Iniciar sesión <LogIn :size="16" aria-hidden="true" /></RouterLink>
+      </div>
     </header>
 
     <main class="index-content">

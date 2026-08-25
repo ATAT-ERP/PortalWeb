@@ -23,6 +23,7 @@
 
 .index-brand,
 .index-header-login,
+.index-header-register,
 .index-nav a,
 .index-button {
   text-decoration: none;
@@ -72,6 +73,7 @@
 }
 
 .index-header-login,
+.index-header-register,
 .index-button {
   display: inline-flex;
   align-items: center;
@@ -101,6 +103,29 @@
 .index-button-primary:hover {
   background: var(--color-accent);
 
+  transform: translateY(-1px);
+}
+
+.index-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.index-header-register {
+  padding: 0.56rem 0.85rem;
+
+  border: 1px solid var(--color-border);
+
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  font-size: 0.84rem;
+}
+
+.index-header-register:hover {
+  border-color: var(--color-accent);
+
+  color: var(--color-accent);
   transform: translateY(-1px);
 }
 
@@ -193,6 +218,7 @@
 }
 
 .index-header-login:focus-visible,
+.index-header-register:focus-visible,
 .index-button:focus-visible,
 .index-nav a:focus-visible,
 .index-brand:focus-visible {
@@ -551,7 +577,7 @@
     display: none;
   }
 
-  .index-header-login {
+  .index-header-actions {
     margin-left: auto;
   }
 
