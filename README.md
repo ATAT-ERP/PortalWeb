@@ -8,6 +8,7 @@ Frontend web de **A.T.A.T. ERP**. Consume por HTTP/JSON la API REST de **NexusBa
 - Vite
 - JavaScript
 - Vue Router
+- @lucide/vue
 - npm
 
 ## Requisitos
@@ -52,15 +53,28 @@ npm install nombre-paquete
 
 ## Configuración
 
-La variable `VITE_API_URL` define la base de la API versionada, por ejemplo:
+La variable `VITE_API_URL` define la base de NexusBack:
 
 ```env
-VITE_API_URL=http://localhost:8000/api/
+VITE_API_URL=http://localhost:8000/api
 ```
 
-No se versiona el archivo `.env`; sí se incluye `.env.example` como referencia.
+NexusBack no usa `/api/v1`. No se versiona el archivo `.env`; sí se incluye `.env.example` como referencia.
+
+## Integración users actual
+
+El login real está conectado desde `LoginPage`:
+
+```text
+LoginPage → userService.login(email, password) → POST /api/users/login/
+          → sessionService.saveSession(response) → /home
+```
+
+La sesión se persiste por pestaña mediante `sessionStorage`. Las demás operaciones disponibles en `user.service.js` todavía no están conectadas a una interfaz.
 
 ## Documentación
 
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Guía de trabajo](docs/WORKFLOW.md)
+- [Integración con NexusBack](docs/nexusback/README.md)
+- [Contrato del módulo users](docs/nexusback/users.md)

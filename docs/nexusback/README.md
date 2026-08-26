@@ -50,7 +50,7 @@ Las solicitudes y respuestas del API son JSON cuando corresponde:
 
 El `api.js` actual ya centraliza JSON y devuelve `null` para 204/205. No duplicar esa configuración en páginas.
 
-## Bearer
+## Sesión y Bearer
 
 Los endpoints protegidos requieren:
 
@@ -58,23 +58,25 @@ Los endpoints protegidos requieren:
 Authorization: Bearer <access_token>
 ```
 
-El Bearer se adjunta solamente en endpoints protegidos; los endpoints públicos no lo requieren. La estrategia para mantener el token en PortalWeb aún no está definida. No colocar tokens en URLs, logs, mensajes visibles ni código versionado.
+El Bearer se adjunta solamente en endpoints protegidos; los endpoints públicos no lo requieren. No colocar tokens en URLs, logs, mensajes visibles ni código versionado.
 
-## Sesión
-
-El flujo general es:
+El login actualmente implementado es:
 
 ```text
-login
+LoginPage
     ↓
-recibir sesión
+userService.login(email, password)
     ↓
-PortalWeb mantiene la sesión según una estrategia futura
+POST /api/users/login/
     ↓
-usar access_token como Bearer
+sessionService.saveSession(response)
+    ↓
+/home
 ```
 
-NexusBack no tiene actualmente endpoint de refresh. Aunque login devuelva `refresh_token`, esta guía no define todavía dónde ni cómo persistirlo; tampoco prescribe localStorage, sessionStorage, cookies, Pinia ni Vuex.
+La respuesta se guarda por pestaña en `sessionStorage` bajo `atat_session`, sin transformar sus propiedades. Login no obtiene automáticamente el perfil. NexusBack no tiene endpoint de refresh y PortalWeb no implementa refresh automático.
+
+`user.service.js` también expone `getById`, `update`, `register`, `logout` y `changePassword`, pero sus integraciones de UI corresponden a otras issues.
 
 ## Errores
 
@@ -96,8 +98,14 @@ También puede devolver el formato habitual de DRF:
 }
 ```
 
-La infraestructura frontend debe conservar como mínimo `status`, `code`, `message`, `errors` y `detail`; preferentemente debe conservar el body completo. El `api.js` actual todavía descarta parte de esa información en respuestas HTTP no exitosas: esa corrección queda para una tarea futura.
+`api.js` normaliza el mensaje y conserva `status`, `code` y `errors` en el error. Prioriza `message`, luego `detail.message`, luego un `detail` string y finalmente un mensaje por status.
 
-## Estado actual / requisito pendiente de integración: CORS
+## Desarrollo local y CORS
 
-NexusBack todavía no tiene `django-cors-headers` ni `CORS_ALLOWED_ORIGINS` configurado. Por ello, PortalWeb servido por Vite desde otro origen no puede consumir el backend directamente desde el navegador hasta que se resuelva CORS o se utilice una estrategia same-origin/proxy. Este es el estado actual, no una instrucción para cambiarlo en esta documentación.
+PortalWeb normalmente corre en `http://localhost:5173` y NexusBack en `http://localhost:8000`. Para permitir el consumo desde el navegador, NexusBack debe recibir en su `.env`:
+
+```env
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+```
+
+Después de cambiar una variable de `.env` usada por Docker, el contenedor debe iniciarse o recrearse para recibirla. No incluir secretos en documentación ni en archivos versionados.

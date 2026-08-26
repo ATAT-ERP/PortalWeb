@@ -1,18 +1,65 @@
 :root {
   font-family: Arial, sans-serif;
-  color: #1f2937;
-  background: #f8fafc;
+  color: var(--color-text-primary);
+  background: var(--color-background);
 
-  --ink: #12233d;
-  --ink-soft: #5b6b81;
-  --accent: #4f7a6b;
-  --brass: #b8935b;
-  --border: #e4e7e5;
-  --surface: #f4f5f3;
-  --brick: #c0402a;
-  --brick-bg: #fdf1ee;
+  /* Base y texto */
+  --color-text-primary: #12233d;
+  --color-text-secondary: #5b6b81;
+  --color-text-on-dark: #f4f2ec;
+  --color-text-disabled: #a7afba;
+  --color-text-primary-hover: #1b3352;
+
+  /* Superficies */
+  --color-background: #f8fafc;
+  --color-surface: #f4f5f3;
+  --color-surface-raised: #ffffff;
+  --color-surface-input: #fbfbfa;
+  --color-surface-disabled: #f4f5f7;
+  --color-border: #e4e7e5;
+
+  /* Estados */
+  --color-accent: #4f7a6b;
+  --color-accent-background: rgba(79, 122, 107, 0.12);
+  --color-accent-focus: rgba(79, 122, 107, 0.14);
+  --color-highlight: #b8935b;
+  --color-danger: #c0402a;
+  --color-danger-background: #fdf1ee;
+  --color-danger-background-strong: rgba(192, 64, 42, 0.12);
+
+  /* Navegación */
+  --color-navigation-text: #dfe4e9;
+  --color-navigation-text-muted: #cfd6de;
+  --color-navigation-text-danger: #f3b9ab;
+  --color-navigation-surface: rgba(244, 242, 236, 0.08);
+  --color-navigation-danger-background: rgba(192, 64, 42, 0.16);
+
+  /* Fondos decorativos */
+  --color-background-accent-soft: #e9efec;
+  --color-background-highlight-soft: #f6efe4;
+
+  /* Sombras */
+  --shadow-card: 0 1px 3px rgba(18, 35, 61, 0.04);
+  --shadow-login-card:
+    0 1px 2px rgba(18, 35, 61, 0.05),
+    0 24px 60px -14px rgba(18, 35, 61, 0.28);
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-body { margin: 0; min-width: 320px; }
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

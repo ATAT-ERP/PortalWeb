@@ -1,12 +1,8 @@
 <template>
   <div class="account-page">
-    <!-- Header con ícono -->
     <header class="page-header">
       <div class="header-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
+        <UserRound :size="24" />
       </div>
       <div class="header-text">
         <h1>Mi cuenta</h1>
@@ -14,40 +10,51 @@
       </div>
     </header>
 
-    <!-- Tarjeta de Perfil -->
     <section class="profile-card">
       <div class="profile-avatar" aria-hidden="true">{{ initials }}</div>
 
-      <dl class="profile-fields">
-        <div class="field-row">
-          <dt>NOMBRE</dt>
-          <dd>{{ profile.firstName }}</dd>
+      <p v-if="isLoading && !profile" class="profile-state">
+        Cargando información de la cuenta...
+      </p>
+
+      <div v-else-if="!profile" class="profile-state">
+        <p class="state-error">{{ errorMessage || 'No hay información de la cuenta disponible.' }}</p>
+        <button type="button" class="state-retry" @click="loadProfile">Reintentar</button>
+      </div>
+
+      <div v-else class="profile-details">
+        <dl class="profile-fields">
+          <div class="field-row">
+            <dt>NOMBRE</dt>
+            <dd>{{ profile.first_name || '—' }}</dd>
+          </div>
+          <div class="field-row">
+            <dt>APELLIDO</dt>
+            <dd>{{ profile.last_name || '—' }}</dd>
+          </div>
+          <div class="field-row">
+            <dt>EMAIL</dt>
+            <dd class="email-value">{{ profile.email || '—' }}</dd>
+          </div>
+          <div class="field-row">
+            <dt>ESTADO DE LA CUENTA</dt>
+            <dd class="status-value">
+              <span class="status-badge">{{ status }}</span>
+            </dd>
+          </div>
+        </dl>
+
+        <div v-if="errorMessage" class="profile-state">
+          <p class="state-error">{{ errorMessage }}</p>
+          <button type="button" class="state-retry" @click="loadProfile">Reintentar</button>
         </div>
-        <div class="field-row">
-          <dt>APELLIDO</dt>
-          <dd>{{ profile.lastName }}</dd>
-        </div>
-        <div class="field-row">
-          <dt>EMAIL</dt>
-          <dd class="email-value">{{ profile.email }}</dd>
-        </div>
-        <div class="field-row">
-          <dt>ESTADO DE LA CUENTA</dt>
-          <dd class="status-value">
-            <span class="status-badge">{{ profile.status }}</span>
-          </dd>
-        </div>
-      </dl>
+      </div>
     </section>
 
-    <!-- Tarjeta de Seguridad -->
     <section class="security-card">
       <header class="security-header">
         <div class="security-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
+          <LockKeyhole :size="22" />
         </div>
         <div class="security-text">
           <h2>Seguridad</h2>
@@ -56,43 +63,55 @@
       </header>
 
       <form class="password-form" @submit.prevent="handleChangePassword">
-        <div class="field">
+          <div class="account-field" :class="{ 'account-field-invalid': touched.current && currentError }">
           <label for="current-password">Contraseña actual</label>
-          <input 
-            id="current-password" 
+          <input
+            id="current-password"
             v-model="passwordForm.current"
-            type="password" 
-            autocomplete="current-password" 
+            type="password"
+            autocomplete="current-password"
             placeholder="••••••••"
+            :disabled="isSaving"
+            @blur="touched.current = true"
           />
+            <span v-if="touched.current && currentError" class="account-field-error">{{ currentError }}</span>
         </div>
 
         <div class="form-row">
-          <div class="field">
+          <div class="account-field" :class="{ 'account-field-invalid': touched.newPass && newPassError }">
             <label for="new-password">Nueva contraseña</label>
-            <input 
-              id="new-password" 
+            <input
+              id="new-password"
               v-model="passwordForm.newPass"
-              type="password" 
-              autocomplete="new-password" 
+              type="password"
+              autocomplete="new-password"
               placeholder="••••••••"
+              :disabled="isSaving"
+              @blur="touched.newPass = true"
             />
+            <span v-if="touched.newPass && newPassError" class="account-field-error">{{ newPassError }}</span>
           </div>
 
-          <div class="field">
+          <div class="account-field" :class="{ 'account-field-invalid': touched.confirmPass && confirmError }">
             <label for="confirm-password">Confirmar nueva contraseña</label>
-            <input 
-              id="confirm-password" 
+            <input
+              id="confirm-password"
               v-model="passwordForm.confirmPass"
-              type="password" 
-              autocomplete="new-password" 
+              type="password"
+              autocomplete="new-password"
               placeholder="••••••••"
+              :disabled="isSaving"
+              @blur="touched.confirmPass = true"
             />
+            <span v-if="touched.confirmPass && confirmError" class="account-field-error">{{ confirmError }}</span>
           </div>
         </div>
 
-        <button type="submit" class="submit-btn">
-          Cambiar contraseña
+        <p v-if="formError" class="form-message form-message-error" role="alert">{{ formError }}</p>
+        <p v-if="formSuccess" class="form-message form-message-success">{{ formSuccess }}</p>
+
+        <button type="submit" class="account-submit-button" :disabled="isSaving">
+          {{ isSaving ? 'Guardando...' : 'Cambiar contraseña' }}
         </button>
       </form>
     </section>
@@ -100,260 +119,128 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { UserRound, LockKeyhole } from '@lucide/vue'
+import { changePassword, getById } from '../../services/user.service'
+import { clearSession, getAccessToken, getProfile, getSession, setProfile } from '../../services/session.service'
+import '../../assets/css/AccountPage.css'
 
-// TODO: reemplazar por los datos reales del usuario autenticado vía account.service.js
-// cuando el endpoint esté confirmado con Agus.
-const profile = ref({
-  firstName: 'Nombre',
-  lastName: 'Apellido',
-  email: 'usuario@ejemplo.com',
-  status: 'Activa'
-})
+const router = useRouter()
 
-// Nota: v-model solo captura los valores escritos para la maqueta, no realiza
-// ninguna validación (longitud, fortaleza ni coincidencia).
+const profile = ref(null)
+const isLoading = ref(true)
+const errorMessage = ref('')
+
 const passwordForm = ref({
   current: '',
   newPass: '',
   confirmPass: ''
 })
 
-const initials = computed(() =>
-  `${profile.value.firstName[0] ?? ''}${profile.value.lastName[0] ?? ''}`.toUpperCase()
+const isSaving = ref(false)
+const formError = ref('')
+const formSuccess = ref('')
+const touched = ref({ current: false, newPass: false, confirmPass: false })
+
+const currentError = computed(() => {
+  if (!passwordForm.value.current) return 'Ingresá tu contraseña actual.'
+  return ''
+})
+
+const newPassError = computed(() => {
+  if (!passwordForm.value.newPass) return 'Ingresá la nueva contraseña.'
+  return ''
+})
+
+const confirmError = computed(() => {
+  if (!passwordForm.value.confirmPass) return 'Confirmá la nueva contraseña.'
+  if (passwordForm.value.confirmPass !== passwordForm.value.newPass) return 'Las contraseñas no coinciden.'
+  return ''
+})
+
+const isPasswordFormValid = computed(
+  () => !currentError.value && !newPassError.value && !confirmError.value
 )
 
-function handleChangePassword() {
-  // TODO: Integración pendiente con NexusBack previa confirmación con Agus.
+const initials = computed(() => {
+  const first = profile.value?.first_name?.trim()?.[0] ?? ''
+  const last = profile.value?.last_name?.trim()?.[0] ?? ''
+  return `${first}${last}`.toUpperCase() || '?'
+})
+
+const status = computed(() => (profile.value?.is_active ? 'Activa' : 'Inactiva'))
+
+async function loadProfile() {
+  const session = getSession()
+
+  if (!session?.id || !getAccessToken()) {
+    clearSession()
+    router.push('/login')
+    return
+  }
+
+  profile.value = getProfile()
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    const user = await getById(session.id, session.access_token)
+    profile.value = user
+    setProfile(user)
+  } catch (error) {
+    if (error.status === 401) {
+      clearSession()
+      router.push('/login')
+      return
+    }
+    errorMessage.value = error instanceof Error ? error.message : 'No se pudo cargar la información de la cuenta.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(loadProfile)
+
+async function handleChangePassword() {
+  touched.value.current = true
+  touched.value.newPass = true
+  touched.value.confirmPass = true
+  formError.value = ''
+  formSuccess.value = ''
+
+  if (!isPasswordFormValid.value) return
+
+  const session = getSession()
+  if (!session?.access_token) {
+    clearSession()
+    router.push('/login')
+    return
+  }
+
+  isSaving.value = true
+
+  try {
+    await changePassword(
+      {
+        current_password: passwordForm.value.current,
+        new_password: passwordForm.value.newPass,
+        confirm_password: passwordForm.value.confirmPass,
+      },
+      session.access_token
+    )
+    passwordForm.value = { current: '', newPass: '', confirmPass: '' }
+    touched.value = { current: false, newPass: false, confirmPass: false }
+    formSuccess.value = 'Contraseña actualizada correctamente.'
+  } catch (error) {
+    if (error.status === 401 && error.code === 'NEX-USR-010') {
+      clearSession()
+      router.push('/login')
+      return
+    }
+    formError.value = error instanceof Error ? error.message : 'No se pudo cambiar la contraseña. Intentá nuevamente.'
+  } finally {
+    isSaving.value = false
+  }
 }
 </script>
-
-<style scoped>
-.account-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Page Header */
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.header-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: #ffffff;
-  flex-shrink: 0;
-}
-
-.header-text h1 {
-  margin: 0 0 0.2rem;
-  font-size: 1.4rem;
-  font-weight: 650;
-  color: var(--ink);
-}
-
-.header-text p {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--ink-soft);
-}
-
-/* Tarjetas base */
-.profile-card,
-.security-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.6rem;
-  box-shadow: 0 1px 3px rgba(18, 35, 61, 0.04);
-}
-
-/* Específicos de Perfil */
-.profile-card {
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
-}
-
-.profile-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 96px;
-  height: 96px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.profile-fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.25rem 1.75rem;
-  margin: 0;
-  flex: 1;
-}
-
-.field-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.field-row dt {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-  letter-spacing: 0.06em;
-}
-
-/* Especificidad corregida sin usar !important */
-.field-row dd {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.field-row dd.email-value {
-  font-size: 0.98rem;
-}
-
-.field-row dd.status-value {
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  background: rgba(79, 122, 107, 0.12);
-  color: var(--accent);
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-/* Específicos de Seguridad */
-.security-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  margin-bottom: 1.35rem;
-}
-
-.security-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #ffffff;
-  flex-shrink: 0;
-}
-
-.security-text h2 {
-  margin: 0 0 0.2rem;
-  font-size: 1.15rem;
-  font-weight: 650;
-  color: var(--ink);
-}
-
-.security-text p {
-  margin: 0;
-  font-size: 0.86rem;
-  color: var(--ink-soft);
-}
-
-/* Formulario */
-.password-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-  max-width: 540px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.1rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.field label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.field input {
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: 0.65rem 0.85rem;
-  font-size: 0.92rem;
-  color: var(--ink);
-  background: #fbfbfa;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.field input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79, 122, 107, 0.14);
-}
-
-.submit-btn {
-  align-self: flex-start;
-  margin-top: 0.4rem;
-  padding: 0.7rem 1.4rem;
-  border: none;
-  border-radius: 10px;
-  background: var(--ink);
-  color: #ffffff;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.submit-btn:hover {
-  background: #1b3352;
-}
-
-/* Adaptación Responsive */
-@media (max-width: 640px) {
-  .profile-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .password-form {
-    max-width: 100%;
-  }
-
-  .submit-btn {
-    width: 100%;
-  }
-}
-</style>

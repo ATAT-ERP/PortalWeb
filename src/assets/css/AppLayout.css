@@ -1,0 +1,247 @@
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-surface);
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--color-text-primary);
+  color: var(--color-text-on-dark);
+  padding: 1.5rem 1.1rem;
+}
+
+.sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.layout-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.layout-logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--color-text-on-dark);
+  color: var(--color-text-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.layout-brand-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.company-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  background: var(--color-navigation-surface);
+  font-size: 0.78rem;
+  color: var(--color-navigation-text-muted);
+}
+
+.company-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: var(--color-navigation-text);
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nav-link:hover {
+  background: var(--color-navigation-surface);
+  color: var(--color-surface-raised);
+}
+
+.nav-link.active {
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-navigation-text-muted);
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.logout-btn:hover {
+  background: var(--color-navigation-danger-background);
+  color: var(--color-navigation-text-danger);
+}
+
+.nav-link:focus-visible,
+.logout-btn:focus-visible,
+.menu-toggle:focus-visible,
+.user-info:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+/* Main column */
+.main-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 1.5rem;
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.menu-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.3rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.12s ease;
+}
+
+.user-info:hover {
+  background: var(--color-surface);
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 550;
+  color: var(--color-text-primary);
+}
+
+.content-area {
+  flex: 1;
+  padding: 1.75rem;
+}
+
+.backdrop {
+  display: none;
+}
+
+/* Responsive: sidebar off-canvas below 880px */
+@media (max-width: 880px) {
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 12px 0 32px -12px rgba(18, 35, 61, 0.3);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 35, 61, 0.35);
+    z-index: 20;
+  }
+
+  .content-area {
+    padding: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}
