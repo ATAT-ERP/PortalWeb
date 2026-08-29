@@ -42,6 +42,16 @@
           Mi cuenta
         </router-link>
 
+        <router-link
+          to="/companies"
+          class="nav-link"
+          :class="{ active: route.path.startsWith('/companies') }"
+          @click="sidebarOpen = false"
+        >
+          <Building2 class="nav-icon" aria-hidden="true" />
+          Compañías
+        </router-link>
+
         <!-- Los módulos futuros se agregan acá como nuevos router-link,
             sin tocar el resto del layout. -->
       </nav>
@@ -81,7 +91,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Home, UserRound, LogOut, Menu } from '@lucide/vue'
+import { Building2, Home, UserRound, LogOut, Menu } from '@lucide/vue'
 import { logout } from '../../services/user.service'
 import { clearSession, getAccessToken } from '../../services/session.service'
 import '../../assets/css/AppLayout.css'
