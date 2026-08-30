@@ -205,8 +205,24 @@
   color: var(--color-text-secondary);
 }
 
-.company-row-cuit {
+.company-row-legal {
+  font-size: 0.82rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.company-row-meta {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.company-row-badges {
+  display: flex;
+  gap: 0.5rem;
   flex-shrink: 0;
+}
+
+.company-row-cuit {
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   background: var(--color-surface);
@@ -214,6 +230,48 @@
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.03em;
+}
+
+.company-row-status {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.company-row-status-active {
+  background: rgba(79, 122, 107, 0.12);
+  color: var(--color-accent);
+}
+
+.company-row-status-inactive {
+  background: #f0f0f0;
+  color: #666666;
+}
+
+.company-row-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.company-row-action:hover {
+  background: var(--color-accent-background);
+  color: var(--color-accent);
+}
+
+.company-row-action:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
 }
 
 /* Responsive */

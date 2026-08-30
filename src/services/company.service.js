@@ -27,3 +27,20 @@ export function createCompany(data, accessToken) {
 export function searchCompanies(q, accessToken) {
   return api.get(`/companies/search/?q=${encodeURIComponent(q)}`, { headers: bearerHeaders(accessToken) })
 }
+
+export function getCompanies(accessToken, isActive = null) {
+  const params = isActive !== null ? `?is_active=${isActive}` : ''
+  return api.get(`/companies/${params}`, { headers: bearerHeaders(accessToken) })
+}
+
+export function getCompanyById(id, accessToken) {
+  return api.get(`/companies/${id}/`, { headers: bearerHeaders(accessToken) })
+}
+
+export function updateCompany(id, data, accessToken) {
+  return api.patch(`/companies/${id}/`, data, { headers: bearerHeaders(accessToken) })
+}
+
+export function deleteCompany(id, accessToken) {
+  return api.delete(`/companies/${id}/`, { headers: bearerHeaders(accessToken) })
+}

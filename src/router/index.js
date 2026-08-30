@@ -47,6 +47,11 @@ const router = createRouter({
           path: 'companies/nueva',
           name: 'company-new',
           component: () => import('../pages/company/CompanyFormPage.vue')
+        },
+        {
+          path: 'companies/:id/edit',
+          name: 'company-edit',
+          component: () => import('../pages/company/CompanyFormPage.vue')
         }
         // Los módulos futuros se agregan acá como nuevas rutas hijas,
         // y quedan protegidos automáticamente sin tocar nada más.
