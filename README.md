@@ -78,3 +78,14 @@ La sesión se persiste por pestaña mediante `sessionStorage`. Las demás operac
 - [Guía de trabajo](docs/WORKFLOW.md)
 - [Integración con NexusBack](docs/nexusback/README.md)
 - [Contrato del módulo users](docs/nexusback/users.md)
+
+## Instrucciones para agentes de desarrollo
+
+PortalWeb incluye instrucciones versionadas para asistentes de código y agentes internos.
+
+* `AGENTS.md`: convenciones y reglas generales del repositorio.
+* `.agents/skills/frontend-module/`: guía para crear nuevas páginas, secciones o módulos respetando la arquitectura existente.
+* `.agents/skills/frontend-change/`: guía para modificar funcionalidades existentes sin alterar contratos o patrones fuera de alcance.
+* `CLAUDE.md` y `.gemini/settings.json`: integración con herramientas compatibles.
+
+Estas instrucciones buscan mantener consistencia entre contribuciones y preservar la arquitectura y los contratos actuales del proyecto.
