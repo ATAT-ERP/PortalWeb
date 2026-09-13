@@ -28,5 +28,5 @@ export function uploadDocument({ company_id, file, category_id, name }) {
  * @author Agustin
  */
 export function getDocuments(companyId) {
-  return api.get(`/documents/?company_id=${encodeURIComponent(companyId)}`)
+  return api.get(`/documents/?company_id=${encodeURIComponent(companyId)}`, { auth: true })
 }

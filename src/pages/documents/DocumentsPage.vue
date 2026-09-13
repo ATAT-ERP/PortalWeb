@@ -130,6 +130,12 @@ async function loadDocuments() {
     if (loadId === documentLoadId) documents.value = result
   } catch (error) {
     if (loadId === documentLoadId) {
+      if (error.status === 401 && error.code === 'NEX-USR-010') {
+        clearSession()
+        router.push('/login')
+        return
+      }
+
       documents.value = []
       listError.value = error instanceof Error ? error.message : 'No se pudieron cargar los documentos. Intentá nuevamente.'
     }
