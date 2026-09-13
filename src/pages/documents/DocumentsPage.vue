@@ -6,9 +6,44 @@
       </div>
       <div>
         <h1>Documentos</h1>
-        <p>Cargá un documento para la compañía activa.</p>
+        <p>Consultá y cargá documentos de la compañía activa.</p>
       </div>
     </header>
+
+    <section class="documents-card">
+      <header class="documents-list-header">
+        <h2>Documentos cargados</h2>
+      </header>
+
+      <p v-if="!activeCompany" class="documents-list-state">Seleccioná una compañía para ver sus documentos.</p>
+      <p v-else-if="isLoadingDocuments" class="documents-list-state">Cargando documentos...</p>
+      <p v-else-if="listError" class="documents-message documents-message-error" role="alert">{{ listError }}</p>
+      <p v-else-if="documents.length === 0" class="documents-list-state">Todavía no hay documentos en esta compañía.</p>
+
+      <div v-else class="documents-table-wrapper">
+        <table class="documents-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Tamaño</th>
+              <th>Creado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="document in documents" :key="document.id">
+              <td>
+                <strong>{{ document.name || document.original_name }}</strong>
+                <span v-if="document.original_name && document.original_name !== document.name" class="documents-original-name">{{ document.original_name }}</span>
+              </td>
+              <td>{{ document.mime_type }}</td>
+              <td>{{ formatSize(document.size) }}</td>
+              <td>{{ formatDate(document.created_at) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <section class="documents-card">
       <form class="documents-form" @submit.prevent="handleSubmit" novalidate>
@@ -54,13 +89,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { FileUp, Upload } from '@lucide/vue'
-import { uploadDocument } from '../../services/document.service'
+import { getDocuments, uploadDocument } from '../../services/document.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
-import '../../assets/css/DocumentUploadPage.css'
+import '../../assets/css/DocumentsPage.css'
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024
 
@@ -71,6 +106,37 @@ const name = ref('')
 const isUploading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const documents = ref([])
+const isLoadingDocuments = ref(false)
+const listError = ref('')
+let documentLoadId = 0
+
+watch(activeCompany, loadDocuments, { immediate: true })
+
+async function loadDocuments() {
+  const loadId = ++documentLoadId
+  documents.value = []
+  listError.value = ''
+
+  if (!activeCompany.value) {
+    isLoadingDocuments.value = false
+    return
+  }
+
+  isLoadingDocuments.value = true
+
+  try {
+    const result = await getDocuments(activeCompany.value.id)
+    if (loadId === documentLoadId) documents.value = result
+  } catch (error) {
+    if (loadId === documentLoadId) {
+      documents.value = []
+      listError.value = error instanceof Error ? error.message : 'No se pudieron cargar los documentos. Intentá nuevamente.'
+    }
+  } finally {
+    if (loadId === documentLoadId) isLoadingDocuments.value = false
+  }
+}
 
 function handleFileChange(event) {
   const file = event.target.files[0]
@@ -113,6 +179,7 @@ async function handleSubmit() {
     fileInput.value.value = ''
     name.value = ''
     successMessage.value = 'Documento cargado correctamente.'
+    await loadDocuments()
   } catch (error) {
     if (error.status === 401 && error.code === 'NEX-USR-010') {
       clearSession()
@@ -124,5 +191,15 @@ async function handleSubmit() {
   } finally {
     isUploading.value = false
   }
+}
+
+function formatSize(size) {
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatDate(value) {
+  return new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
 }
 </script>

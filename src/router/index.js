@@ -56,7 +56,7 @@ const router = createRouter({
         {
           path: 'documents',
           name: 'documents',
-          component: () => import('../pages/documents/DocumentUploadPage.vue')
+          component: () => import('../pages/documents/DocumentsPage.vue')
         }
         // Los módulos futuros se agregan acá como nuevas rutas hijas,
         // y quedan protegidos automáticamente sin tocar nada más.

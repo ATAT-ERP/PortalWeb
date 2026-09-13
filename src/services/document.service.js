@@ -18,3 +18,15 @@ export function uploadDocument({ company_id, file, category_id, name }) {
 
   return api.post('/documents/', formData, { auth: true })
 }
+
+/**
+ * Obtiene los documentos de una compañía.
+ *
+ * @param {string} companyId Identificador UUID de la compañía.
+ * @returns {Promise<Array>} Documentos devueltos por NexusBack.
+ * @version 1.0
+ * @author Agustin
+ */
+export function getDocuments(companyId) {
+  return api.get(`/documents/?company_id=${encodeURIComponent(companyId)}`)
+}
