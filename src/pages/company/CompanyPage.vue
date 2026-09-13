@@ -32,9 +32,10 @@
 
     <section class="company-card">
       <p v-if="errorMessage" class="company-state company-state-error" role="alert">{{ errorMessage }}</p>
+      <p v-else-if="loading" class="company-state">Cargando compañías...</p>
       <p v-else-if="searching" class="company-state">Buscando compañías...</p>
       <p v-else-if="companies.length === 0" class="company-state">
-        {{ hasSearched ? 'No se encontraron compañías para la búsqueda.' : 'Buscá una compañía para ver los resultados.' }}
+        {{ hasSearched ? 'No se encontraron compañías para la búsqueda.' : 'No hay compañías registradas.' }}
       </p>
 
       <ul v-else class="company-list">
@@ -44,9 +45,18 @@
           </span>
           <div class="company-row-text">
             <strong>{{ company.name }}</strong>
-            <span>{{ typeLabel(company.type) }}{{ company.address_city ? ` · ${company.address_city}` : '' }}</span>
+            <span v-if="company.legal_name" class="company-row-legal">{{ company.legal_name }}</span>
+            <span class="company-row-meta">{{ typeLabel(company.type) }}{{ company.address_city ? ` · ${company.address_city}` : '' }}</span>
           </div>
-          <span v-if="company.tax_id" class="company-row-cuit">{{ company.tax_id }}</span>
+          <div class="company-row-badges">
+            <span v-if="company.tax_id" class="company-row-cuit">{{ company.tax_id }}</span>
+            <span :class="['company-row-status', company.is_active ? 'company-row-status-active' : 'company-row-status-inactive']">
+              {{ company.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          <RouterLink :to="`/companies/${company.id}/edit`" class="company-row-action" aria-label="Editar compañía">
+            <Edit2 :size="18" aria-hidden="true" />
+          </RouterLink>
         </li>
       </ul>
     </section>
@@ -54,10 +64,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Building2, Plus, Search } from '@lucide/vue'
-import { searchCompanies } from '../../services/company.service'
+import { Building2, Plus, Search, Edit2 } from '@lucide/vue'
+import { getCompanies, searchCompanies } from '../../services/company.service'
 import { clearSession, getSession } from '../../services/session.service'
 import '../../assets/css/CompanyPage.css'
 
@@ -65,6 +75,7 @@ const router = useRouter()
 
 const query = ref('')
 const companies = ref([])
+const loading = ref(false)
 const searching = ref(false)
 const hasSearched = ref(false)
 const errorMessage = ref('')
@@ -72,6 +83,38 @@ const errorMessage = ref('')
 function typeLabel(type) {
   return type === 'organization' ? 'Organización' : 'Autónomo / individual'
 }
+
+async function loadCompanies() {
+  loading.value = true
+  errorMessage.value = ''
+
+  const session = getSession()
+  if (!session?.access_token) {
+    clearSession()
+    router.push('/login')
+    return
+  }
+
+  try {
+    companies.value = await getCompanies(session.access_token)
+    hasSearched.value = false
+    query.value = ''
+  } catch (error) {
+    if (error.status === 401 && error.code === 'NEX-USR-010') {
+      clearSession()
+      router.push('/login')
+      return
+    }
+    companies.value = []
+    errorMessage.value = error instanceof Error ? error.message : 'No se pudo cargar el listado. Intentá nuevamente.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadCompanies()
+})
 
 async function handleSearch() {
   if (searching.value) return
