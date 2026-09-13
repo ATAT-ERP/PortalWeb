@@ -245,3 +245,121 @@
     transition: none;
   }
 }
+
+/* Custom Company Selector & Dropdown (Estilo Imagen) */
+.company-selector {
+  position: relative;
+}
+
+.company-select-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.company-select-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.company-select-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.company-select-tag {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.company-select-value {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.company-select-value .company-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.chevron-icon {
+  color: rgba(255, 255, 255, 0.6);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevron-icon.open {
+  transform: rotate(180deg);
+}
+
+.company-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.35rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #1e293b;
+  font-size: 0.8rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.dropdown-option:hover {
+  background: #f1f5f9;
+}
+
+.dropdown-option.active {
+  background: #f1f5f9;
+}
+
+.option-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.company-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+}
+
+.company-dot.inactive {
+  background: #cbd5e1;
+}
+
+.check-icon {
+  color: #64748b;
+}

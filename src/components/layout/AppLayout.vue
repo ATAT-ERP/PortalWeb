@@ -13,11 +13,39 @@
           <span class="layout-brand-name">A.T.A.T. ERP</span>
         </div>
 
-        <!-- TODO: reemplazar por selector real de empresa activa cuando se
-            implemente soporte de múltiples empresas por usuario. -->
-        <div class="company-chip">
-          <span class="company-dot"></span>
-          <span class="company-label">Empresa activa</span>
+        <!-- Selector de Empresa Activa (Exacto a la imagen) -->
+        <div class="company-selector">
+          <button type="button" class="company-select-btn" @click="dropdownOpen = !dropdownOpen">
+            <div class="company-select-info">
+              <span class="company-select-tag">Empresa activa</span>
+              <div class="company-select-value">
+                <span class="company-dot"></span>
+                <span class="company-name">TechSolutions Test</span>
+              </div>
+            </div>
+            <svg class="chevron-icon" :class="{ open: dropdownOpen }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <!-- Menú desplegable flotante -->
+          <div v-if="dropdownOpen" class="company-dropdown-menu">
+            <button type="button" class="dropdown-option active" @click="dropdownOpen = false">
+              <span class="company-dot"></span>
+              <span class="option-name">TechSolutions Test</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="check-icon">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button type="button" class="dropdown-option" @click="dropdownOpen = false">
+              <span class="company-dot inactive"></span>
+              <span class="option-name">Distribuidora G.G.A.</span>
+            </button>
+            <button type="button" class="dropdown-option" @click="dropdownOpen = false">
+              <span class="company-dot inactive"></span>
+              <span class="option-name">Consultora Mar del Plata</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -42,8 +70,15 @@
           Mi cuenta
         </router-link>
 
-        <!-- Los módulos futuros se agregan acá como nuevos router-link,
-            sin tocar el resto del layout. -->
+        <router-link
+          to="/companies"
+          class="nav-link"
+          :class="{ active: route.path.startsWith('/companies') }"
+          @click="sidebarOpen = false"
+        >
+          <Building2 class="nav-icon" aria-hidden="true" />
+          Compañías
+        </router-link>
       </nav>
 
       <button type="button" class="logout-btn" @click="handleLogout" :disabled="loggingOut">
@@ -81,7 +116,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Home, UserRound, LogOut, Menu } from '@lucide/vue'
+import { Building2, Home, UserRound, LogOut, Menu } from '@lucide/vue'
 import { logout } from '../../services/user.service'
 import { clearSession, getAccessToken } from '../../services/session.service'
 import '../../assets/css/AppLayout.css'
@@ -90,6 +125,7 @@ const route = useRoute()
 const router = useRouter()
 
 const sidebarOpen = ref(false)
+const dropdownOpen = ref(false)
 const loggingOut = ref(false)
 
 const user = ref({ name: 'Usuario' })
@@ -112,10 +148,7 @@ async function handleLogout() {
       await logout(token)
     }
   } catch (error) {
-    // Si la llamada remota falla (red caída, token ya vencido, etc.),
-    // igual limpiamos la sesión local: el objetivo del issue #7 es que
-    // una sesión inválida no pueda seguir usando el Portal, con o sin
-    // respuesta exitosa del backend.
+    // Si la llamada falla igual limpiamos la sesión local
   } finally {
     clearSession()
     loggingOut.value = false
