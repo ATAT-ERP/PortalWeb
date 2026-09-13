@@ -68,7 +68,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Building2, Plus, Search, Edit2 } from '@lucide/vue'
 import { getCompanies, searchCompanies } from '../../services/company.service'
-import { clearSession, getSession } from '../../services/session.service'
+import { clearSession } from '../../services/session.service'
 import '../../assets/css/CompanyPage.css'
 
 const router = useRouter()
@@ -88,15 +88,8 @@ async function loadCompanies() {
   loading.value = true
   errorMessage.value = ''
 
-  const session = getSession()
-  if (!session?.access_token) {
-    clearSession()
-    router.push('/login')
-    return
-  }
-
   try {
-    companies.value = await getCompanies(session.access_token)
+    companies.value = await getCompanies()
     hasSearched.value = false
     query.value = ''
   } catch (error) {
@@ -121,18 +114,11 @@ async function handleSearch() {
 
   errorMessage.value = ''
 
-  const session = getSession()
-  if (!session?.access_token) {
-    clearSession()
-    router.push('/login')
-    return
-  }
-
   searching.value = true
   hasSearched.value = true
 
   try {
-    companies.value = await searchCompanies(query.value.trim(), session.access_token)
+    companies.value = await searchCompanies(query.value.trim())
   } catch (error) {
     if (error.status === 401 && error.code === 'NEX-USR-010') {
       clearSession()

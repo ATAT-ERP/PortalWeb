@@ -118,7 +118,7 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Building2, Home, UserRound, LogOut, Menu } from '@lucide/vue'
 import { logout } from '../../services/user.service'
-import { clearSession, getAccessToken } from '../../services/session.service'
+import { clearSession } from '../../services/session.service'
 import '../../assets/css/AppLayout.css'
 
 const route = useRoute()
@@ -141,12 +141,8 @@ const userInitials = computed(() =>
 
 async function handleLogout() {
   loggingOut.value = true
-  const token = getAccessToken()
-
   try {
-    if (token) {
-      await logout(token)
-    }
+    await logout()
   } catch (error) {
     // Si la llamada falla igual limpiamos la sesión local
   } finally {

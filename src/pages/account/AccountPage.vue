@@ -123,7 +123,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { UserRound, LockKeyhole } from '@lucide/vue'
 import { changePassword, getById } from '../../services/user.service'
-import { clearSession, getAccessToken, getProfile, getSession, setProfile } from '../../services/session.service'
+import { clearSession, getProfile, getSession, setProfile } from '../../services/session.service'
 import '../../assets/css/AccountPage.css'
 
 const router = useRouter()
@@ -174,7 +174,7 @@ const status = computed(() => (profile.value?.is_active ? 'Activa' : 'Inactiva')
 async function loadProfile() {
   const session = getSession()
 
-  if (!session?.id || !getAccessToken()) {
+  if (!session?.id) {
     clearSession()
     router.push('/login')
     return
@@ -185,7 +185,7 @@ async function loadProfile() {
   isLoading.value = true
 
   try {
-    const user = await getById(session.id, session.access_token)
+    const user = await getById(session.id)
     profile.value = user
     setProfile(user)
   } catch (error) {
@@ -211,13 +211,6 @@ async function handleChangePassword() {
 
   if (!isPasswordFormValid.value) return
 
-  const session = getSession()
-  if (!session?.access_token) {
-    clearSession()
-    router.push('/login')
-    return
-  }
-
   isSaving.value = true
 
   try {
@@ -226,8 +219,7 @@ async function handleChangePassword() {
         current_password: passwordForm.value.current,
         new_password: passwordForm.value.newPass,
         confirm_password: passwordForm.value.confirmPass,
-      },
-      session.access_token
+    }
     )
     passwordForm.value = { current: '', newPass: '', confirmPass: '' }
     touched.value = { current: false, newPass: false, confirmPass: false }

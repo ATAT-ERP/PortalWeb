@@ -194,7 +194,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Building2, Plus, UserRound } from '@lucide/vue'
 import { createCompany, updateCompany, getCompanyById } from '../../services/company.service'
-import { clearSession, getSession } from '../../services/session.service'
+import { clearSession } from '../../services/session.service'
 import '../../assets/css/CompanyFormPage.css'
 
 const router = useRouter()
@@ -253,15 +253,8 @@ const hasServerErrors = computed(() => Object.keys(serverErrors.value).length > 
 onMounted(async () => {
   if (isEditing.value) {
     isLoading.value = true
-    const session = getSession()
-    if (!session?.access_token) {
-      clearSession()
-      router.push('/login')
-      return
-    }
-
     try {
-      const company = await getCompanyById(companyId.value, session.access_token)
+      const company = await getCompanyById(companyId.value)
       form.value.type = company.type || 'individual'
       form.value.name = company.name || ''
       form.value.legal_name = company.legal_name || ''
@@ -316,20 +309,13 @@ async function handleSubmit() {
 
   if (!isFormValid.value) return
 
-  const session = getSession()
-  if (!session?.access_token) {
-    clearSession()
-    router.push('/login')
-    return
-  }
-
   isSaving.value = true
 
   try {
     if (isEditing.value) {
-      await updateCompany(companyId.value, buildPayload(), session.access_token)
+      await updateCompany(companyId.value, buildPayload())
     } else {
-      await createCompany(buildPayload(), session.access_token)
+      await createCompany(buildPayload())
     }
     router.push('/companies')
   } catch (error) {
