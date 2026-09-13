@@ -195,6 +195,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { Building2, Plus, UserRound } from '@lucide/vue'
 import { createCompany, updateCompany, getCompanyById } from '../../services/company.service'
 import { clearSession } from '../../services/session.service'
+import { addCompany } from '../../stores/company.store'
 import '../../assets/css/CompanyFormPage.css'
 
 const router = useRouter()
@@ -315,7 +316,8 @@ async function handleSubmit() {
     if (isEditing.value) {
       await updateCompany(companyId.value, buildPayload())
     } else {
-      await createCompany(buildPayload())
+      const company = await createCompany(buildPayload())
+      addCompany(company)
     }
     router.push('/companies')
   } catch (error) {
