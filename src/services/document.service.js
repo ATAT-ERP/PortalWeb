@@ -23,12 +23,14 @@ export function uploadDocument({ company_id, file, category_id, name }) {
  * Obtiene los documentos de una compañía.
  *
  * @param {string} companyId Identificador UUID de la compañía.
+ * @param {string} query Texto opcional para buscar por nombre.
  * @returns {Promise<Array>} Documentos devueltos por NexusBack.
  * @version 1.0
  * @author Agustin
  */
-export function getDocuments(companyId) {
-  return api.get(`/documents/?company_id=${encodeURIComponent(companyId)}`, { auth: true })
+export function getDocuments(companyId, query = '') {
+  const search = query ? `&q=${encodeURIComponent(query)}` : ''
+  return api.get(`/documents/?company_id=${encodeURIComponent(companyId)}${search}`, { auth: true })
 }
 
 /**

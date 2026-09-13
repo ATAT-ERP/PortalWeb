@@ -15,10 +15,18 @@
         <h2>Documentos cargados</h2>
       </header>
 
+      <div v-if="activeCompany" class="documents-search">
+        <label for="documents-search">Buscar documentos</label>
+        <input id="documents-search" v-model="searchQuery" type="search"
+          placeholder="Buscar por nombre" @input="handleSearchInput"/>
+      </div>
+
       <p v-if="!activeCompany" class="documents-list-state">Seleccioná una compañía para ver sus documentos.</p>
       <p v-else-if="isLoadingDocuments" class="documents-list-state">Cargando documentos...</p>
       <p v-else-if="listError" class="documents-message documents-message-error" role="alert">{{ listError }}</p>
-      <p v-else-if="documents.length === 0" class="documents-list-state">Todavía no hay documentos en esta compañía.</p>
+      <p v-else-if="documents.length === 0" class="documents-list-state">
+        {{ searchQuery ? 'No se encontraron documentos para la búsqueda.' : 'Todavía no hay documentos en esta compañía.' }}
+      </p>
 
       <div v-else class="documents-table-wrapper">
         <table class="documents-table">
@@ -122,9 +130,15 @@ const documents = ref([])
 const isLoadingDocuments = ref(false)
 const listError = ref('')
 const downloadingDocumentId = ref(null)
+const searchQuery = ref('')
 let documentLoadId = 0
+let searchTimeout
 
-watch(activeCompany, loadDocuments, { immediate: true })
+watch(activeCompany, () => {
+  searchQuery.value = ''
+  window.clearTimeout(searchTimeout)
+  loadDocuments()
+}, { immediate: true })
 
 async function loadDocuments() {
   const loadId = ++documentLoadId
@@ -139,7 +153,7 @@ async function loadDocuments() {
   isLoadingDocuments.value = true
 
   try {
-    const result = await getDocuments(activeCompany.value.id)
+    const result = await getDocuments(activeCompany.value.id, searchQuery.value.trim())
     if (loadId === documentLoadId) documents.value = result
   } catch (error) {
     if (loadId === documentLoadId) {
@@ -151,6 +165,11 @@ async function loadDocuments() {
   } finally {
     if (loadId === documentLoadId) isLoadingDocuments.value = false
   }
+}
+
+function handleSearchInput() {
+  window.clearTimeout(searchTimeout)
+  searchTimeout = window.setTimeout(loadDocuments, 300)
 }
 
 function handleFileChange(event) {
