@@ -77,6 +77,12 @@
           <Building2 class="nav-icon" aria-hidden="true" />
           Compañías
         </router-link>
+
+        <router-link to="/documents" class="nav-link" :class="{ active: route.path.startsWith('/documents') }"
+          @click="sidebarOpen = false">
+          <FileText class="nav-icon" aria-hidden="true" />
+          Documentos
+        </router-link>
       </nav>
 
       <button type="button" class="logout-btn" @click="handleLogout" :disabled="loggingOut">
@@ -114,7 +120,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Building2, Home, UserRound, LogOut, Menu } from '@lucide/vue'
+import { Building2, FileText, Home, UserRound, LogOut, Menu } from '@lucide/vue'
 import { logout } from '../../services/user.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, companies, isLoadingCompanies, loadCompanies, selectCompany } from '../../stores/company.store'
