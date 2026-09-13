@@ -5,8 +5,8 @@
         <Building2 :size="24" />
       </div>
       <div class="company-header-text">
-        <h1>Nueva compañía</h1>
-        <p>Registrá una actividad, comercio u organización dentro de A.T.A.T.</p>
+        <h1>{{ isEditing ? 'Editar compañía' : 'Nueva compañía' }}</h1>
+        <p>{{ isEditing ? 'Modificá los datos de la compañía.' : 'Registrá una actividad, comercio u organización dentro de A.T.A.T.' }}</p>
       </div>
     </header>
 
@@ -182,7 +182,7 @@
 
         <button type="submit" class="company-submit-button" :disabled="isSaving">
           <Plus :size="18" aria-hidden="true" />
-          <span>{{ isSaving ? 'Guardando...' : 'Crear compañía' }}</span>
+          <span>{{ isSaving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear compañía' }}</span>
         </button>
       </form>
     </section>
@@ -190,14 +190,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Building2, Plus, UserRound } from '@lucide/vue'
-import { createCompany } from '../../services/company.service'
+import { createCompany, updateCompany, getCompanyById } from '../../services/company.service'
 import { clearSession, getSession } from '../../services/session.service'
 import '../../assets/css/CompanyFormPage.css'
 
 const router = useRouter()
+const route = useRoute()
+
+const isEditing = computed(() => !!route.params.id)
+const companyId = computed(() => route.params.id)
 
 const form = ref({
   type: 'individual',
@@ -215,6 +219,7 @@ const form = ref({
 })
 
 const isSaving = ref(false)
+const isLoading = ref(false)
 const formError = ref('')
 const serverErrors = ref({})
 const touched = ref({ name: false, tax_id: false, email: false })
@@ -244,6 +249,43 @@ const emailError = computed(() => {
 
 const isFormValid = computed(() => !nameError.value && !taxIdError.value && !emailError.value)
 const hasServerErrors = computed(() => Object.keys(serverErrors.value).length > 0)
+
+onMounted(async () => {
+  if (isEditing.value) {
+    isLoading.value = true
+    const session = getSession()
+    if (!session?.access_token) {
+      clearSession()
+      router.push('/login')
+      return
+    }
+
+    try {
+      const company = await getCompanyById(companyId.value, session.access_token)
+      form.value.type = company.type || 'individual'
+      form.value.name = company.name || ''
+      form.value.legal_name = company.legal_name || ''
+      form.value.tax_id = company.tax_id || ''
+      form.value.email = company.email || ''
+      form.value.phone = company.phone || ''
+      form.value.address_street = company.address_street || ''
+      form.value.address_number = company.address_number || ''
+      form.value.address_city = company.address_city || ''
+      form.value.address_postal_code = company.address_postal_code || ''
+      form.value.address_province = company.address_province || ''
+      form.value.address_country = company.address_country || ''
+    } catch (error) {
+      if (error.status === 401 && error.code === 'NEX-USR-010') {
+        clearSession()
+        router.push('/login')
+        return
+      }
+      formError.value = error instanceof Error ? error.message : 'No se pudo cargar la compañía. Intentá nuevamente.'
+    } finally {
+      isLoading.value = false
+    }
+  }
+})
 
 function buildPayload() {
   const optional = (value) => value.trim() || null
@@ -284,7 +326,11 @@ async function handleSubmit() {
   isSaving.value = true
 
   try {
-    await createCompany(buildPayload(), session.access_token)
+    if (isEditing.value) {
+      await updateCompany(companyId.value, buildPayload(), session.access_token)
+    } else {
+      await createCompany(buildPayload(), session.access_token)
+    }
     router.push('/companies')
   } catch (error) {
     if (error.status === 401 && error.code === 'NEX-USR-010') {
@@ -293,7 +339,7 @@ async function handleSubmit() {
       return
     }
 
-    formError.value = error instanceof Error ? error.message : 'No se pudo crear la compañía. Intentá nuevamente.'
+    formError.value = error instanceof Error ? error.message : (isEditing.value ? 'No se pudo guardar los cambios. Intentá nuevamente.' : 'No se pudo crear la compañía. Intentá nuevamente.')
 
     if (error.errors && typeof error.errors === 'object') {
       for (const key of Object.keys(error.errors)) {
