@@ -28,6 +28,7 @@
               <th>Tipo</th>
               <th>Tamaño</th>
               <th>Creado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -39,6 +40,17 @@
               <td>{{ document.mime_type }}</td>
               <td>{{ formatSize(document.size) }}</td>
               <td>{{ formatDate(document.created_at) }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="documents-download-button"
+                  :disabled="downloadingDocumentId === document.id"
+                  @click="handleDownload(document)"
+                >
+                  <Download :size="16" aria-hidden="true" />
+                  <span>{{ downloadingDocumentId === document.id ? 'Descargando...' : 'Descargar' }}</span>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -91,8 +103,8 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { FileUp, Upload } from '@lucide/vue'
-import { getDocuments, uploadDocument } from '../../services/document.service'
+import { Download, FileUp, Upload } from '@lucide/vue'
+import { downloadDocument, getDocuments, uploadDocument } from '../../services/document.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/DocumentsPage.css'
@@ -109,6 +121,7 @@ const successMessage = ref('')
 const documents = ref([])
 const isLoadingDocuments = ref(false)
 const listError = ref('')
+const downloadingDocumentId = ref(null)
 let documentLoadId = 0
 
 watch(activeCompany, loadDocuments, { immediate: true })
@@ -130,11 +143,7 @@ async function loadDocuments() {
     if (loadId === documentLoadId) documents.value = result
   } catch (error) {
     if (loadId === documentLoadId) {
-      if (error.status === 401 && error.code === 'NEX-USR-010') {
-        clearSession()
-        router.push('/login')
-        return
-      }
+      if (handleUnauthorizedError(error)) return
 
       documents.value = []
       listError.value = error instanceof Error ? error.message : 'No se pudieron cargar los documentos. Intentá nuevamente.'
@@ -187,16 +196,40 @@ async function handleSubmit() {
     successMessage.value = 'Documento cargado correctamente.'
     await loadDocuments()
   } catch (error) {
-    if (error.status === 401 && error.code === 'NEX-USR-010') {
-      clearSession()
-      router.push('/login')
-      return
-    }
+    if (handleUnauthorizedError(error)) return
 
     errorMessage.value = error instanceof Error ? error.message : 'No se pudo cargar el documento. Intentá nuevamente.'
   } finally {
     isUploading.value = false
   }
+}
+
+async function handleDownload(document) {
+  errorMessage.value = ''
+  downloadingDocumentId.value = document.id
+
+  try {
+    const result = await downloadDocument(document.id)
+    const link = window.document.createElement('a')
+    link.href = result.url
+    window.document.body.append(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    if (handleUnauthorizedError(error)) return
+
+    errorMessage.value = error instanceof Error ? error.message : 'No se pudo descargar el documento. Intentá nuevamente.'
+  } finally {
+    downloadingDocumentId.value = null
+  }
+}
+
+function handleUnauthorizedError(error) {
+  if (error.status !== 401 || error.code !== 'NEX-USR-010') return false
+
+  clearSession()
+  router.push('/login')
+  return true
 }
 
 function formatSize(size) {

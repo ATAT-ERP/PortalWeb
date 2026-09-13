@@ -30,3 +30,15 @@ export function uploadDocument({ company_id, file, category_id, name }) {
 export function getDocuments(companyId) {
   return api.get(`/documents/?company_id=${encodeURIComponent(companyId)}`, { auth: true })
 }
+
+/**
+ * Solicita la URL firmada para descargar un documento.
+ *
+ * @param {string} id Identificador UUID del documento.
+ * @returns {Promise<Object>} URL firmada devuelta por NexusBack.
+ * @version 1.0
+ * @author Agustin
+ */
+export function downloadDocument(id) {
+  return api.get(`/documents/${id}/download/`, { auth: true })
+}

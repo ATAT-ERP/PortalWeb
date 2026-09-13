@@ -62,7 +62,7 @@
 
 .documents-table {
   width: 100%;
-  min-width: 580px;
+  min-width: 690px;
   border-collapse: collapse;
   font-size: 0.84rem;
   color: var(--color-text-secondary);
@@ -92,6 +92,26 @@
 .documents-original-name {
   margin-top: 0.2rem;
   font-size: 0.76rem;
+}
+
+.documents-download-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.documents-download-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .documents-form {
