@@ -75,3 +75,74 @@
   color: var(--color-text-secondary);
 }
 
+/* Tarjeta Mi Compañía (Estilo Imagen) */
+.company-card {
+  background: var(--color-surface-raised, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card, 0 1px 3px rgba(0,0,0,0.05));
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.company-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.company-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #10b981;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.company-card-title h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 650;
+  color: var(--color-text-primary, #0f172a);
+}
+
+.company-card-title p {
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+  color: var(--color-text-secondary, #64748b);
+}
+
+.company-card-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem 2rem;
+}
+
+@media (max-width: 640px) {
+  .company-card-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.info-label {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.info-value {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+}

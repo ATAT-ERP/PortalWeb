@@ -32,12 +32,44 @@
         </div>
       </article>
     </section>
+
+    <!-- Tarjeta "Mi compañía" idéntica a la imagen -->
+    <article class="company-card">
+      <div class="company-card-header">
+        <div class="company-card-icon">
+          <Building2 :size="24" />
+        </div>
+        <div class="company-card-title">
+          <h2>Mi compañía</h2>
+          <p>Información de la compañía activa</p>
+        </div>
+      </div>
+
+      <div class="company-card-body">
+        <div class="info-group">
+          <span class="info-label">Nombre</span>
+          <span class="info-value">TechSolutions Test</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">CUIT</span>
+          <span class="info-value">20389123456</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Razón social</span>
+          <span class="info-value">TechSolutions S.R.L.</span>
+        </div>
+        <div class="info-group">
+          <span class="info-label">Tipo de actividad</span>
+          <span class="info-value">Autónomo / individual</span>
+        </div>
+      </div>
+    </article>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { Zap, Info } from '@lucide/vue'
+import { Zap, Info, Building2 } from '@lucide/vue'
 import '../../assets/css/HomePage.css'
 
 const userName = ref('')

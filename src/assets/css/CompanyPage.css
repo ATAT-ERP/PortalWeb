@@ -1,0 +1,240 @@
+.company-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Page Header */
+.company-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.company-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
+  flex-shrink: 0;
+}
+
+.company-header-text {
+  flex: 1;
+}
+
+.company-header-text h1 {
+  margin: 0 0 0.2rem;
+  font-size: 1.4rem;
+  font-weight: 650;
+  color: var(--color-text-primary);
+}
+
+.company-header-text p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+}
+
+.company-new-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-text-primary);
+  color: var(--color-surface-raised);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.company-new-link:hover {
+  background: var(--color-text-primary-hover);
+}
+
+.company-new-link:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+/* Tarjetas */
+.company-card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1.4rem;
+  box-shadow: var(--shadow-card);
+}
+
+/* Búsqueda */
+.company-search-form {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.company-search-form input {
+  flex: 1;
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.92rem;
+  color: var(--color-text-primary);
+  background: var(--color-surface-input);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.company-search-form input::placeholder {
+  color: var(--color-text-disabled);
+}
+
+.company-search-form input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-focus);
+}
+
+.company-search-form input:disabled {
+  background: var(--color-surface-disabled);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.company-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.1rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-text-primary);
+  color: var(--color-surface-raised);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.company-search-button:hover:not(:disabled) {
+  background: var(--color-text-primary-hover);
+}
+
+.company-search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.company-search-button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+/* Estados */
+.company-state {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+}
+
+.company-state-error {
+  color: var(--color-danger);
+}
+
+/* Resultados */
+.company-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.company-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 0.2rem;
+}
+
+.company-row + .company-row {
+  border-top: 1px solid var(--color-border);
+}
+
+.company-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.company-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.company-row-text strong {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-row-text span {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.company-row-cuit {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .company-header {
+    flex-wrap: wrap;
+  }
+
+  .company-search-form {
+    flex-direction: column;
+  }
+
+  .company-search-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .company-new-link,
+  .company-search-form input,
+  .company-search-button {
+    transition: none;
+  }
+}
