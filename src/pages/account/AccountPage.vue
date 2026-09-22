@@ -65,44 +65,23 @@
       <form class="password-form" @submit.prevent="handleChangePassword">
           <div class="account-field" :class="{ 'account-field-invalid': touched.current && currentError }">
           <label for="current-password">Contraseña actual</label>
-          <input
-            id="current-password"
-            v-model="passwordForm.current"
-            type="password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            :disabled="isSaving"
-            @blur="touched.current = true"
-          />
+          <input id="current-password" v-model="passwordForm.current" type="password"
+            autocomplete="current-password" placeholder="••••••••" :disabled="isSaving" @blur="touched.current = true"/>
             <span v-if="touched.current && currentError" class="account-field-error">{{ currentError }}</span>
         </div>
 
         <div class="form-row">
           <div class="account-field" :class="{ 'account-field-invalid': touched.newPass && newPassError }">
             <label for="new-password">Nueva contraseña</label>
-            <input
-              id="new-password"
-              v-model="passwordForm.newPass"
-              type="password"
-              autocomplete="new-password"
-              placeholder="••••••••"
-              :disabled="isSaving"
-              @blur="touched.newPass = true"
-            />
+            <input id="new-password" v-model="passwordForm.newPass" type="password"
+              autocomplete="new-password" placeholder="••••••••" :disabled="isSaving" @blur="touched.newPass = true"/>
             <span v-if="touched.newPass && newPassError" class="account-field-error">{{ newPassError }}</span>
           </div>
 
           <div class="account-field" :class="{ 'account-field-invalid': touched.confirmPass && confirmError }">
             <label for="confirm-password">Confirmar nueva contraseña</label>
-            <input
-              id="confirm-password"
-              v-model="passwordForm.confirmPass"
-              type="password"
-              autocomplete="new-password"
-              placeholder="••••••••"
-              :disabled="isSaving"
-              @blur="touched.confirmPass = true"
-            />
+            <input id="confirm-password" v-model="passwordForm.confirmPass" type="password"
+              autocomplete="new-password" placeholder="••••••••" :disabled="isSaving" @blur="touched.confirmPass = true"/>
             <span v-if="touched.confirmPass && confirmError" class="account-field-error">{{ confirmError }}</span>
           </div>
         </div>
