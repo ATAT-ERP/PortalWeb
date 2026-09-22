@@ -1,3 +1,5 @@
+import { getAccessToken } from './session.service'
+
 const baseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '')
 
 function buildUrl(path) {
@@ -9,10 +11,11 @@ function buildUrl(path) {
 }
 
 /**
- * Ejecuta una solicitud JSON contra la base configurada de NexusBack.
+ * Ejecuta una solicitud contra la base configurada de NexusBack.
  *
- * Devuelve `null` para respuestas 204/205 y normaliza errores HTTP con
- * `message`, `status`, `code` y `errors`.
+ * Con `auth: true` agrega el Bearer de la sesión actual. Devuelve `null` para
+ * respuestas 204/205 y normaliza errores HTTP con `message`, `status`, `code`
+ * y `errors`.
  *
  * @param {string} path Ruta relativa a `VITE_API_URL`.
  * @returns {Promise<unknown>} Respuesta procesada de la API.
@@ -20,13 +23,14 @@ function buildUrl(path) {
  * @author Agustin
  */
 async function request(path, options = {}) {
-  const { body, headers, ...requestOptions } = options
+  const { auth, body, headers, ...requestOptions } = options
   const hasJsonBody = body !== undefined && !(body instanceof FormData)
   const response = await fetch(buildUrl(path), {
     ...requestOptions,
     headers: {
       Accept: 'application/json',
       ...(hasJsonBody ? { 'Content-Type': 'application/json' } : {}),
+      ...(auth ? { Authorization: `Bearer ${getAccessToken()}` } : {}),
       ...headers,
     },
     ...(body !== undefined ? { body: hasJsonBody ? JSON.stringify(body) : body } : {}),
