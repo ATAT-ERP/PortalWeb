@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.33.0",
+    "@primevue/themes": "4.2.5",
+    "primevue": "4.2.5",
     "vue": "^3.5.40",
     "vue-router": "^5.2.0"
   },

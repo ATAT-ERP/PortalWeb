@@ -1,81 +1,189 @@
 <template>
-  <div class="index-page">
+  <div ref="landing" class="index-page" lang="es-AR">
+    <a class="index-skip" href="#contenido">Saltar al contenido</a>
     <header class="index-header">
-      <RouterLink to="/" class="index-brand" aria-label="A.T.A.T. ERP, inicio">
-        <span class="index-brand-mark">AT</span><span>A.T.A.T. ERP</span>
-      </RouterLink>
+      <RouterLink to="/" class="index-brand" aria-label="A.T.A.T., inicio">A.T.A.T<span>.</span></RouterLink>
       <nav class="index-nav" aria-label="Navegación principal">
-        <a href="#funciones">Funciones</a><a href="#publico">Para quién</a><a href="#objetivo">Objetivo</a>
+        <a href="#funciones">Qué podés hacer</a>
+        <a href="#publico">Para quién</a>
       </nav>
-      <div class="index-header-actions">
-        <RouterLink to="/register" class="index-header-register">Crear cuenta</RouterLink>
-        <RouterLink to="/login" class="index-header-login">Iniciar sesión <LogIn :size="16" aria-hidden="true" /></RouterLink>
-      </div>
+      <Button class="index-login" :as="RouterLink" to="/login">
+        Ingresar <ArrowUpRight :size="16" aria-hidden="true" />
+      </Button>
     </header>
 
-    <main class="index-content">
+    <main id="contenido" ref="journeyContainer" class="index-content">
       <section class="index-hero" aria-labelledby="index-title">
-        <div class="index-hero-copy">
-          <p class="index-eyebrow">ERP contable para gestión diaria</p>
-          <h1 id="index-title" class="index-hero-title">Gestión contable simple para PyMEs y contadores</h1>
-          <p class="index-hero-description">Centralizá empresas, información y tareas contables en un solo lugar para trabajar con más claridad cada día.</p>
-          <div class="index-hero-actions">
-            <RouterLink to="/login" class="index-button index-button-primary"><LogIn :size="18" aria-hidden="true" />Iniciar sesión</RouterLink>
-            <a href="#funciones" class="index-button index-button-secondary">Ver funciones<ArrowRight :size="18" aria-hidden="true" /></a>
-          </div>
+        <p class="hero-kicker hero-enter">Software ERP</p>
+        <h1 id="index-title" class="hero-enter">Tu gestión,<br /><span class="hero-dynamic-line"><span class="hero-plus" aria-hidden="true">+</span><span class="hero-plus-label">más </span><span class="hero-rotating-word"><Transition name="hero-word" mode="out-in"><span :key="heroWords[heroWordIndex]">{{ heroWords[heroWordIndex] }}.</span></Transition></span><span class="hero-fixed-word">clara.</span></span></h1>
+        <p class="index-hero-description hero-enter">Un lugar para ordenar tu día a día.<br />Y dedicarle más atención a lo que viene.</p>
+        <div class="index-actions hero-enter">
+          <Button :as="RouterLink" to="/register">Crear mi cuenta <ArrowRight :size="18" aria-hidden="true" /></Button>
+          <Button as="a" href="#funciones" severity="secondary" variant="outlined">Conocer ATAT <ArrowDown :size="17" aria-hidden="true" /></Button>
         </div>
-
-        <aside class="index-preview" aria-label="Vista demo del panel mensual">
-          <div class="index-preview-topline">
-            <div><p class="index-preview-label">Resumen financiero</p><h2>Panel mensual</h2></div>
-            <span class="index-demo-badge">Vista demo</span>
-          </div>
-          <div class="index-preview-summary">
-            <div class="index-summary-item"><span class="index-summary-icon index-summary-icon-income"><TrendingUp :size="18" aria-hidden="true" /></span><div><span>Ingresos del mes</span><strong>$ 1.280.000</strong></div></div>
-            <div class="index-summary-item"><span class="index-summary-icon index-summary-icon-expense"><TrendingDown :size="18" aria-hidden="true" /></span><div><span>Egresos del mes</span><strong>$ 740.000</strong></div></div>
-          </div>
-          <div class="index-preview-metrics">
-            <div><FileWarning :size="18" aria-hidden="true" /><span>Facturas pendientes</span><strong>18</strong></div>
-            <div><Building2 :size="18" aria-hidden="true" /><span>Empresas activas</span><strong>6</strong></div>
-          </div>
-          <div class="index-cash-flow">
-            <div class="index-cash-flow-header"><span>Flujo de efectivo</span><strong>72%</strong></div>
-            <div class="index-progress" role="progressbar" aria-label="Flujo de efectivo" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"><span></span></div>
-          </div>
-        </aside>
+        <div class="index-hero-details hero-enter" aria-hidden="true">
+          <Building2 /><span></span><FileText /><span></span><BriefcaseBusiness />
+        </div>
+        <a ref="heroAnchor" href="#funciones" class="index-scroll hero-enter">Un poco de orden cambia el recorrido <ArrowDown :size="14" aria-hidden="true" /></a>
       </section>
 
-      <section id="funciones" class="index-section" aria-labelledby="index-features-title">
-        <div class="index-section-heading"><p class="index-eyebrow">Todo lo esencial</p><h2 id="index-features-title">Funciones para organizar la gestión diaria</h2></div>
-        <div class="index-feature-grid">
-          <article class="index-feature-card"><FileText class="index-feature-icon" :size="22" aria-hidden="true" /><h3>Facturación</h3><p>Ordená comprobantes y mantené la información lista para consultar.</p></article>
-          <article class="index-feature-card"><BarChart3 class="index-feature-icon" :size="22" aria-hidden="true" /><h3>Reportes</h3><p>Accedé a resúmenes claros para revisar la situación de cada empresa.</p></article>
-          <article class="index-feature-card"><Building2 class="index-feature-icon" :size="22" aria-hidden="true" /><h3>Gestión multiempresa</h3><p>Trabajá con varias organizaciones desde un mismo espacio ordenado.</p></article>
-          <article class="index-feature-card"><FileSpreadsheet class="index-feature-icon" :size="22" aria-hidden="true" /><h3>Importación de datos</h3><p>Incorporá información para reducir la carga manual de todos los días.</p></article>
+      <section id="funciones" class="index-section" aria-labelledby="features-title">
+        <div ref="featuresHeading" class="index-heading" data-reveal>
+          <p class="index-eyebrow">01 / Lo esencial, conectado</p>
+          <h2 id="features-title">Cada cosa en su lugar.</h2>
+          <p>Las herramientas para empezar a organizar tu gestión.</p>
+        </div>
+        <div class="index-features">
+          <article v-for="(feature, i) in features" :key="feature.title" :ref="element => featureAnchors[i] = element" data-reveal :style="{ '--delay': `${i * 80}ms` }">
+            <component :is="feature.icon" :size="26" aria-hidden="true" />
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </article>
         </div>
       </section>
 
-      <section id="publico" class="index-section index-audience" aria-labelledby="index-audience-title">
-        <div class="index-section-heading"><p class="index-eyebrow">Diseñado para acompañar</p><h2 id="index-audience-title">Una herramienta clara para distintos equipos</h2></div>
-        <div class="index-audience-list">
-          <article><BriefcaseBusiness :size="21" aria-hidden="true" /><div><h3>PyMEs</h3><p>Para ordenar su operación contable.</p></div></article>
-          <article><Landmark :size="21" aria-hidden="true" /><div><h3>Contadores / estudios contables</h3><p>Para seguir múltiples empresas con contexto.</p></div></article>
-          <article><UsersRound :size="21" aria-hidden="true" /><div><h3>Usuarios no técnicos</h3><p>Para acceder a información sin complejidad.</p></div></article>
+      <section id="beneficios" class="index-section" aria-labelledby="benefits-title">
+        <div ref="benefitsHeading" class="index-heading" data-reveal>
+          <p class="index-eyebrow">02 / Una forma más simple</p>
+          <h2 id="benefits-title">Menos dispersión.<br />Más perspectiva.</h2>
+          <p>Información organizada para trabajar con más claridad.</p>
+        </div>
+        <div class="index-benefits">
+          <Card v-for="(benefit, i) in benefits" :key="benefit.title" :ref="element => benefitAnchors[i] = element" data-reveal :style="{ '--delay': `${i * 80}ms` }">
+            <template #content>
+              <component :is="benefit.icon" :size="24" aria-hidden="true" />
+              <h3>{{ benefit.title }}</h3>
+              <p>{{ benefit.description }}</p>
+            </template>
+          </Card>
         </div>
       </section>
 
-      <section id="objetivo" class="index-goal" aria-labelledby="index-goal-title">
-        <div class="index-goal-icon"><LayoutDashboard :size="24" aria-hidden="true" /></div>
-        <div><p class="index-eyebrow">Nuestro objetivo</p><h2 id="index-goal-title">Menos tareas manuales, más información para decidir.</h2><p class="index-goal-description">Centralizá datos, accedé con claridad a la información contable y acompañá mejores decisiones en cada empresa.</p></div>
-        <CheckCircle2 class="index-goal-check" :size="28" aria-hidden="true" />
+      <section id="publico" class="index-section index-audience" aria-labelledby="audience-title">
+        <div ref="audienceHeading" class="index-heading" data-reveal>
+          <p class="index-eyebrow">03 / Tu manera de trabajar</p>
+          <h2 id="audience-title">Detrás de cada gestión,<br />hay alguien como vos.</h2>
+        </div>
+        <div class="index-audience-grid">
+          <article ref="audienceOne" data-reveal>
+            <Store :size="26" aria-hidden="true" />
+            <h3>Pequeñas PyMEs</h3>
+            <p>Un espacio para reunir la información de tu empresa y tener sus documentos a mano.</p>
+          </article>
+          <article ref="audienceTwo" data-reveal style="--delay: 80ms">
+            <Calculator :size="26" aria-hidden="true" />
+            <h3>Contadores y pequeños estudios</h3>
+            <p>Distintas empresas, un mismo lugar. Organizá la documentación de cada una sin perder el contexto.</p>
+          </article>
+        </div>
+        <div ref="closingAnchor" class="index-closing" data-reveal>
+          <p>Empezá por poner todo en su lugar.</p>
+          <Button :as="RouterLink" to="/register">Crear mi cuenta <ArrowRight :size="18" aria-hidden="true" /></Button>
+        </div>
+        <div ref="endAnchor" class="index-endpoint" aria-hidden="true"></div>
       </section>
+      <LandingJourney :container="journeyContainer" :anchors="journeyAnchors" />
     </main>
-
-    <footer class="site-footer"><p>Portal de gestión A.T.A.T. ERP</p></footer>
+    <footer class="index-footer"><span class="index-brand">A.T.A.T<span>.</span></span><p>Un lugar para tu gestión.</p></footer>
   </div>
 </template>
 
 <script setup>
-import { ArrowRight, BarChart3, Building2, BriefcaseBusiness, CheckCircle2, FileSpreadsheet, FileText, FileWarning, Landmark, LayoutDashboard, LogIn, TrendingDown, TrendingUp, UsersRound } from '@lucide/vue'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { RouterLink } from 'vue-router'
+import { ArrowDown, ArrowRight, ArrowUpRight, Building2, BriefcaseBusiness, Calculator, FileText, FolderOpen, Layers3, ListChecks, Search, Store } from '@lucide/vue'
+import Button from 'primevue/button'
+import Card from 'primevue/card'
+import LandingJourney from '../components/landing/LandingJourney.vue'
 import '../assets/css/IndexPage.css'
+
+const features = [
+  { icon: Building2, title: 'Tus empresas', description: 'Registrá y actualizá empresas. Encontralas por nombre, razón social o CUIT.' },
+  { icon: FolderOpen, title: 'Tus documentos', description: 'Cargá archivos y mantené la documentación asociada a cada empresa.' },
+  { icon: Search, title: 'Todo a mano', description: 'Buscá documentos por nombre y descargalos cuando los necesites.' }
+]
+const benefits = [
+  { icon: ListChecks, title: 'Más orden', description: 'Cada documento, en el contexto de su empresa.' },
+  { icon: Layers3, title: 'Menos dispersión', description: 'Reuní empresas y documentos en un mismo espacio.' },
+  { icon: Search, title: 'Más claridad', description: 'Encontrá la información que necesitás para seguir trabajando.' }
+]
+const heroWords = ['clara', 'ordenada', 'conectada', 'simple']
+const heroWordIndex = ref(0)
+const landing = ref(null)
+const journeyContainer = ref(null)
+const heroAnchor = ref(null)
+const featuresHeading = ref(null)
+const featureAnchors = ref([])
+const benefitsHeading = ref(null)
+const benefitAnchors = ref([])
+const audienceHeading = ref(null)
+const audienceOne = ref(null)
+const audienceTwo = ref(null)
+const closingAnchor = ref(null)
+const endAnchor = ref(null)
+const journeyAnchors = computed(() => ({
+  hero: heroAnchor.value,
+  featuresHeading: featuresHeading.value,
+  features: featureAnchors.value,
+  benefitsHeading: benefitsHeading.value,
+  benefits: benefitAnchors.value,
+  audienceHeading: audienceHeading.value,
+  audience: [audienceOne.value, audienceTwo.value],
+  closing: closingAnchor.value,
+  end: endAnchor.value
+}))
+let observer
+let motion
+let heroWordTimer
+function startHeroWordRotation() {
+  if (!motion.matches && !heroWordTimer) {
+    heroWordTimer = window.setInterval(() => {
+      heroWordIndex.value = (heroWordIndex.value + 1) % heroWords.length
+    }, 4200)
+  }
+}
+function updateHeroWordRotation() {
+  if (motion.matches) {
+    window.clearInterval(heroWordTimer)
+    heroWordTimer = undefined
+    heroWordIndex.value = 0
+    return
+  }
+  startHeroWordRotation()
+}
+function revealAll() {
+  if (motion.matches) {
+    observer.disconnect()
+    landing.value.querySelectorAll('[data-reveal]').forEach(element => element.classList.remove('reveal-pending'))
+  }
+}
+onMounted(() => {
+  motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+  observer = new IntersectionObserver(entries => {
+    entries.forEach(({ target, isIntersecting }) => {
+      if (isIntersecting) {
+        target.classList.remove('reveal-pending')
+        observer.unobserve(target)
+      }
+    })
+  }, { threshold: 0.12 })
+  if (!motion.matches) {
+    landing.value.querySelectorAll('[data-reveal]').forEach(element => {
+      // Content already in view (including anchor navigation) stays immediately available.
+      if (element.getBoundingClientRect().top > window.innerHeight) {
+        element.classList.add('reveal-pending')
+        observer.observe(element)
+      }
+    })
+  }
+  motion.addEventListener('change', revealAll)
+  motion.addEventListener('change', updateHeroWordRotation)
+  startHeroWordRotation()
+})
+onBeforeUnmount(() => {
+  observer.disconnect()
+  motion.removeEventListener('change', revealAll)
+  motion.removeEventListener('change', updateHeroWordRotation)
+  window.clearInterval(heroWordTimer)
+})
 </script>

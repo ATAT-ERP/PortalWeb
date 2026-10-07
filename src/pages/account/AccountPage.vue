@@ -65,44 +65,23 @@
       <form class="password-form" @submit.prevent="handleChangePassword">
           <div class="account-field" :class="{ 'account-field-invalid': touched.current && currentError }">
           <label for="current-password">Contraseña actual</label>
-          <input
-            id="current-password"
-            v-model="passwordForm.current"
-            type="password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            :disabled="isSaving"
-            @blur="touched.current = true"
-          />
+          <input id="current-password" v-model="passwordForm.current" type="password"
+            autocomplete="current-password" placeholder="••••••••" :disabled="isSaving" @blur="touched.current = true"/>
             <span v-if="touched.current && currentError" class="account-field-error">{{ currentError }}</span>
         </div>
 
         <div class="form-row">
           <div class="account-field" :class="{ 'account-field-invalid': touched.newPass && newPassError }">
             <label for="new-password">Nueva contraseña</label>
-            <input
-              id="new-password"
-              v-model="passwordForm.newPass"
-              type="password"
-              autocomplete="new-password"
-              placeholder="••••••••"
-              :disabled="isSaving"
-              @blur="touched.newPass = true"
-            />
+            <input id="new-password" v-model="passwordForm.newPass" type="password"
+              autocomplete="new-password" placeholder="••••••••" :disabled="isSaving" @blur="touched.newPass = true"/>
             <span v-if="touched.newPass && newPassError" class="account-field-error">{{ newPassError }}</span>
           </div>
 
           <div class="account-field" :class="{ 'account-field-invalid': touched.confirmPass && confirmError }">
             <label for="confirm-password">Confirmar nueva contraseña</label>
-            <input
-              id="confirm-password"
-              v-model="passwordForm.confirmPass"
-              type="password"
-              autocomplete="new-password"
-              placeholder="••••••••"
-              :disabled="isSaving"
-              @blur="touched.confirmPass = true"
-            />
+            <input id="confirm-password" v-model="passwordForm.confirmPass" type="password"
+              autocomplete="new-password" placeholder="••••••••" :disabled="isSaving" @blur="touched.confirmPass = true"/>
             <span v-if="touched.confirmPass && confirmError" class="account-field-error">{{ confirmError }}</span>
           </div>
         </div>
@@ -123,7 +102,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { UserRound, LockKeyhole } from '@lucide/vue'
 import { changePassword, getById } from '../../services/user.service'
-import { clearSession, getAccessToken, getProfile, getSession, setProfile } from '../../services/session.service'
+import { clearSession, getProfile, getSession, setProfile } from '../../services/session.service'
 import '../../assets/css/AccountPage.css'
 
 const router = useRouter()
@@ -174,7 +153,7 @@ const status = computed(() => (profile.value?.is_active ? 'Activa' : 'Inactiva')
 async function loadProfile() {
   const session = getSession()
 
-  if (!session?.id || !getAccessToken()) {
+  if (!session?.id) {
     clearSession()
     router.push('/login')
     return
@@ -185,7 +164,7 @@ async function loadProfile() {
   isLoading.value = true
 
   try {
-    const user = await getById(session.id, session.access_token)
+    const user = await getById(session.id)
     profile.value = user
     setProfile(user)
   } catch (error) {
@@ -211,13 +190,6 @@ async function handleChangePassword() {
 
   if (!isPasswordFormValid.value) return
 
-  const session = getSession()
-  if (!session?.access_token) {
-    clearSession()
-    router.push('/login')
-    return
-  }
-
   isSaving.value = true
 
   try {
@@ -226,8 +198,7 @@ async function handleChangePassword() {
         current_password: passwordForm.value.current,
         new_password: passwordForm.value.newPass,
         confirm_password: passwordForm.value.confirmPass,
-      },
-      session.access_token
+    }
     )
     passwordForm.value = { current: '', newPass: '', confirmPass: '' }
     touched.value = { current: false, newPass: false, confirmPass: false }
