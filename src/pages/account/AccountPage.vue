@@ -23,31 +23,74 @@
       </div>
 
       <div v-else class="profile-details">
-        <dl class="profile-fields">
-          <div class="field-row">
-            <dt>NOMBRE</dt>
-            <dd>{{ profile.first_name || '—' }}</dd>
-          </div>
-          <div class="field-row">
-            <dt>APELLIDO</dt>
-            <dd>{{ profile.last_name || '—' }}</dd>
-          </div>
-          <div class="field-row">
-            <dt>EMAIL</dt>
-            <dd class="email-value">{{ profile.email || '—' }}</dd>
-          </div>
-          <div class="field-row">
-            <dt>ESTADO DE LA CUENTA</dt>
-            <dd class="status-value">
-              <span class="status-badge">{{ status }}</span>
-            </dd>
-          </div>
-        </dl>
+        <form v-if="isEditingProfile" class="profile-form" @submit.prevent="handleSaveProfile" novalidate>
+          <div class="form-row">
+            <div class="account-field" :class="{ 'account-field-invalid': profileServerErrors.first_name || (profileTouched.first_name && firstNameError) }">
+              <label for="profile-first-name">Nombre</label>
+              <input id="profile-first-name" v-model="profileForm.first_name" type="text"
+                placeholder="Ingresá tu nombre" autocomplete="given-name" :disabled="isSavingProfile"
+                @blur="profileTouched.first_name = true"/>
+              <span v-if="profileServerErrors.first_name || (profileTouched.first_name && firstNameError)" class="account-field-error">
+                {{ profileServerErrors.first_name || firstNameError }}
+              </span>
+            </div>
 
-        <div v-if="errorMessage" class="profile-state">
-          <p class="state-error">{{ errorMessage }}</p>
-          <button type="button" class="state-retry" @click="loadProfile">Reintentar</button>
-        </div>
+            <div class="account-field" :class="{ 'account-field-invalid': profileServerErrors.last_name || (profileTouched.last_name && lastNameError) }">
+              <label for="profile-last-name">Apellido</label>
+              <input id="profile-last-name" v-model="profileForm.last_name" type="text"
+                placeholder="Ingresá tu apellido" autocomplete="family-name" :disabled="isSavingProfile"
+                @blur="profileTouched.last_name = true"/>
+              <span v-if="profileServerErrors.last_name || (profileTouched.last_name && lastNameError)" class="account-field-error">
+                {{ profileServerErrors.last_name || lastNameError }}
+              </span>
+            </div>
+          </div>
+
+          <p v-if="profileError && !hasProfileServerErrors" class="form-message form-message-error" role="alert">{{ profileError }}</p>
+
+          <div class="profile-form-actions">
+            <button type="submit" class="account-submit-button" :disabled="isSavingProfile">
+              {{ isSavingProfile ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+            <button type="button" class="profile-cancel-button" :disabled="isSavingProfile" @click="cancelEditProfile">
+              Cancelar
+            </button>
+          </div>
+        </form>
+
+        <template v-else>
+          <dl class="profile-fields">
+            <div class="field-row">
+              <dt>NOMBRE</dt>
+              <dd>{{ profile.first_name || '—' }}</dd>
+            </div>
+            <div class="field-row">
+              <dt>APELLIDO</dt>
+              <dd>{{ profile.last_name || '—' }}</dd>
+            </div>
+            <div class="field-row">
+              <dt>EMAIL</dt>
+              <dd class="email-value">{{ profile.email || '—' }}</dd>
+            </div>
+            <div class="field-row">
+              <dt>ESTADO DE LA CUENTA</dt>
+              <dd class="status-value">
+                <span class="status-badge">{{ status }}</span>
+              </dd>
+            </div>
+          </dl>
+
+          <p v-if="profileSuccess" class="form-message form-message-success">{{ profileSuccess }}</p>
+
+          <div class="profile-actions">
+            <button type="button" class="profile-edit-button" @click="startEditProfile">Editar datos</button>
+          </div>
+
+          <div v-if="errorMessage" class="profile-state">
+            <p class="state-error">{{ errorMessage }}</p>
+            <button type="button" class="state-retry" @click="loadProfile">Reintentar</button>
+          </div>
+        </template>
       </div>
     </section>
 
@@ -101,7 +144,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { UserRound, LockKeyhole } from '@lucide/vue'
-import { changePassword, getById } from '../../services/user.service'
+import { changePassword, getById, update } from '../../services/user.service'
 import { clearSession, getProfile, getSession, setProfile } from '../../services/session.service'
 import '../../assets/css/AccountPage.css'
 
@@ -110,6 +153,14 @@ const router = useRouter()
 const profile = ref(null)
 const isLoading = ref(true)
 const errorMessage = ref('')
+
+const isEditingProfile = ref(false)
+const isSavingProfile = ref(false)
+const profileForm = ref({ first_name: '', last_name: '' })
+const profileError = ref('')
+const profileSuccess = ref('')
+const profileServerErrors = ref({})
+const profileTouched = ref({ first_name: false, last_name: false })
 
 const passwordForm = ref({
   current: '',
@@ -141,6 +192,19 @@ const confirmError = computed(() => {
 const isPasswordFormValid = computed(
   () => !currentError.value && !newPassError.value && !confirmError.value
 )
+
+const firstNameError = computed(() => {
+  if (profileForm.value.first_name.length > 150) return 'El nombre no puede superar los 150 caracteres.'
+  return ''
+})
+
+const lastNameError = computed(() => {
+  if (profileForm.value.last_name.length > 150) return 'El apellido no puede superar los 150 caracteres.'
+  return ''
+})
+
+const isProfileFormValid = computed(() => !firstNameError.value && !lastNameError.value)
+const hasProfileServerErrors = computed(() => Object.keys(profileServerErrors.value).length > 0)
 
 const initials = computed(() => {
   const first = profile.value?.first_name?.trim()?.[0] ?? ''
@@ -180,6 +244,67 @@ async function loadProfile() {
 }
 
 onMounted(loadProfile)
+
+function startEditProfile() {
+  profileForm.value = {
+    first_name: profile.value.first_name ?? '',
+    last_name: profile.value.last_name ?? ''
+  }
+  profileTouched.value = { first_name: false, last_name: false }
+  profileServerErrors.value = {}
+  profileError.value = ''
+  profileSuccess.value = ''
+  isEditingProfile.value = true
+}
+
+function cancelEditProfile() {
+  profileTouched.value = { first_name: false, last_name: false }
+  profileServerErrors.value = {}
+  profileError.value = ''
+  isEditingProfile.value = false
+}
+
+async function handleSaveProfile() {
+  if (isSavingProfile.value) return
+
+  profileTouched.value.first_name = true
+  profileTouched.value.last_name = true
+  profileError.value = ''
+  profileSuccess.value = ''
+  profileServerErrors.value = {}
+
+  if (!isProfileFormValid.value) return
+
+  isSavingProfile.value = true
+
+  try {
+    const user = await update(profile.value.id, {
+      first_name: profileForm.value.first_name.trim(),
+      last_name: profileForm.value.last_name.trim()
+    })
+    profile.value = user
+    setProfile(user)
+    isEditingProfile.value = false
+    profileSuccess.value = 'Datos personales actualizados correctamente.'
+  } catch (error) {
+    if (error.status === 401 && error.code === 'NEX-USR-010') {
+      clearSession()
+      router.push('/login')
+      return
+    }
+
+    profileError.value = error instanceof Error ? error.message : 'No se pudieron guardar los datos. Intentá nuevamente.'
+
+    if (error.errors && typeof error.errors === 'object') {
+      for (const key of Object.keys(error.errors)) {
+        const value = error.errors[key]
+        profileServerErrors.value[key] = Array.isArray(value) ? value[0] : value
+      }
+    }
+  } finally {
+    isSavingProfile.value = false
+  }
+}
 
 async function handleChangePassword() {
   touched.value.current = true

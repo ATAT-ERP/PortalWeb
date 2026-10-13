@@ -161,9 +161,71 @@
 }
 
 .state-retry:focus-visible,
+.profile-edit-button:focus-visible,
+.profile-cancel-button:focus-visible,
 .account-submit-button:focus-visible {
   outline: 2px solid var(--color-highlight);
   outline-offset: 2px;
+}
+
+/* Edición de datos personales */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  flex: 1;
+}
+
+.profile-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-form-actions .account-submit-button {
+  margin-top: 0;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.profile-edit-button,
+.profile-cancel-button {
+  align-self: flex-start;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.profile-edit-button {
+  border: none;
+  background: var(--color-text-primary);
+  color: var(--color-surface-raised);
+}
+
+.profile-edit-button:hover {
+  background: var(--color-text-primary-hover);
+}
+
+.profile-cancel-button {
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.profile-cancel-button:hover:not(:disabled) {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+}
+
+.profile-cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Específicos de Seguridad */
@@ -309,5 +371,14 @@
 
   .account-submit-button {
     width: 100%;
+  }
+
+  .profile-form-actions {
+    flex-wrap: wrap;
+  }
+
+  .profile-form-actions .profile-cancel-button {
+    width: 100%;
+    align-self: stretch;
   }
 }
