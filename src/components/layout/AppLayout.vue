@@ -1,35 +1,39 @@
 <template>
   <div class="app-shell">
-    <div
-      v-if="sidebarOpen"
-      class="backdrop"
-      @click="sidebarOpen = false"
-    ></div>
+    <div v-if="sidebarOpen" class="backdrop" @click="sidebarOpen = false"></div>
 
-    <aside class="sidebar" :class="{ open: sidebarOpen }">
+    <aside
+      class="sidebar"
+      :class="{ open: sidebarOpen, expanded: dropdownOpen }"
+      aria-label="Navegación principal"
+    >
       <div class="sidebar-top">
         <div class="layout-brand-row">
           <span class="layout-logo-mark">AT</span>
-          <span class="layout-brand-name">A.T.A.T. ERP</span>
+          <span class="nav-label layout-brand-name">A.T.A.T. ERP</span>
         </div>
 
-        <!-- Selector de Empresa Activa (Exacto a la imagen) -->
-        <div class="company-selector">
-          <button type="button" class="company-select-btn" :disabled="isLoadingCompanies || companies.length === 0" @click="dropdownOpen = !dropdownOpen">
-            <div class="company-select-info">
-              <span class="company-select-tag">Empresa activa</span>
-              <div class="company-select-value">
-                <span :class="['company-dot', { inactive: !activeCompany }]"></span>
+        <div ref="selectorRef" class="company-selector">
+          <button
+            type="button"
+            class="company-select-btn"
+            aria-controls="company-dropdown"
+            :aria-expanded="dropdownOpen"
+            :aria-label="`Empresa activa: ${companyLabel}`"
+            :disabled="isLoadingCompanies || companies.length === 0"
+            @click="dropdownOpen = !dropdownOpen"
+          >
+            <span class="company-avatar" aria-hidden="true">{{ companyInitial }}</span>
+            <span class="nav-label company-select-content">
+              <span class="company-select-info">
+                <span class="company-select-tag">Empresa activa</span>
                 <span class="company-name">{{ companyLabel }}</span>
-              </div>
-            </div>
-            <svg class="chevron-icon" :class="{ open: dropdownOpen }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
+              </span>
+              <ChevronDown class="chevron-icon" :class="{ open: dropdownOpen }" aria-hidden="true" />
+            </span>
           </button>
 
-          <!-- Menú desplegable flotante -->
-          <div v-if="dropdownOpen" class="company-dropdown-menu">
+          <div v-if="dropdownOpen" id="company-dropdown" class="company-dropdown-menu">
             <button
               v-for="company in companies"
               :key="company.id"
@@ -37,17 +41,18 @@
               :class="['dropdown-option', { active: activeCompany && company.id === activeCompany.id }]"
               @click="handleCompanySelect(company)"
             >
-              <span :class="['company-dot', { inactive: !activeCompany || company.id !== activeCompany.id }]"></span>
               <span class="option-name">{{ company.name }}</span>
-              <svg v-if="activeCompany && company.id === activeCompany.id" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="check-icon">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
+              <Check
+                v-if="activeCompany && company.id === activeCompany.id"
+                class="check-icon"
+                aria-hidden="true"
+              />
             </button>
           </div>
         </div>
       </div>
 
-      <nav class="nav-list">
+      <nav class="nav-list" aria-label="Secciones">
         <router-link
           to="/home"
           class="nav-link"
@@ -55,7 +60,7 @@
           @click="sidebarOpen = false"
         >
           <Home class="nav-icon" aria-hidden="true" />
-          Inicio
+          <span class="nav-label">Inicio</span>
         </router-link>
 
         <router-link
@@ -65,7 +70,7 @@
           @click="sidebarOpen = false"
         >
           <UserRound class="nav-icon" aria-hidden="true" />
-          Mi cuenta
+          <span class="nav-label">Mi cuenta</span>
         </router-link>
 
         <router-link
@@ -75,19 +80,23 @@
           @click="sidebarOpen = false"
         >
           <Building2 class="nav-icon" aria-hidden="true" />
-          Compañías
+          <span class="nav-label">Compañías</span>
         </router-link>
 
-        <router-link to="/documents" class="nav-link" :class="{ active: route.path.startsWith('/documents') }"
-          @click="sidebarOpen = false">
+        <router-link
+          to="/documents"
+          class="nav-link"
+          :class="{ active: route.path.startsWith('/documents') }"
+          @click="sidebarOpen = false"
+        >
           <FileText class="nav-icon" aria-hidden="true" />
-          Documentos
+          <span class="nav-label">Documentos</span>
         </router-link>
       </nav>
 
-      <button type="button" class="logout-btn" @click="handleLogout" :disabled="loggingOut">
+      <button type="button" class="logout-btn" :disabled="loggingOut" @click="handleLogout">
         <LogOut class="nav-icon" aria-hidden="true" />
-        {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
+        <span class="nav-label">{{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}</span>
       </button>
     </aside>
 
@@ -118,9 +127,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Building2, FileText, Home, UserRound, LogOut, Menu } from '@lucide/vue'
+import { Building2, Check, ChevronDown, FileText, Home, UserRound, LogOut, Menu } from '@lucide/vue'
 import { logout } from '../../services/user.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, companies, isLoadingCompanies, loadCompanies, selectCompany } from '../../stores/company.store'
@@ -132,6 +141,7 @@ const router = useRouter()
 const sidebarOpen = ref(false)
 const dropdownOpen = ref(false)
 const loggingOut = ref(false)
+const selectorRef = ref(null)
 
 const user = ref({ name: 'Usuario' })
 
@@ -150,7 +160,24 @@ const companyLabel = computed(() => {
   return companies.value.length ? 'Seleccioná una compañía' : 'Sin compañías'
 })
 
+const companyInitial = computed(
+  () => activeCompany.value?.name?.trim()?.[0]?.toUpperCase() ?? '?'
+)
+
+function handleOutsideClick(event) {
+  if (dropdownOpen.value && selectorRef.value && !selectorRef.value.contains(event.target)) {
+    dropdownOpen.value = false
+  }
+}
+
+function handleKeydown(event) {
+  if (event.key === 'Escape') dropdownOpen.value = false
+}
+
 onMounted(async () => {
+  document.addEventListener('click', handleOutsideClick)
+  document.addEventListener('keydown', handleKeydown)
+
   try {
     await loadCompanies()
   } catch (error) {
@@ -159,6 +186,11 @@ onMounted(async () => {
       router.push('/login')
     }
   }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleOutsideClick)
+  document.removeEventListener('keydown', handleKeydown)
 })
 
 function handleCompanySelect(company) {
@@ -171,7 +203,7 @@ async function handleLogout() {
   try {
     await logout()
   } catch (error) {
-    // Si la llamada falla igual limpiamos la sesión local
+    // Si la llamada remota falla igual limpiamos la sesión local
   } finally {
     clearSession()
     loggingOut.value = false
