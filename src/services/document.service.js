@@ -16,7 +16,7 @@ export function uploadDocument({ company_id, file, category_id, name }) {
   if (category_id) formData.append('category_id', category_id)
   if (name) formData.append('name', name)
 
-  return api.post('/documents/', formData, { auth: true })
+  return api.post('/cloud/files/', formData, { auth: true })
 }
 
 /**
@@ -30,7 +30,7 @@ export function uploadDocument({ company_id, file, category_id, name }) {
  */
 export function getDocuments(companyId, query = '') {
   const search = query ? `&q=${encodeURIComponent(query)}` : ''
-  return api.get(`/documents/?company_id=${encodeURIComponent(companyId)}${search}`, { auth: true })
+  return api.get(`/cloud/files/?company_id=${encodeURIComponent(companyId)}${search}`, { auth: true })
 }
 
 /**
@@ -42,5 +42,5 @@ export function getDocuments(companyId, query = '') {
  * @author Agustin
  */
 export function downloadDocument(id) {
-  return api.get(`/documents/${id}/download/`, { auth: true })
+  return api.get(`/cloud/files/${id}/download/`, { auth: true })
 }
