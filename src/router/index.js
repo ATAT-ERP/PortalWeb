@@ -61,6 +61,11 @@ const router = createRouter({
         // Los módulos futuros se agregan acá como nuevas rutas hijas,
         // y quedan protegidos automáticamente sin tocar nada más.
       ]
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../pages/NotFoundPage.vue')
     }
   ]
 })
