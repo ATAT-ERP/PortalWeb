@@ -75,12 +75,14 @@
       <p>Se realizará una emisión interna dentro del ERP. El backend asignará el número y calculará los importes.</p>
       <div class="invoice-form-actions"><Button label="Confirmar emisión" :disabled="busy" :loading="busy" @click="emitInvoice" /><Button label="Cancelar" severity="secondary" outlined :disabled="busy" @click="confirmIssue = false" /></div>
     </Dialog>
+    <BackLink to="/billing" label="Volver a Facturación" />
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { onBeforeRouteLeave, RouterLink, useRouter } from 'vue-router'
+import BackLink from '../../components/BackLink.vue'
 import { FileText } from '@lucide/vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'

@@ -15,11 +15,13 @@
         <ArrowUpRight class="billing-home-arrow" :size="19" aria-hidden="true" />
       </RouterLink>
     </nav>
+    <BackLink to="/home" label="Volver a Inicio" />
   </div>
 </template>
 
 <script setup>
 import { RouterLink } from 'vue-router'
+import BackLink from '../../components/BackLink.vue'
 import { ArrowUpRight, FileMinus, FilePlus, Files, Landmark, Store } from '@lucide/vue'
 import '../../assets/css/BillingHomePage.css'
 

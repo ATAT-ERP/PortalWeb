@@ -60,10 +60,12 @@
         </li>
       </ul>
     </section>
+    <BackLink to="/home" label="Volver a Inicio" />
   </div>
 </template>
 
 <script setup>
+import BackLink from '../../components/BackLink.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Building2, Plus, Search, Edit2 } from '@lucide/vue'

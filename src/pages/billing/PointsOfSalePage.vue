@@ -34,12 +34,14 @@
         </DataTable>
       </template>
     </section>
+    <BackLink to="/billing" label="Volver a Facturación" />
   </div>
 </template>
 
 <script setup>
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import BackLink from '../../components/BackLink.vue'
 import { Building2, Plus } from '@lucide/vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'

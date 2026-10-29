@@ -38,12 +38,14 @@
         </form>
       </template>
     </section>
+    <BackLink to="/billing" label="Volver a Facturación" />
   </div>
 </template>
 
 <script setup>
 import { onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import BackLink from '../../components/BackLink.vue'
 import { Building2 } from '@lucide/vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'

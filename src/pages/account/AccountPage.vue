@@ -137,10 +137,12 @@
         </button>
       </form>
     </section>
+    <BackLink to="/home" label="Volver a Inicio" />
   </div>
 </template>
 
 <script setup>
+import BackLink from '../../components/BackLink.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { UserRound, LockKeyhole } from '@lucide/vue'

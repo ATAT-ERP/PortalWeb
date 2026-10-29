@@ -186,10 +186,12 @@
         </button>
       </form>
     </section>
+    <BackLink to="/companies" label="Volver a Compañías" />
   </div>
 </template>
 
 <script setup>
+import BackLink from '../../components/BackLink.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Building2, Plus, UserRound } from '@lucide/vue'

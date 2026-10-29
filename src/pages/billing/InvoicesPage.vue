@@ -125,12 +125,14 @@
         <h3>Importes</h3><dl class="invoice-detail-grid"><div><dt>Neto gravado</dt><dd>{{ invoice.net_taxed }}</dd></div><div><dt>Neto no gravado</dt><dd>{{ invoice.net_untaxed }}</dd></div><div><dt>Exento</dt><dd>{{ invoice.net_exempt }}</dd></div><div><dt>IVA</dt><dd>{{ invoice.vat_amount }}</dd></div><div><dt>Total</dt><dd>{{ invoice.total }}</dd></div></dl>
       </div>
     </Dialog>
+    <BackLink to="/billing" label="Volver a Facturación" />
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import BackLink from '../../components/BackLink.vue'
 import { Download, Eye, FileText, Search } from '@lucide/vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
