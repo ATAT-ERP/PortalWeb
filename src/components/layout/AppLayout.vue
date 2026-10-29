@@ -183,7 +183,8 @@ const navItems = [
       { label: 'Facturas', icon: FileText, disabled: true },
       { label: 'Comprobantes', to: '/billing/invoices', icon: ReceiptText },
       { label: 'Notas de crédito', icon: FileText, disabled: true },
-      { label: 'Perfil fiscal', to: '/billing/fiscal-profile', icon: Building2 }
+      { label: 'Perfil fiscal', to: '/billing/fiscal-profile', icon: Building2 },
+      { label: 'Puntos de venta', to: '/billing/points-of-sale', icon: Building2 }
     ]
   }
 ]

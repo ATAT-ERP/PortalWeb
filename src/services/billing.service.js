@@ -28,3 +28,15 @@ export function getInvoice(companyId, invoiceId) {
 export function getPointsOfSale(companyId) {
   return api.get(`/billing/companies/${encodeURIComponent(companyId)}/points-of-sale/`, { auth: true })
 }
+
+export function createPointOfSale(companyId) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/points-of-sale/`, undefined, { auth: true })
+}
+
+export function activatePointOfSale(companyId, pointId) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/points-of-sale/${encodeURIComponent(pointId)}/activate/`, undefined, { auth: true })
+}
+
+export function deactivatePointOfSale(companyId, pointId) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/points-of-sale/${encodeURIComponent(pointId)}/deactivate/`, undefined, { auth: true })
+}
