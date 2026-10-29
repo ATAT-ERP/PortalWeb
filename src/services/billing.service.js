@@ -25,6 +25,30 @@ export function getInvoice(companyId, invoiceId) {
   return api.get(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/`, { auth: true })
 }
 
+export function createInvoice(companyId, data) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/invoices/`, data, { auth: true })
+}
+
+export function updateInvoice(companyId, invoiceId, data) {
+  return api.patch(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/`, data, { auth: true })
+}
+
+export function createInvoiceItem(companyId, invoiceId, data) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/items/`, data, { auth: true })
+}
+
+export function updateInvoiceItem(companyId, invoiceId, itemId, data) {
+  return api.patch(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/items/${encodeURIComponent(itemId)}/`, data, { auth: true })
+}
+
+export function deleteInvoiceItem(companyId, invoiceId, itemId) {
+  return api.delete(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/items/${encodeURIComponent(itemId)}/`, { auth: true })
+}
+
+export function issueInvoice(companyId, invoiceId) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/issue/`, undefined, { auth: true })
+}
+
 export function getPointsOfSale(companyId) {
   return api.get(`/billing/companies/${encodeURIComponent(companyId)}/points-of-sale/`, { auth: true })
 }

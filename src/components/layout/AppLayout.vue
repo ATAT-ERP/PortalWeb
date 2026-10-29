@@ -180,7 +180,7 @@ const navItems = [
   { label: 'Cloud', to: '/documents', icon: Cloud },
   {
     label: 'Facturación', icon: ReceiptText, children: [
-      { label: 'Facturas', icon: FileText, disabled: true },
+      { label: 'Facturas', to: '/billing/invoice-form', icon: FileText },
       { label: 'Comprobantes', to: '/billing/invoices', icon: ReceiptText },
       { label: 'Notas de crédito', icon: FileText, disabled: true },
       { label: 'Perfil fiscal', to: '/billing/fiscal-profile', icon: Building2 },

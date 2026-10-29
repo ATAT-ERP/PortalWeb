@@ -64,6 +64,11 @@ const router = createRouter({
           component: () => import('../pages/billing/InvoicesPage.vue')
         },
         {
+          path: 'billing/invoice-form',
+          name: 'invoice-form',
+          component: () => import('../pages/billing/InvoiceFormPage.vue')
+        },
+        {
           path: 'billing/fiscal-profile',
           name: 'fiscal-profile',
           component: () => import('../pages/billing/FiscalProfilePage.vue')
