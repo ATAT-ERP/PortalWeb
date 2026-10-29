@@ -1,5 +1,17 @@
 import { api } from './api'
 
+export function getFiscalProfile(companyId) {
+  return api.get(`/billing/companies/${encodeURIComponent(companyId)}/fiscal-profile/`, { auth: true })
+}
+
+export function createFiscalProfile(companyId, data) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/fiscal-profile/`, data, { auth: true })
+}
+
+export function updateFiscalProfile(companyId, data) {
+  return api.patch(`/billing/companies/${encodeURIComponent(companyId)}/fiscal-profile/`, data, { auth: true })
+}
+
 export function getInvoices(companyId, filters = {}) {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(filters)) {

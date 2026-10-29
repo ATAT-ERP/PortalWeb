@@ -62,6 +62,11 @@ const router = createRouter({
           path: 'billing/invoices',
           name: 'invoices',
           component: () => import('../pages/billing/InvoicesPage.vue')
+        },
+        {
+          path: 'billing/fiscal-profile',
+          name: 'fiscal-profile',
+          component: () => import('../pages/billing/FiscalProfilePage.vue')
         }
         // Los módulos futuros se agregan acá como nuevas rutas hijas,
         // y quedan protegidos automáticamente sin tocar nada más.
