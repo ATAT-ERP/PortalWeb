@@ -41,7 +41,20 @@
     <Dialog v-model:visible="detailVisible" modal :header="detailKind === 'invoice' ? 'Detalle de factura' : 'Detalle de nota de crédito'" :style="{ width: 'min(900px, 95vw)' }" @hide="closeDetail">
       <p v-if="loadingDetail" class="invoices-state" role="status">Cargando detalle...</p>
       <p v-else-if="detailError" class="invoices-error" role="alert">{{ detailError }}</p>
-      <div v-else-if="invoice && detailKind === 'invoice'" class="invoice-detail">
+      <div v-if="invoice" class="invoices-pdf-actions">
+        <p v-if="invoice.status === 'draft'" class="invoices-state">El PDF estará disponible para consulta después de la emisión, si existe una representación.</p>
+        <p v-else-if="loadingRepresentation" class="invoices-state" role="status">Consultando disponibilidad del PDF...</p>
+        <template v-else>
+          <p v-if="representationMissing" class="invoices-state">Este comprobante todavía no tiene una representación PDF.</p>
+          <p v-if="representationError" class="invoices-error" role="alert">{{ representationError }}</p>
+          <Button v-if="representation" type="button" severity="secondary" outlined :disabled="downloadingPdf" :loading="downloadingPdf" @click="downloadPdf"><Download :size="16" aria-hidden="true" /> Descargar PDF</Button>
+          <Button v-else-if="generationState === 'pending'" type="button" label="Generando PDF..." :loading="true" disabled />
+          <Button v-else-if="generationState === 'uncertain'" type="button" label="Consultar estado del PDF" severity="secondary" outlined @click="loadRepresentation" />
+          <Button v-else-if="representationMissing" type="button" label="Generar PDF" severity="secondary" outlined @click="generatePdf" />
+          <Button v-else-if="representationError" type="button" label="Reintentar consulta del PDF" severity="secondary" outlined @click="loadRepresentation" />
+        </template>
+      </div>
+      <div v-if="invoice && detailKind === 'invoice'" class="invoice-detail">
         <h3>{{ invoice.invoice_type_display }} · {{ invoice.formatted_number ?? 'Sin número' }}</h3>
         <dl class="invoice-detail-grid">
           <div><dt>Estado</dt><dd><Tag :severity="statusSeverity[invoice.status]" :value="statusLabels[invoice.status]" /></dd></div>
@@ -116,9 +129,9 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Eye, FileText, Search } from '@lucide/vue'
+import { Download, Eye, FileText, Search } from '@lucide/vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -126,7 +139,8 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
-import { getCreditNote, getCreditNoteItems, getCreditNotes, getInvoice, getInvoices, getPointsOfSale } from '../../services/billing.service'
+import { generateCreditNoteRepresentation, generateInvoiceRepresentation, getCreditNote, getCreditNoteItems, getCreditNoteRepresentation, getCreditNotes, getInvoice, getInvoiceRepresentation, getInvoices, getPointsOfSale } from '../../services/billing.service'
+import { downloadDocument } from '../../services/document.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/InvoicesPage.css'
@@ -158,6 +172,14 @@ const listError = ref('')
 const pointsError = ref('')
 const detailError = ref('')
 const detailVisible = ref(false)
+const representation = ref(null)
+const loadingRepresentation = ref(false)
+const representationMissing = ref(false)
+const representationError = ref('')
+const downloadingPdf = ref(false)
+const pendingGenerations = reactive(new Map())
+const generationKey = computed(() => invoice.value && activeCompany.value ? `${activeCompany.value.id}:${detailKind.value}:${invoice.value.id}` : '')
+const generationState = computed(() => pendingGenerations.get(generationKey.value))
 const filtersChanged = ref(false)
 let listRequest = 0
 let pointsRequest = 0
@@ -272,6 +294,7 @@ function clearFilters() {
 }
 
 async function openInvoice(row) {
+  closeDetail()
   const request = ++detailRequest
   const { kind, record } = row
   detailKind.value = kind
@@ -282,7 +305,11 @@ async function openInvoice(row) {
   try {
     const companyId = activeCompany.value.id
     const [result, items] = kind === 'invoice' ? [await getInvoice(companyId, record.id), []] : await Promise.all([getCreditNote(companyId, record.id), getCreditNoteItems(companyId, record.id)])
-    if (request === detailRequest) { invoice.value = result; creditItems.value = items }
+    if (request === detailRequest) {
+      invoice.value = result
+      creditItems.value = items
+      if (result.status !== 'draft') loadRepresentation()
+    }
   } catch (error) {
     if (request === detailRequest && !handleUnauthorized(error)) detailError.value = requestError(error, 'No se pudo cargar el detalle. Intentá nuevamente.')
   } finally {
@@ -296,6 +323,97 @@ function closeDetail() {
   creditItems.value = []
   loadingDetail.value = false
   detailError.value = ''
+  representation.value = null
+  loadingRepresentation.value = false
+  representationMissing.value = false
+  representationError.value = ''
+  downloadingPdf.value = false
+}
+
+async function loadRepresentation() {
+  const request = detailRequest
+  const companyId = activeCompany.value.id
+  const id = invoice.value.id
+  const kind = detailKind.value
+  const key = generationKey.value
+  const stateAtStart = pendingGenerations.get(key)
+  representation.value = null
+  representationMissing.value = false
+  representationError.value = ''
+  loadingRepresentation.value = true
+  try {
+    const result = kind === 'invoice' ? await getInvoiceRepresentation(companyId, id) : await getCreditNoteRepresentation(companyId, id)
+    if (request === detailRequest) {
+      representation.value = result
+      if (pendingGenerations.get(key) !== 'pending') pendingGenerations.delete(key)
+    }
+  } catch (error) {
+    if (request !== detailRequest || handleUnauthorized(error)) return
+    if (error.status === 404 && error.message === 'El comprobante todavía no tiene representación.') {
+      representationMissing.value = true
+      if (stateAtStart !== 'pending' && pendingGenerations.get(key) === 'uncertain') pendingGenerations.delete(key)
+    }
+    else representationError.value = pdfError(error, 'No se pudo consultar la representación PDF. Intentá nuevamente.')
+  } finally {
+    if (request === detailRequest) loadingRepresentation.value = false
+  }
+}
+
+async function generatePdf() {
+  if (!invoice.value || invoice.value.status === 'draft' || !representationMissing.value || loadingRepresentation.value || generationState.value) return
+  const request = detailRequest
+  const companyId = activeCompany.value.id
+  const id = invoice.value.id
+  const kind = detailKind.value
+  const key = generationKey.value
+  pendingGenerations.set(key, 'pending')
+  representationError.value = ''
+  try {
+    const result = kind === 'invoice' ? await generateInvoiceRepresentation(companyId, id) : await generateCreditNoteRepresentation(companyId, id)
+    if (request === detailRequest && detailVisible.value) {
+      representation.value = result
+      representationMissing.value = false
+      pendingGenerations.delete(key)
+    } else {
+      pendingGenerations.set(key, 'uncertain')
+    }
+  } catch (error) {
+    if (!error.status || error.status >= 500) {
+      pendingGenerations.set(key, 'uncertain')
+      if (request === detailRequest) representationError.value = 'No se pudo confirmar la generación. Consultá el estado del PDF antes de volver a intentar.'
+    } else {
+      pendingGenerations.delete(key)
+      if (request === detailRequest && !handleUnauthorized(error)) representationError.value = pdfError(error, 'No se pudo generar el PDF. Intentá nuevamente.')
+    }
+  }
+}
+
+async function downloadPdf() {
+  if (downloadingPdf.value || !representation.value) return
+  const request = detailRequest
+  const fileId = representation.value.file.id
+  downloadingPdf.value = true
+  representationError.value = ''
+  try {
+    const result = await downloadDocument(fileId)
+    if (request !== detailRequest || !detailVisible.value) return
+    const link = window.document.createElement('a')
+    link.href = result.url
+    window.document.body.append(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    if (request === detailRequest && !handleUnauthorized(error)) representationError.value = pdfError(error, 'No se pudo descargar el PDF. Intentá nuevamente.')
+  } finally {
+    if (request === detailRequest) downloadingPdf.value = false
+  }
+}
+
+function pdfError(error, fallback) {
+  if (error.status === 400) return 'El PDF no está disponible para este comprobante.'
+  if (error.status === 403) return 'No tenés permiso para acceder al PDF de esta compañía.'
+  if (error.status === 404) return 'No se encontró el comprobante o el archivo solicitado.'
+  return fallback
 }
 
 function pointNumber(id) {

@@ -25,6 +25,14 @@ export function getInvoice(companyId, invoiceId) {
   return api.get(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/`, { auth: true })
 }
 
+export function getInvoiceRepresentation(companyId, invoiceId) {
+  return api.get(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/representation/`, { auth: true })
+}
+
+export function generateInvoiceRepresentation(companyId, invoiceId) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/representation/`, undefined, { auth: true })
+}
+
 export function createInvoice(companyId, data) {
   return api.post(`/billing/companies/${encodeURIComponent(companyId)}/invoices/`, data, { auth: true })
 }
@@ -55,6 +63,14 @@ export function getCreditNotes(companyId) {
 
 export function getCreditNote(companyId, id) {
   return api.get(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/`, { auth: true })
+}
+
+export function getCreditNoteRepresentation(companyId, id) {
+  return api.get(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/representation/`, { auth: true })
+}
+
+export function generateCreditNoteRepresentation(companyId, id) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/representation/`, undefined, { auth: true })
 }
 
 export function createCreditNote(companyId, data) {

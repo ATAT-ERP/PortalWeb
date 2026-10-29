@@ -12,6 +12,7 @@
 .invoices-state { color: var(--color-text-secondary); }
 .invoices-error { color: var(--color-danger); }
 .invoices-retry { padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+.invoices-pdf-actions { margin-bottom: 1.25rem; }
 .invoice-detail h3 { margin: 1.5rem 0 .75rem; font-size: 1rem; }
 .invoice-detail h3:first-child { margin-top: 0; }
 .invoice-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .9rem 1.5rem; margin: 0; }
