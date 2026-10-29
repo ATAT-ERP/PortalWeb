@@ -22,13 +22,14 @@
         <p v-if="pointsError" class="invoices-error" role="alert">{{ pointsError }} <button type="button" class="invoices-retry" @click="loadPoints">Reintentar</button></p>
         <p v-if="loadingInvoices" class="invoices-state" role="status">Cargando facturas...</p>
         <p v-else-if="listError" class="invoices-error" role="alert">{{ listError }}</p>
+        <p v-else-if="filtersChanged" class="invoices-state">Seleccioná Buscar para aplicar los filtros.</p>
         <DataTable v-else :value="invoices" data-key="id" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" scrollable>
           <template #empty>No se encontraron facturas.</template>
           <Column field="invoice_type_display" header="Tipo" />
           <Column header="Número"><template #body="{ data }">{{ data.formatted_number ?? 'Sin número' }}</template></Column>
           <Column header="Fecha de emisión"><template #body="{ data }">{{ formatDate(data.issue_date) }}</template></Column>
           <Column field="receiver_name" header="Receptor" />
-          <Column header="Estado"><template #body="{ data }">{{ statusLabels[data.status] }}</template></Column>
+          <Column header="Estado"><template #body="{ data }"><Tag :severity="statusSeverity[data.status]" :value="statusLabels[data.status]" /></template></Column>
           <Column header="Total"><template #body="{ data }">{{ data.total }}</template></Column>
           <Column header="Detalle"><template #body="{ data }"><Button type="button" size="small" severity="secondary" outlined @click="openInvoice(data.id)"><Eye :size="16" aria-hidden="true" /> Ver</Button></template></Column>
         </DataTable>
@@ -41,7 +42,7 @@
       <div v-else-if="invoice" class="invoice-detail">
         <h3>{{ invoice.invoice_type_display }} · {{ invoice.formatted_number ?? 'Sin número' }}</h3>
         <dl class="invoice-detail-grid">
-          <div><dt>Estado</dt><dd>{{ statusLabels[invoice.status] }}</dd></div>
+          <div><dt>Estado</dt><dd><Tag :severity="statusSeverity[invoice.status]" :value="statusLabels[invoice.status]" /></dd></div>
           <div><dt>Punto de venta</dt><dd>{{ invoice.point_of_sale_number }}</dd></div>
           <div><dt>Fecha de emisión</dt><dd>{{ formatDate(invoice.issue_date) }}</dd></div>
           <div><dt>Concepto</dt><dd>{{ invoice.concept_display }}</dd></div>
@@ -90,7 +91,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Eye, FileText, Search } from '@lucide/vue'
 import Button from 'primevue/button'
@@ -99,6 +100,7 @@ import DataTable from 'primevue/datatable'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import Tag from 'primevue/tag'
 import { getInvoice, getInvoices, getPointsOfSale } from '../../services/billing.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
@@ -106,6 +108,7 @@ import '../../assets/css/InvoicesPage.css'
 
 const statuses = [{ label: 'Borrador', value: 'draft' }, { label: 'Emitida', value: 'issued' }, { label: 'Cancelada', value: 'cancelled' }]
 const statusLabels = { draft: 'Borrador', issued: 'Emitida', cancelled: 'Cancelada' }
+const statusSeverity = { draft: 'secondary', issued: 'success', cancelled: 'danger' }
 const invoiceTypes = [{ label: 'Factura A', value: 1 }, { label: 'Factura B', value: 6 }, { label: 'Factura C', value: 11 }]
 const documentLabels = { 80: 'CUIT', 86: 'CUIL', 87: 'CDI', 96: 'DNI' }
 const vatConditions = { 1: 'IVA Responsable Inscripto', 4: 'IVA Sujeto Exento', 5: 'Consumidor Final', 6: 'Responsable Monotributo', 13: 'Monotributista Social', 15: 'IVA No Alcanzado', 16: 'Monotributo Trabajador Independiente Promovido' }
@@ -124,9 +127,18 @@ const listError = ref('')
 const pointsError = ref('')
 const detailError = ref('')
 const detailVisible = ref(false)
+const filtersChanged = ref(false)
 let listRequest = 0
 let pointsRequest = 0
 let detailRequest = 0
+
+watch(filters, () => {
+  listRequest++
+  invoices.value = []
+  listError.value = ''
+  loadingInvoices.value = false
+  filtersChanged.value = true
+}, { deep: true, flush: 'sync' })
 
 watch(activeCompany, () => {
   Object.assign(filters, emptyFilters())
@@ -135,6 +147,8 @@ watch(activeCompany, () => {
   loadInvoices()
   loadPoints()
 }, { immediate: true, flush: 'sync' })
+
+onBeforeUnmount(() => { listRequest++; pointsRequest++; detailRequest++ })
 
 function handleUnauthorized(error) {
   if (error.status !== 401 || error.code !== 'NEX-USR-010') return false
@@ -147,6 +161,7 @@ async function loadInvoices() {
   const request = ++listRequest
   invoices.value = []
   listError.value = ''
+  filtersChanged.value = false
   if (!activeCompany.value) { loadingInvoices.value = false; return }
   loadingInvoices.value = true
   try {
@@ -154,7 +169,7 @@ async function loadInvoices() {
     if (request === listRequest) invoices.value = result
   } catch (error) {
     if (request === listRequest && !handleUnauthorized(error)) {
-      listError.value = error.status === 400 ? 'Revisá los filtros ingresados e intentá nuevamente.' : error instanceof Error ? error.message : 'No se pudieron cargar las facturas.'
+      listError.value = requestError(error, 'No se pudieron cargar las facturas. Intentá nuevamente.')
     }
   } finally {
     if (request === listRequest) loadingInvoices.value = false
@@ -171,7 +186,7 @@ async function loadPoints() {
     const result = await getPointsOfSale(activeCompany.value.id)
     if (request === pointsRequest) pointsOfSale.value = result
   } catch (error) {
-    if (request === pointsRequest && !handleUnauthorized(error)) pointsError.value = error instanceof Error ? error.message : 'No se pudieron cargar los puntos de venta.'
+    if (request === pointsRequest && !handleUnauthorized(error)) pointsError.value = requestError(error, 'No se pudieron cargar los puntos de venta. Intentá nuevamente.')
   } finally {
     if (request === pointsRequest) loadingPoints.value = false
   }
@@ -192,7 +207,7 @@ async function openInvoice(id) {
     const result = await getInvoice(activeCompany.value.id, id)
     if (request === detailRequest) invoice.value = result
   } catch (error) {
-    if (request === detailRequest && !handleUnauthorized(error)) detailError.value = error instanceof Error ? error.message : 'No se pudo cargar el detalle.'
+    if (request === detailRequest && !handleUnauthorized(error)) detailError.value = requestError(error, 'No se pudo cargar el detalle. Intentá nuevamente.')
   } finally {
     if (request === detailRequest) loadingDetail.value = false
   }
@@ -203,6 +218,14 @@ function closeDetail() {
   invoice.value = null
   loadingDetail.value = false
   detailError.value = ''
+}
+
+function requestError(error, fallback) {
+  if (error.status === 400) return 'Revisá los filtros ingresados e intentá nuevamente.'
+  if (error.status === 403) return 'No tenés permiso para consultar los datos de esta compañía.'
+  if (error.status === 404 && error.message === 'No FiscalProfile matches the given query.') return 'La compañía necesita un perfil fiscal para consultar sus comprobantes.'
+  if (error.status === 404) return 'No se encontró el recurso solicitado.'
+  return fallback
 }
 
 function formatDate(value) {
