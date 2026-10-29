@@ -89,20 +89,27 @@
           </RouterLink>
 
           <div v-if="item.children && item.children.length && isGroupOpen(item)" class="nav-submenu">
-            <RouterLink
-              v-for="child in item.children"
-              :key="child.to"
-              :to="child.to"
-              class="nav-link nav-sublink"
-              :class="{ active: isRouteActive(child.to) }"
-              :title="child.label"
-              @click="sidebarOpen = false"
-            >
-              <span class="nav-icon-wrap">
-                <component :is="child.icon" class="nav-icon" aria-hidden="true" />
-              </span>
-              <span class="nav-label nav-link-label">{{ child.label }}</span>
-            </RouterLink>
+            <template v-for="child in item.children" :key="child.label">
+              <button v-if="child.disabled" type="button" class="nav-link nav-sublink nav-link-disabled" :title="child.label" disabled>
+                <span class="nav-icon-wrap">
+                  <component :is="child.icon" class="nav-icon" aria-hidden="true" />
+                </span>
+                <span class="nav-label nav-link-label">{{ child.label }}</span>
+              </button>
+              <RouterLink
+                v-else
+                :to="child.to"
+                class="nav-link nav-sublink"
+                :class="{ active: isRouteActive(child.to) }"
+                :title="child.label"
+                @click="sidebarOpen = false"
+              >
+                <span class="nav-icon-wrap">
+                  <component :is="child.icon" class="nav-icon" aria-hidden="true" />
+                </span>
+                <span class="nav-label nav-link-label">{{ child.label }}</span>
+              </RouterLink>
+            </template>
           </div>
         </template>
       </nav>
@@ -152,7 +159,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Building2, ChevronDown, ChevronRight, Cloud, Home, LogOut, Menu, UserRound } from '@lucide/vue'
+import { Building2, ChevronDown, ChevronRight, Cloud, FileText, Home, LogOut, Menu, ReceiptText, UserRound } from '@lucide/vue'
 import Select from 'primevue/select'
 import { logout } from '../../services/user.service'
 import { clearSession } from '../../services/session.service'
@@ -170,7 +177,14 @@ const loggingOut = ref(false)
 
 const navItems = [
   { label: 'Inicio', to: '/home', icon: Home },
-  { label: 'Cloud', to: '/documents', icon: Cloud }
+  { label: 'Cloud', to: '/documents', icon: Cloud },
+  {
+    label: 'Facturación', icon: ReceiptText, children: [
+      { label: 'Facturas', icon: FileText, disabled: true },
+      { label: 'Comprobantes', to: '/billing/invoices', icon: ReceiptText },
+      { label: 'Notas de crédito', icon: FileText, disabled: true }
+    ]
+  }
 ]
 
 const companyLabel = computed(() => {
@@ -185,7 +199,7 @@ function isRouteActive(path) {
 
 function isNavItemActive(item) {
   if (item.to) return isRouteActive(item.to)
-  return item.children && item.children.some((child) => isRouteActive(child.to))
+  return item.children && item.children.some((child) => child.to && isRouteActive(child.to))
 }
 
 function isGroupOpen(item) {

@@ -340,6 +340,14 @@
   font-size: 0.825rem;
 }
 
+.nav-link-disabled,
+.nav-link-disabled:not(.active):hover {
+  background: transparent;
+  color: var(--color-navigation-text-muted);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .sidebar-bottom {
   display: flex;
   flex-direction: column;
