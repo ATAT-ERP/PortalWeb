@@ -1,107 +1,137 @@
 <template>
-  <div class="app-shell">
+  <div class="app-shell" @keydown.esc.window="sidebarOpen = false">
     <div v-if="sidebarOpen" class="backdrop" @click="sidebarOpen = false"></div>
 
     <aside
       class="sidebar"
-      :class="{ open: sidebarOpen, expanded: dropdownOpen }"
+      :class="{ open: sidebarOpen, expanded: companySelectOpen }"
       aria-label="Navegación principal"
     >
       <div class="sidebar-top">
-        <div class="layout-brand-row">
-          <span class="layout-logo-mark">AT</span>
-          <span class="nav-label layout-brand-name">A.T.A.T. ERP</span>
-        </div>
-
-        <div ref="selectorRef" class="company-selector">
-          <button
-            type="button"
-            class="company-select-btn"
-            aria-controls="company-dropdown"
-            :aria-expanded="dropdownOpen"
+        <div class="company-selector" :title="companyLabel">
+          <Select
+            ref="companySelectRef"
+            :model-value="activeCompany"
+            :options="companies"
+            option-label="name"
+            data-key="id"
+            :placeholder="companyLabel"
+            :loading="isLoadingCompanies"
             :aria-label="`Empresa activa: ${companyLabel}`"
-            :disabled="isLoadingCompanies || companies.length === 0"
-            @click="dropdownOpen = !dropdownOpen"
+            panel-class="company-select-panel"
+            class="company-select"
+            @update:model-value="handleCompanySelect"
+            @show="companySelectOpen = true"
+            @hide="companySelectOpen = false"
           >
-            <span class="company-avatar" aria-hidden="true">{{ companyInitial }}</span>
-            <span class="nav-label company-select-content">
-              <span class="company-select-info">
-                <span class="company-select-tag">Empresa activa</span>
-                <span class="company-name">{{ companyLabel }}</span>
+            <template #value="{ value }">
+              <span class="company-select-value">
+                <span class="company-icon-wrap" aria-hidden="true">
+                  <Building2 class="company-icon" />
+                </span>
+                <span class="nav-label company-select-content">
+                  <span class="company-select-info">
+                    <span class="company-select-tag">Empresa activa</span>
+                    <span class="company-name">{{ value ? value.name : companyLabel }}</span>
+                  </span>
+                </span>
               </span>
-              <ChevronDown class="chevron-icon" :class="{ open: dropdownOpen }" aria-hidden="true" />
-            </span>
-          </button>
+            </template>
 
-          <div v-if="dropdownOpen" id="company-dropdown" class="company-dropdown-menu">
-            <button
-              v-for="company in companies"
-              :key="company.id"
-              type="button"
-              :class="['dropdown-option', { active: activeCompany && company.id === activeCompany.id }]"
-              @click="handleCompanySelect(company)"
-            >
-              <span class="option-name">{{ company.name }}</span>
-              <Check
-                v-if="activeCompany && company.id === activeCompany.id"
-                class="check-icon"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
+            <template #dropdownicon>
+              <ChevronDown class="company-chevron" aria-hidden="true" />
+            </template>
+
+            <template #footer>
+              <RouterLink
+                to="/companies"
+                class="company-manage-link"
+                @click="handleManageCompanies"
+              >
+                <Building2 aria-hidden="true" />
+                Administrar compañías
+              </RouterLink>
+            </template>
+          </Select>
         </div>
       </div>
 
       <nav class="nav-list" aria-label="Secciones">
-        <router-link
-          to="/home"
-          class="nav-link"
-          :class="{ active: route.path === '/home' }"
-          @click="sidebarOpen = false"
-        >
-          <Home class="nav-icon" aria-hidden="true" />
-          <span class="nav-label">Inicio</span>
-        </router-link>
+        <template v-for="item in navItems" :key="item.label">
+          <button
+            v-if="item.children && item.children.length"
+            type="button"
+            class="nav-link nav-group-toggle"
+            :class="{ active: isNavItemActive(item) }"
+            :title="item.label"
+            :aria-expanded="isGroupOpen(item)"
+            @click="toggleGroup(item)"
+          >
+            <span class="nav-icon-wrap">
+              <component :is="item.icon" class="nav-icon" aria-hidden="true" />
+            </span>
+            <span class="nav-label nav-link-label">{{ item.label }}</span>
+            <ChevronDown v-if="isGroupOpen(item)" class="nav-group-chevron" aria-hidden="true" />
+            <ChevronRight v-else class="nav-group-chevron" aria-hidden="true" />
+          </button>
+          <RouterLink
+            v-else
+            :to="item.to"
+            class="nav-link"
+            :class="{ active: isRouteActive(item.to) }"
+            :title="item.label"
+            @click="sidebarOpen = false"
+          >
+            <span class="nav-icon-wrap">
+              <component :is="item.icon" class="nav-icon" aria-hidden="true" />
+            </span>
+            <span class="nav-label nav-link-label">{{ item.label }}</span>
+          </RouterLink>
 
-        <router-link
-          to="/cuenta"
-          class="nav-link"
-          :class="{ active: route.path === '/cuenta' }"
-          @click="sidebarOpen = false"
-        >
-          <UserRound class="nav-icon" aria-hidden="true" />
-          <span class="nav-label">Mi cuenta</span>
-        </router-link>
-
-        <router-link
-          to="/companies"
-          class="nav-link"
-          :class="{ active: route.path.startsWith('/companies') }"
-          @click="sidebarOpen = false"
-        >
-          <Building2 class="nav-icon" aria-hidden="true" />
-          <span class="nav-label">Compañías</span>
-        </router-link>
-
-        <router-link
-          to="/documents"
-          class="nav-link"
-          :class="{ active: route.path.startsWith('/documents') }"
-          @click="sidebarOpen = false"
-        >
-          <FileText class="nav-icon" aria-hidden="true" />
-          <span class="nav-label">Documentos</span>
-        </router-link>
+          <div v-if="item.children && item.children.length && isGroupOpen(item)" class="nav-submenu">
+            <RouterLink
+              v-for="child in item.children"
+              :key="child.to"
+              :to="child.to"
+              class="nav-link nav-sublink"
+              :class="{ active: isRouteActive(child.to) }"
+              :title="child.label"
+              @click="sidebarOpen = false"
+            >
+              <span class="nav-icon-wrap">
+                <component :is="child.icon" class="nav-icon" aria-hidden="true" />
+              </span>
+              <span class="nav-label nav-link-label">{{ child.label }}</span>
+            </RouterLink>
+          </div>
+        </template>
       </nav>
 
-      <button type="button" class="logout-btn" :disabled="loggingOut" @click="handleLogout">
-        <LogOut class="nav-icon" aria-hidden="true" />
-        <span class="nav-label">{{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}</span>
-      </button>
+      <div class="sidebar-bottom">
+        <RouterLink
+          to="/cuenta"
+          class="nav-link"
+          :class="{ active: isRouteActive('/cuenta') }"
+          title="Mi cuenta"
+          @click="sidebarOpen = false"
+        >
+          <span class="nav-icon-wrap">
+            <UserRound class="nav-icon" aria-hidden="true" />
+          </span>
+          <span class="nav-label nav-link-label">Mi cuenta</span>
+        </RouterLink>
+
+        <button type="button" class="logout-btn" :disabled="loggingOut" @click="handleLogout">
+          <span class="nav-icon-wrap">
+            <LogOut class="nav-icon" aria-hidden="true" />
+          </span>
+          <span class="nav-label nav-link-label">{{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}</span>
+        </button>
+      </div>
     </aside>
 
     <div class="main-column">
-      <header class="topbar">
+      <div class="mobile-nav-bar">
         <button
           type="button"
           class="menu-toggle"
@@ -110,14 +140,7 @@
         >
           <Menu aria-hidden="true" />
         </button>
-
-        <div class="topbar-spacer"></div>
-
-        <router-link to="/cuenta" class="user-info">
-          <span class="user-avatar">{{ userInitials }}</span>
-          <span class="user-name">{{ user.name }}</span>
-        </router-link>
-      </header>
+      </div>
 
       <main class="content-area">
         <router-view />
@@ -127,9 +150,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Building2, Check, ChevronDown, FileText, Home, UserRound, LogOut, Menu } from '@lucide/vue'
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { Building2, ChevronDown, ChevronRight, Cloud, Home, LogOut, Menu, UserRound } from '@lucide/vue'
+import Select from 'primevue/select'
 import { logout } from '../../services/user.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, companies, isLoadingCompanies, loadCompanies, selectCompany } from '../../stores/company.store'
@@ -139,20 +163,15 @@ const route = useRoute()
 const router = useRouter()
 
 const sidebarOpen = ref(false)
-const dropdownOpen = ref(false)
+const companySelectOpen = ref(false)
+const companySelectRef = ref(null)
+const expandedGroups = ref(new Map())
 const loggingOut = ref(false)
-const selectorRef = ref(null)
 
-const user = ref({ name: 'Usuario' })
-
-const userInitials = computed(() =>
-  user.value.name
-    .split(' ')
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-)
+const navItems = [
+  { label: 'Inicio', to: '/home', icon: Home },
+  { label: 'Cloud', to: '/documents', icon: Cloud }
+]
 
 const companyLabel = computed(() => {
   if (isLoadingCompanies.value) return 'Cargando compañías...'
@@ -160,24 +179,33 @@ const companyLabel = computed(() => {
   return companies.value.length ? 'Seleccioná una compañía' : 'Sin compañías'
 })
 
-const companyInitial = computed(
-  () => activeCompany.value?.name?.trim()?.[0]?.toUpperCase() ?? '?'
-)
-
-function handleOutsideClick(event) {
-  if (dropdownOpen.value && selectorRef.value && !selectorRef.value.contains(event.target)) {
-    dropdownOpen.value = false
-  }
+function isRouteActive(path) {
+  return route.path === path || route.path.startsWith(`${path}/`)
 }
 
-function handleKeydown(event) {
-  if (event.key === 'Escape') dropdownOpen.value = false
+function isNavItemActive(item) {
+  if (item.to) return isRouteActive(item.to)
+  return item.children && item.children.some((child) => isRouteActive(child.to))
+}
+
+function isGroupOpen(item) {
+  return expandedGroups.value.has(item.label)
+    ? expandedGroups.value.get(item.label)
+    : isNavItemActive(item)
+}
+
+function toggleGroup(item) {
+  const groups = new Map(expandedGroups.value)
+  groups.set(item.label, !isGroupOpen(item))
+  expandedGroups.value = groups
+}
+
+function handleManageCompanies() {
+  sidebarOpen.value = false
+  companySelectRef.value.hide()
 }
 
 onMounted(async () => {
-  document.addEventListener('click', handleOutsideClick)
-  document.addEventListener('keydown', handleKeydown)
-
   try {
     await loadCompanies()
   } catch (error) {
@@ -188,14 +216,8 @@ onMounted(async () => {
   }
 })
 
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleOutsideClick)
-  document.removeEventListener('keydown', handleKeydown)
-})
-
 function handleCompanySelect(company) {
   selectCompany(company)
-  dropdownOpen.value = false
 }
 
 async function handleLogout() {
