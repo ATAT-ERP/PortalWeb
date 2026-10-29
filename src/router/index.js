@@ -69,6 +69,11 @@ const router = createRouter({
           component: () => import('../pages/billing/InvoiceFormPage.vue')
         },
         {
+          path: 'billing/credit-notes',
+          name: 'credit-notes',
+          component: () => import('../pages/billing/CreditNotesPage.vue')
+        },
+        {
           path: 'billing/fiscal-profile',
           name: 'fiscal-profile',
           component: () => import('../pages/billing/FiscalProfilePage.vue')

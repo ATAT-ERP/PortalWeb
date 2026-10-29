@@ -49,6 +49,46 @@ export function issueInvoice(companyId, invoiceId) {
   return api.post(`/billing/companies/${encodeURIComponent(companyId)}/invoices/${encodeURIComponent(invoiceId)}/issue/`, undefined, { auth: true })
 }
 
+export function getCreditNotes(companyId) {
+  return api.get(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/`, { auth: true })
+}
+
+export function getCreditNote(companyId, id) {
+  return api.get(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/`, { auth: true })
+}
+
+export function createCreditNote(companyId, data) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/`, data, { auth: true })
+}
+
+export function addCreditNoteInvoices(companyId, id, invoices) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/invoices/`, { invoices }, { auth: true })
+}
+
+export function deleteCreditNoteInvoice(companyId, id, associationId) {
+  return api.delete(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/invoices/${encodeURIComponent(associationId)}/`, { auth: true })
+}
+
+export function getCreditNoteItems(companyId, id) {
+  return api.get(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/items/`, { auth: true })
+}
+
+export function createCreditNoteItem(companyId, id, data) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/items/`, data, { auth: true })
+}
+
+export function updateCreditNoteItem(companyId, id, itemId, data) {
+  return api.patch(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/items/${encodeURIComponent(itemId)}/`, data, { auth: true })
+}
+
+export function deleteCreditNoteItem(companyId, id, itemId) {
+  return api.delete(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/items/${encodeURIComponent(itemId)}/`, { auth: true })
+}
+
+export function issueCreditNote(companyId, id) {
+  return api.post(`/billing/companies/${encodeURIComponent(companyId)}/credit-notes/${encodeURIComponent(id)}/issue/`, undefined, { auth: true })
+}
+
 export function getPointsOfSale(companyId) {
   return api.get(`/billing/companies/${encodeURIComponent(companyId)}/points-of-sale/`, { auth: true })
 }

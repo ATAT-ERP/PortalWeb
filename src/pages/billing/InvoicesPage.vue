@@ -2,33 +2,36 @@
   <div class="invoices-page">
     <header class="invoices-header">
       <span class="invoices-header-icon" aria-hidden="true"><FileText :size="24" /></span>
-      <div><h1>Comprobantes</h1><p>Consultá las facturas de la compañía activa.</p></div>
+      <div><h1>Comprobantes</h1><p>Consultá las facturas y notas de crédito de la compañía activa.</p></div>
     </header>
 
     <section class="invoices-card" aria-labelledby="invoices-title">
-      <h2 id="invoices-title">Facturas</h2>
+      <h2 id="invoices-title">Historial de comprobantes</h2>
       <p v-if="!activeCompany" class="invoices-state">Seleccioná una compañía para ver sus facturas.</p>
       <template v-else>
         <form class="invoices-filters" @submit.prevent="loadInvoices">
-          <label>Receptor<InputText v-model="filters.receiver" placeholder="Nombre o documento" /></label>
-          <label>Número<InputText v-model="filters.number" placeholder="00001-00000015" /></label>
+          <label>Comprobante<Select v-model="documentKind" :options="documentKinds" option-label="label" option-value="value" /></label>
+          <label v-if="documentKind === 'invoice'">Receptor<InputText v-model="filters.receiver" placeholder="Nombre o documento" /></label>
+          <label v-if="documentKind === 'invoice'">Número<InputText v-model="filters.number" placeholder="00001-00000015" /></label>
           <label>Estado<Select v-model="filters.status" :options="statuses" option-label="label" option-value="value" placeholder="Todos" show-clear /></label>
-          <label>Tipo<Select v-model="filters.invoice_type" :options="invoiceTypes" option-label="label" option-value="value" placeholder="Todos" show-clear /></label>
-          <label>Punto de venta<Select v-model="filters.point_of_sale" :options="pointsOfSale" option-label="number" option-value="id" placeholder="Todos" show-clear :disabled="loadingPoints || !!pointsError" /></label>
+          <label>Tipo<Select v-model="filters.invoice_type" :options="documentKind === 'invoice' ? invoiceTypes : creditNoteTypes" option-label="label" option-value="value" placeholder="Todos" show-clear /></label>
+          <label v-if="documentKind === 'invoice'">Punto de venta<Select v-model="filters.point_of_sale" :options="pointsOfSale" option-label="number" option-value="id" placeholder="Todos" show-clear :disabled="loadingPoints || !!pointsError" /></label>
           <label>Desde<input v-model="filters.issue_date_from" type="date" /></label>
           <label>Hasta<input v-model="filters.issue_date_to" type="date" /></label>
           <div class="invoices-actions"><Button type="submit" label="Buscar"><Search :size="16" aria-hidden="true" /> Buscar</Button><Button type="button" label="Limpiar" severity="secondary" outlined @click="clearFilters" /></div>
         </form>
-        <p v-if="pointsError" class="invoices-error" role="alert">{{ pointsError }} <button type="button" class="invoices-retry" @click="loadPoints">Reintentar</button></p>
-        <p v-if="loadingInvoices" class="invoices-state" role="status">Cargando facturas...</p>
+        <p v-if="pointsError && documentKind === 'invoice'" class="invoices-error" role="alert">{{ pointsError }} <button type="button" class="invoices-retry" @click="loadPoints">Reintentar</button></p>
+        <p v-if="documentKind === 'credit'" class="invoices-state">Los filtros de notas de crédito se aplican localmente.</p>
+        <p v-if="loadingInvoices" class="invoices-state" role="status">Cargando comprobantes...</p>
         <p v-else-if="listError" class="invoices-error" role="alert">{{ listError }}</p>
         <p v-else-if="filtersChanged" class="invoices-state">Seleccioná Buscar para aplicar los filtros.</p>
         <DataTable v-else :value="invoices" data-key="id" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" scrollable>
-          <template #empty>No se encontraron facturas.</template>
-          <Column field="invoice_type_display" header="Tipo" />
-          <Column header="Número"><template #body="{ data }">{{ data.formatted_number ?? 'Sin número' }}</template></Column>
+          <template #empty>No se encontraron comprobantes.</template>
+          <Column header="Tipo"><template #body="{ data }">{{ documentKind === 'invoice' ? data.invoice_type_display : creditTypeLabels[data.credit_note_type] }}</template></Column>
+          <Column header="Número"><template #body="{ data }">{{ documentKind === 'invoice' ? (data.formatted_number ?? 'Sin número') : (data.number ?? 'Sin número') }}</template></Column>
+          <Column v-if="documentKind === 'credit'" header="Punto de venta"><template #body="{ data }">{{ pointNumber(data.point_of_sale) }}</template></Column>
           <Column header="Fecha de emisión"><template #body="{ data }">{{ formatDate(data.issue_date) }}</template></Column>
-          <Column field="receiver_name" header="Receptor" />
+          <Column header="Receptor"><template #body="{ data }">{{ data.receiver_name ?? '—' }}</template></Column>
           <Column header="Estado"><template #body="{ data }"><Tag :severity="statusSeverity[data.status]" :value="statusLabels[data.status]" /></template></Column>
           <Column header="Total"><template #body="{ data }">{{ data.total }}</template></Column>
           <Column header="Detalle"><template #body="{ data }"><Button type="button" size="small" severity="secondary" outlined @click="openInvoice(data.id)"><Eye :size="16" aria-hidden="true" /> Ver</Button></template></Column>
@@ -36,10 +39,10 @@
       </template>
     </section>
 
-    <Dialog v-model:visible="detailVisible" modal header="Detalle de factura" :style="{ width: 'min(900px, 95vw)' }" @hide="closeDetail">
+    <Dialog v-model:visible="detailVisible" modal :header="documentKind === 'invoice' ? 'Detalle de factura' : 'Detalle de nota de crédito'" :style="{ width: 'min(900px, 95vw)' }" @hide="closeDetail">
       <p v-if="loadingDetail" class="invoices-state" role="status">Cargando detalle...</p>
       <p v-else-if="detailError" class="invoices-error" role="alert">{{ detailError }}</p>
-      <div v-else-if="invoice" class="invoice-detail">
+      <div v-else-if="invoice && documentKind === 'invoice'" class="invoice-detail">
         <h3>{{ invoice.invoice_type_display }} · {{ invoice.formatted_number ?? 'Sin número' }}</h3>
         <dl class="invoice-detail-grid">
           <div><dt>Estado</dt><dd><Tag :severity="statusSeverity[invoice.status]" :value="statusLabels[invoice.status]" /></dd></div>
@@ -86,6 +89,29 @@
           <div><dt>Exento</dt><dd>{{ invoice.net_exempt }}</dd></div><div><dt>IVA</dt><dd>{{ invoice.vat_amount }}</dd></div><div><dt>Total</dt><dd>{{ invoice.total }}</dd></div>
         </dl>
       </div>
+      <div v-else-if="invoice" class="invoice-detail">
+        <h3>{{ creditTypeLabels[invoice.credit_note_type] }} · {{ invoice.number ?? 'Sin número' }}</h3>
+        <dl class="invoice-detail-grid">
+          <div><dt>Estado</dt><dd><Tag :severity="statusSeverity[invoice.status]" :value="statusLabels[invoice.status]" /></dd></div>
+          <div><dt>Punto de venta</dt><dd>{{ pointNumber(invoice.point_of_sale) }}</dd></div>
+          <div><dt>Fecha de emisión</dt><dd>{{ formatDate(invoice.issue_date) }}</dd></div>
+          <div><dt>Receptor</dt><dd>{{ invoice.receiver_name ?? '—' }}</dd></div>
+          <div><dt>Documento</dt><dd>{{ invoice.receiver_document_type === null ? '—' : documentLabels[invoice.receiver_document_type] + ' ' + invoice.receiver_document_number }}</dd></div>
+          <div><dt>Condición IVA</dt><dd>{{ invoice.receiver_vat_condition === null ? '—' : vatConditions[invoice.receiver_vat_condition] }}</dd></div>
+          <div><dt>Domicilio receptor</dt><dd>{{ invoice.receiver_address ?? '—' }}</dd></div>
+          <div><dt>Emisor</dt><dd>{{ invoice.issuer_legal_name ?? '—' }}</dd></div>
+          <div><dt>CUIT emisor</dt><dd>{{ invoice.issuer_tax_id ?? '—' }}</dd></div>
+          <div><dt>Domicilio emisor</dt><dd>{{ invoice.issuer_address ?? '—' }}</dd></div>
+          <div><dt>Condición IVA emisor</dt><dd>{{ invoice.issuer_vat_condition === null ? '—' : vatConditions[invoice.issuer_vat_condition] }}</dd></div>
+          <div><dt>Ingresos brutos</dt><dd>{{ invoice.issuer_gross_income || '—' }}</dd></div>
+          <div><dt>Inicio de actividad</dt><dd>{{ formatDate(invoice.issuer_activity_start_date) }}</dd></div>
+        </dl>
+        <h3>Facturas asociadas</h3>
+        <DataTable :value="invoice.credit_note_invoices" scrollable><template #empty>Sin facturas asociadas.</template><Column field="invoice" header="ID de factura" /><Column field="total" header="Total acreditado" /></DataTable>
+        <h3>Ítems</h3>
+        <DataTable :value="creditItems" scrollable><template #empty>Sin ítems.</template><Column field="credit_note_invoice" header="ID de asociación" /><Column field="description" header="Descripción" /><Column field="quantity" header="Cantidad" /><Column field="unit_price" header="Precio unitario" /><Column field="discount" header="Descuento (%)" /><Column header="Tratamiento"><template #body="{ data }">{{ treatments[data.tax_treatment] }}</template></Column><Column header="IVA"><template #body="{ data }">{{ data.vat_rate === null ? '—' : vatRates[data.vat_rate] }}</template></Column></DataTable>
+        <h3>Importes</h3><dl class="invoice-detail-grid"><div><dt>Neto gravado</dt><dd>{{ invoice.net_taxed }}</dd></div><div><dt>Neto no gravado</dt><dd>{{ invoice.net_untaxed }}</dd></div><div><dt>Exento</dt><dd>{{ invoice.net_exempt }}</dd></div><div><dt>IVA</dt><dd>{{ invoice.vat_amount }}</dd></div><div><dt>Total</dt><dd>{{ invoice.total }}</dd></div></dl>
+      </div>
     </Dialog>
   </div>
 </template>
@@ -101,7 +127,7 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
-import { getInvoice, getInvoices, getPointsOfSale } from '../../services/billing.service'
+import { getCreditNote, getCreditNoteItems, getCreditNotes, getInvoice, getInvoices, getPointsOfSale } from '../../services/billing.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/InvoicesPage.css'
@@ -110,6 +136,10 @@ const statuses = [{ label: 'Borrador', value: 'draft' }, { label: 'Emitida', val
 const statusLabels = { draft: 'Borrador', issued: 'Emitida', cancelled: 'Cancelada' }
 const statusSeverity = { draft: 'secondary', issued: 'success', cancelled: 'danger' }
 const invoiceTypes = [{ label: 'Factura A', value: 1 }, { label: 'Factura B', value: 6 }, { label: 'Factura C', value: 11 }]
+const creditNoteTypes = [{ label: 'Nota de crédito A', value: 3 }, { label: 'Nota de crédito B', value: 8 }, { label: 'Nota de crédito C', value: 13 }]
+const creditTypeLabels = { 3: 'Nota de crédito A', 8: 'Nota de crédito B', 13: 'Nota de crédito C' }
+const documentKinds = [{ label: 'Facturas', value: 'invoice' }, { label: 'Notas de crédito', value: 'credit' }]
+const documentKind = ref('invoice')
 const documentLabels = { 80: 'CUIT', 86: 'CUIL', 87: 'CDI', 96: 'DNI' }
 const vatConditions = { 1: 'IVA Responsable Inscripto', 4: 'IVA Sujeto Exento', 5: 'Consumidor Final', 6: 'Responsable Monotributo', 13: 'Monotributista Social', 15: 'IVA No Alcanzado', 16: 'Monotributo Trabajador Independiente Promovido' }
 const vatRates = { 3: '0%', 9: '2,5%', 8: '5%', 4: '10,5%', 5: '21%', 6: '27%' }
@@ -120,6 +150,7 @@ const router = useRouter()
 const invoices = ref([])
 const pointsOfSale = ref([])
 const invoice = ref(null)
+const creditItems = ref([])
 const loadingInvoices = ref(false)
 const loadingPoints = ref(false)
 const loadingDetail = ref(false)
@@ -139,6 +170,13 @@ watch(filters, () => {
   loadingInvoices.value = false
   filtersChanged.value = true
 }, { deep: true, flush: 'sync' })
+
+watch(documentKind, () => {
+  Object.assign(filters, emptyFilters())
+  detailVisible.value = false
+  closeDetail()
+  loadInvoices()
+}, { flush: 'sync' })
 
 watch(activeCompany, () => {
   Object.assign(filters, emptyFilters())
@@ -165,8 +203,9 @@ async function loadInvoices() {
   if (!activeCompany.value) { loadingInvoices.value = false; return }
   loadingInvoices.value = true
   try {
-    const result = await getInvoices(activeCompany.value.id, { ...filters, receiver: filters.receiver.trim(), number: filters.number.trim() })
-    if (request === listRequest) invoices.value = result
+    const kind = documentKind.value
+    const result = kind === 'invoice' ? await getInvoices(activeCompany.value.id, { ...filters, receiver: filters.receiver.trim(), number: filters.number.trim() }) : await getCreditNotes(activeCompany.value.id)
+    if (request === listRequest) invoices.value = kind === 'invoice' ? result : result.filter(note => (!filters.status || note.status === filters.status) && (!filters.invoice_type || note.credit_note_type === filters.invoice_type) && (!filters.issue_date_from || (note.issue_date && note.issue_date >= filters.issue_date_from)) && (!filters.issue_date_to || (note.issue_date && note.issue_date <= filters.issue_date_to)))
   } catch (error) {
     if (request === listRequest && !handleUnauthorized(error)) {
       listError.value = requestError(error, 'No se pudieron cargar las facturas. Intentá nuevamente.')
@@ -204,8 +243,9 @@ async function openInvoice(id) {
   detailVisible.value = true
   loadingDetail.value = true
   try {
-    const result = await getInvoice(activeCompany.value.id, id)
-    if (request === detailRequest) invoice.value = result
+    const companyId = activeCompany.value.id
+    const [result, items] = documentKind.value === 'invoice' ? [await getInvoice(companyId, id), []] : await Promise.all([getCreditNote(companyId, id), getCreditNoteItems(companyId, id)])
+    if (request === detailRequest) { invoice.value = result; creditItems.value = items }
   } catch (error) {
     if (request === detailRequest && !handleUnauthorized(error)) detailError.value = requestError(error, 'No se pudo cargar el detalle. Intentá nuevamente.')
   } finally {
@@ -216,8 +256,14 @@ async function openInvoice(id) {
 function closeDetail() {
   detailRequest++
   invoice.value = null
+  creditItems.value = []
   loadingDetail.value = false
   detailError.value = ''
+}
+
+function pointNumber(id) {
+  const point = pointsOfSale.value.find(point => point.id === id)
+  return point ? point.number : `ID ${id}`
 }
 
 function requestError(error, fallback) {
