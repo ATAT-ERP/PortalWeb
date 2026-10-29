@@ -73,6 +73,7 @@ import { clearSession } from '../../services/session.service'
 import { activeCompany, selectCompany } from '../../stores/company.store'
 import '../../assets/css/CreditNotesPage.css'
 
+
 const choices = entries => entries.map(([value, label]) => ({ value, label }))
 const types = choices([[3, 'Nota de crédito A'], [8, 'Nota de crédito B'], [13, 'Nota de crédito C']])
 const typeLabels = Object.fromEntries(types.map(entry => [entry.value, entry.label]))
@@ -98,7 +99,20 @@ const eligibleInvoices = computed(() => {
 })
 let generation = 0; let restoring = false; let mounted = true
 const dirty = computed(() => itemOpen.value || (!note.value && (noteType.value !== null || pointId.value !== null)) || busy.value)
-function allowDiscard() { return !dirty.value || window.confirm('Hay cambios sin guardar o una operación en curso. ¿Querés continuar?') }
+/**
+ * Confirma si se pueden descartar los cambios pendientes.
+ * @version 1.0
+ * @author Agustin
+ */
+function allowDiscard() { 
+  return !dirty.value || window.confirm('Hay cambios sin guardar o una operación en curso. ¿Querés continuar?') 
+}
+
+/**
+ * Advierte antes de abandonar la p?gina con cambios pendientes.
+ * @version 1.0
+ * @author Agustin
+ */
 function beforeUnload(event) { if (dirty.value) { event.preventDefault(); event.returnValue = '' } }
 window.addEventListener('beforeunload', beforeUnload)
 onBeforeRouteLeave(() => allowDiscard())
@@ -109,12 +123,45 @@ watch(activeCompany, (current, previous) => {
   generation++; reset(); loadInitial()
 }, { immediate: true, flush: 'sync' })
 
-function reset() { note.value = null; items.value = []; points.value = []; invoices.value = []; notes.value = []; noteType.value = null; pointId.value = null; selectedInvoice.value = null; itemOpen.value = false; itemErrors.value = {}; notice.value = ''; errorMessage.value = ''; uncertain.value = false; uncertainMessage.value = ''; confirmIssue.value = false }
+/**
+ * Restablece los datos y estados de la pantalla.
+ * @version 1.0
+ * @author Agustin
+ */
+function reset() { 
+  note.value = null; items.value = []; points.value = []; invoices.value = []; notes.value = []; noteType.value = null; pointId.value = null; selectedInvoice.value = null; itemOpen.value = false; itemErrors.value = {}; notice.value = ''; errorMessage.value = ''; uncertain.value = false; uncertainMessage.value = ''; confirmIssue.value = false 
+}
+
+/**
+ * Gestiona una respuesta de sesi?n inv?lida.
+ * @version 1.0
+ * @author Agustin
+ */
 function unauthorized(error) { if (error.status !== 401 || error.code !== 'NEX-USR-010') return false; clearSession(); router.push('/login'); return true }
+/**
+ * Obtiene la identificaci?n visible de un punto de venta.
+ * @version 1.0
+ * @author Agustin
+ */
 function pointLabel(id) { return points.value.find(point => point.id === id)?.number ?? `ID ${id}` }
+/**
+ * Construye la etiqueta de una factura asociable.
+ * @version 1.0
+ * @author Agustin
+ */
 function invoiceLabel(id) { const value = invoices.value.find(entry => entry.id === id); return value ? `#${id} · ${value.invoice_type_display} ${value.formatted_number ?? 'Sin número'} · ${value.issue_date ?? '—'} · ${value.receiver_name} · ${value.total}` : `Factura #${id}` }
+/**
+ * Obtiene la etiqueta de la factura de una asociaci?n.
+ * @version 1.0
+ * @author Agustin
+ */
 function associationLabel(id) { const association = note.value.credit_note_invoices.find(entry => entry.id === id); return association ? invoiceLabel(association.invoice) : `Asociación #${id}` }
 
+/**
+ * Carga los datos iniciales de la compa??a activa.
+ * @version 1.0
+ * @author Agustin
+ */
 async function loadInitial() {
   const version = ++generation; loadError.value = ''; missingProfile.value = false
   if (!activeCompany.value) { loading.value = false; return }
@@ -130,9 +177,29 @@ async function loadInitial() {
     else loadError.value = error.status === 403 ? 'No tenés permiso para consultar esta compañía.' : 'No se pudieron cargar los datos. Intentá nuevamente.'
   } finally { if (version === generation) loading.value = false }
 }
+/**
+ * Inicia una nueva nota tras confirmar los cambios pendientes.
+ * @version 1.0
+ * @author Agustin
+ */
 function startNew() { if (!allowDiscard()) return; note.value = null; items.value = []; noteType.value = null; pointId.value = null; selectedInvoice.value = null; itemOpen.value = false; errorMessage.value = ''; notice.value = '' }
+/**
+ * Retoma un borrador de nota de cr?dito seleccionado.
+ * @version 1.0
+ * @author Agustin
+ */
 async function resume(id) { if (id && allowDiscard()) await refreshNote(id) }
+/**
+ * Comprueba el estado de la nota de cr?dito actual.
+ * @version 1.0
+ * @author Agustin
+ */
 function checkState() { if (note.value && allowDiscard()) refreshNote(note.value.id) }
+/**
+ * Consulta la nota de cr?dito y sus ?tems.
+ * @version 1.0
+ * @author Agustin
+ */
 async function refreshNote(id) {
   const version = generation; busy.value = true; errorMessage.value = ''
   try {
@@ -143,6 +210,11 @@ async function refreshNote(id) {
   } catch (error) { if (version === generation && !unauthorized(error)) errorMessage.value = error.status === 403 ? 'No tenés permiso para consultar esta nota.' : error.status === 404 ? 'No se encontró la nota.' : 'No se pudo consultar la nota. Intentá nuevamente.' }
   finally { busy.value = false }
 }
+/**
+ * Presenta los errores devueltos por el servidor.
+ * @version 1.0
+ * @author Agustin
+ */
 function showError(error, fields = false) {
   if (unauthorized(error)) return
   if (error.status === 400) {
@@ -154,6 +226,11 @@ function showError(error, fields = false) {
   else if (error.status === 404) errorMessage.value = 'No se encontró el recurso solicitado.'
   else errorMessage.value = 'No se pudo completar la operación. Intentá nuevamente.'
 }
+/**
+ * Ejecuta una operaci?n y gestiona su resultado.
+ * @version 1.0
+ * @author Agustin
+ */
 async function perform(action, onSuccess, message, fieldErrors = false) {
   if (busy.value || uncertain.value || !activeCompany.value) return
   const version = generation; const companyId = activeCompany.value.id; busy.value = true; errorMessage.value = ''; notice.value = ''
@@ -167,20 +244,50 @@ async function perform(action, onSuccess, message, fieldErrors = false) {
     if (mounted && version !== generation && activeCompany.value?.id === companyId) loadInitial()
   }
 }
+/**
+ * Solicita la creaci?n de un borrador de nota de cr?dito.
+ * @version 1.0
+ * @author Agustin
+ */
 function createDraft() {
   if (pointId.value === null || noteType.value === null) { errorMessage.value = 'Seleccioná tipo y punto de venta.'; return }
   perform(companyId => createCreditNote(companyId, { point_of_sale: pointId.value, credit_note_type: noteType.value }), result => { note.value = result; notes.value.unshift(result) }, 'Borrador creado.')
 }
+/**
+ * Asocia la factura seleccionada a la nota de cr?dito.
+ * @version 1.0
+ * @author Agustin
+ */
 function associate() {
   if (selectedInvoice.value === null) return
   perform(companyId => addCreditNoteInvoices(companyId, note.value.id, [selectedInvoice.value]), result => { note.value.credit_note_invoices.push(...result); selectedInvoice.value = null }, 'Factura asociada.')
 }
+/**
+ * Desasocia una factura de la nota de cr?dito.
+ * @version 1.0
+ * @author Agustin
+ */
 function removeAssociation(entry) {
   if (!window.confirm('Se quitará la factura y sus ítems de la nota. ¿Continuar?')) return
   perform(companyId => deleteCreditNoteInvoice(companyId, note.value.id, entry.id), () => { note.value.credit_note_invoices = note.value.credit_note_invoices.filter(value => value.id !== entry.id); items.value = items.value.filter(value => value.credit_note_invoice !== entry.id); if (item.credit_note_invoice === entry.id) itemOpen.value = false }, 'Factura desasociada.')
 }
+/**
+ * Prepara el formulario para agregar un ?tem.
+ * @version 1.0
+ * @author Agustin
+ */
 function addItem() { Object.assign(item, emptyItem()); itemId.value = null; itemErrors.value = {}; itemOpen.value = true }
+/**
+ * Carga un ?tem existente en el formulario de edici?n.
+ * @version 1.0
+ * @author Agustin
+ */
 function editItem(value) { if (itemOpen.value && !allowDiscard()) return; for (const key of Object.keys(item)) item[key] = value[key]; itemId.value = value.id; itemErrors.value = {}; itemOpen.value = true }
+/**
+ * Valida y guarda el ?tem del borrador.
+ * @version 1.0
+ * @author Agustin
+ */
 function saveItem() {
   itemErrors.value = {}; errorMessage.value = ''
   if (item.credit_note_invoice === null) itemErrors.value.credit_note_invoice = 'Seleccioná una factura asociada.'
@@ -192,6 +299,16 @@ function saveItem() {
   const id = itemId.value; const payload = { ...item, discount: item.discount || '0.00' }
   perform(companyId => id === null ? createCreditNoteItem(companyId, note.value.id, payload) : updateCreditNoteItem(companyId, note.value.id, id, payload), result => { if (id === null) items.value.push(result); else items.value.splice(items.value.findIndex(entry => entry.id === id), 1, result); itemOpen.value = false }, 'Ítem guardado.', true)
 }
+/**
+ * Elimina un ?tem del borrador.
+ * @version 1.0
+ * @author Agustin
+ */
 function removeItem(value) { if (!window.confirm('¿Quitar este ítem?')) return; perform(companyId => deleteCreditNoteItem(companyId, note.value.id, value.id), () => { items.value = items.value.filter(entry => entry.id !== value.id); if (itemId.value === value.id) itemOpen.value = false }, 'Ítem eliminado.') }
+/**
+ * Solicita la emisi?n interna de la nota de cr?dito.
+ * @version 1.0
+ * @author Agustin
+ */
 function emit() { if (!note.value || itemOpen.value || !note.value.credit_note_invoices.length || !items.value.length) return; perform(companyId => issueCreditNote(companyId, note.value.id), result => { note.value = result; confirmIssue.value = false; notes.value = notes.value.filter(entry => entry.id !== result.id) }, 'Nota emitida internamente.').finally(() => { confirmIssue.value = false }) }
 </script>

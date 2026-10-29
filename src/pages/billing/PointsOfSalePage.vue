@@ -74,6 +74,11 @@ watch(activeCompany, () => {
 
 onBeforeUnmount(() => { mounted = false; loadId++; companyVersion++ })
 
+/**
+ * Gestiona una respuesta de sesi?n inv?lida.
+ * @version 1.0
+ * @author Agustin
+ */
 function handleUnauthorized(error) {
   if (error.status !== 401 || error.code !== 'NEX-USR-010') return false
   clearSession()
@@ -81,6 +86,11 @@ function handleUnauthorized(error) {
   return true
 }
 
+/**
+ * Consulta los puntos de venta de la compa??a activa.
+ * @version 1.0
+ * @author Agustin
+ */
 async function loadPoints() {
   const request = ++loadId
   loadError.value = ''
@@ -107,14 +117,29 @@ async function loadPoints() {
   }
 }
 
+/**
+ * Solicita la creaci?n de un punto de venta.
+ * @version 1.0
+ * @author Agustin
+ */
 function createPoint() {
   runAction(null, createPointOfSale, 'Punto de venta creado correctamente.')
 }
 
+/**
+ * Solicita el cambio de estado de un punto de venta.
+ * @version 1.0
+ * @author Agustin
+ */
 function changeStatus(point) {
   runAction(point.id, point.is_active ? deactivatePointOfSale : activatePointOfSale, point.is_active ? 'Punto de venta desactivado.' : 'Punto de venta activado.')
 }
 
+/**
+ * Ejecuta una acci?n sobre puntos de venta y actualiza el listado.
+ * @version 1.0
+ * @author Agustin
+ */
 async function runAction(pointId, action, message) {
   if (isSaving.value || !activeCompany.value) return
   const companyId = activeCompany.value.id
@@ -147,6 +172,11 @@ async function runAction(pointId, action, message) {
   }
 }
 
+/**
+ * Formatea una fecha para mostrarla en pantalla.
+ * @version 1.0
+ * @author Agustin
+ */
 function formatDate(value) {
   return new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
 }

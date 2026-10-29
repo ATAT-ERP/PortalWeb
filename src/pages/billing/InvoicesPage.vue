@@ -210,6 +210,11 @@ watch(activeCompany, () => {
 
 onBeforeUnmount(() => { listRequest++; pointsRequest++; detailRequest++ })
 
+/**
+ * Gestiona una respuesta de sesi?n inv?lida.
+ * @version 1.0
+ * @author Agustin
+ */
 function handleUnauthorized(error) {
   if (error.status !== 401 || error.code !== 'NEX-USR-010') return false
   clearSession()
@@ -217,6 +222,11 @@ function handleUnauthorized(error) {
   return true
 }
 
+/**
+ * Consulta y filtra los comprobantes de la compa??a activa.
+ * @version 1.0
+ * @author Agustin
+ */
 async function loadInvoices() {
   const request = ++listRequest
   invoices.value = []
@@ -271,6 +281,11 @@ async function loadInvoices() {
   }
 }
 
+/**
+ * Consulta los puntos de venta de la compa??a activa.
+ * @version 1.0
+ * @author Agustin
+ */
 async function loadPoints() {
   const request = ++pointsRequest
   pointsOfSale.value = []
@@ -287,12 +302,22 @@ async function loadPoints() {
   }
 }
 
+/**
+ * Limpia los filtros y actualiza el historial.
+ * @version 1.0
+ * @author Agustin
+ */
 function clearFilters() {
   if (documentKind.value !== 'all') { documentKind.value = 'all'; return }
   Object.assign(filters, emptyFilters())
   loadInvoices()
 }
 
+/**
+ * Consulta el detalle del comprobante seleccionado.
+ * @version 1.0
+ * @author Agustin
+ */
 async function openInvoice(row) {
   closeDetail()
   const request = ++detailRequest
@@ -317,6 +342,11 @@ async function openInvoice(row) {
   }
 }
 
+/**
+ * Limpia el detalle y descarta solicitudes pendientes.
+ * @version 1.0
+ * @author Agustin
+ */
 function closeDetail() {
   detailRequest++
   invoice.value = null
@@ -330,6 +360,11 @@ function closeDetail() {
   downloadingPdf.value = false
 }
 
+/**
+ * Consulta la disponibilidad de la representaci?n PDF.
+ * @version 1.0
+ * @author Agustin
+ */
 async function loadRepresentation() {
   const request = detailRequest
   const companyId = activeCompany.value.id
@@ -359,6 +394,11 @@ async function loadRepresentation() {
   }
 }
 
+/**
+ * Solicita la generaci?n de la representaci?n PDF.
+ * @version 1.0
+ * @author Agustin
+ */
 async function generatePdf() {
   if (!invoice.value || invoice.value.status === 'draft' || !representationMissing.value || loadingRepresentation.value || generationState.value) return
   const request = detailRequest
@@ -388,6 +428,11 @@ async function generatePdf() {
   }
 }
 
+/**
+ * Solicita e inicia la descarga del PDF disponible.
+ * @version 1.0
+ * @author Agustin
+ */
 async function downloadPdf() {
   if (downloadingPdf.value || !representation.value) return
   const request = detailRequest
@@ -409,6 +454,11 @@ async function downloadPdf() {
   }
 }
 
+/**
+ * Obtiene un mensaje para un error de representaci?n PDF.
+ * @version 1.0
+ * @author Agustin
+ */
 function pdfError(error, fallback) {
   if (error.status === 400) return 'El PDF no está disponible para este comprobante.'
   if (error.status === 403) return 'No tenés permiso para acceder al PDF de esta compañía.'
@@ -416,11 +466,21 @@ function pdfError(error, fallback) {
   return fallback
 }
 
+/**
+ * Obtiene la identificaci?n visible de un punto de venta.
+ * @version 1.0
+ * @author Agustin
+ */
 function pointNumber(id) {
   const point = pointsOfSale.value.find(point => point.id === id)
   return point ? point.number : `ID ${id}`
 }
 
+/**
+ * Obtiene un mensaje para un error de consulta.
+ * @version 1.0
+ * @author Agustin
+ */
 function requestError(error, fallback) {
   if (error.status === 400) return 'Revisá los filtros ingresados e intentá nuevamente.'
   if (error.status === 403) return 'No tenés permiso para consultar los datos de esta compañía.'
@@ -429,6 +489,11 @@ function requestError(error, fallback) {
   return fallback
 }
 
+/**
+ * Formatea una fecha para mostrarla en pantalla.
+ * @version 1.0
+ * @author Agustin
+ */
 function formatDate(value) {
   if (value === null) return '—'
   const [year, month, day] = value.split('-')

@@ -93,6 +93,11 @@ import { clearSession } from '../../services/session.service'
 import { activeCompany, selectCompany } from '../../stores/company.store'
 import '../../assets/css/InvoiceFormPage.css'
 
+/**
+ * Convierte pares de valores y etiquetas en opciones.
+ * @version 1.0
+ * @author Agustin
+ */
 const options = entries => entries.map(([value, label]) => ({ value, label }))
 const vatConditions = options([[1, 'IVA Responsable Inscripto'], [4, 'IVA Sujeto Exento'], [5, 'Consumidor Final'], [6, 'Responsable Monotributo'], [13, 'Monotributista Social'], [15, 'IVA No Alcanzado'], [16, 'Monotributo Trabajador Independiente Promovido']])
 const treatments = options([['taxed', 'Gravado'], ['exempt', 'Exento'], ['untaxed', 'No gravado'], ['not_discriminated', 'No discriminado']])
@@ -115,7 +120,17 @@ const itemFields = [
   { key: 'unit_price', label: 'Precio unitario', required: true }, { key: 'discount', label: 'Descuento (%)' },
   { key: 'tax_treatment', label: 'Tratamiento fiscal', required: true, options: treatments }, { key: 'vat_rate', label: 'Alícuota IVA', options: rates }
 ]
+/**
+ * Prepara los valores iniciales de la cabecera de factura.
+ * @version 1.0
+ * @author Agustin
+ */
 const emptyHeader = () => ({ point_of_sale: null, invoice_type: null, concept: null, service_date_from: '', service_date_to: '', due_date: '', receiver_name: '', receiver_vat_condition: null, receiver_document_type: null, receiver_document_number: '', receiver_address: '' })
+/**
+ * Prepara los valores iniciales de un ?tem.
+ * @version 1.0
+ * @author Agustin
+ */
 const emptyItem = () => ({ description: '', quantity: '', unit_price: '', discount: '0.00', tax_treatment: null, vat_rate: null })
 const form = reactive(emptyHeader())
 const item = reactive(emptyItem())
@@ -143,9 +158,19 @@ const hasUnsaved = computed(() => headerDirty.value || itemOpen.value || busy.va
 let generation = 0
 let restoringCompany = false
 
+/**
+ * Confirma si se pueden descartar los cambios pendientes.
+ * @version 1.0
+ * @author Agustin
+ */
 function allowDiscard() {
   return !hasUnsaved.value || window.confirm('Hay cambios sin guardar o una operación en curso. ¿Querés continuar?')
 }
+/**
+ * Advierte antes de abandonar la p?gina con cambios pendientes.
+ * @version 1.0
+ * @author Agustin
+ */
 function beforeUnload(event) { if (hasUnsaved.value) { event.preventDefault(); event.returnValue = '' } }
 window.addEventListener('beforeunload', beforeUnload)
 onBeforeRouteLeave(() => allowDiscard())
@@ -164,6 +189,11 @@ watch(activeCompany, (company, previous) => {
   loadInitial()
 }, { immediate: true, flush: 'sync' })
 
+/**
+ * Restablece los datos y estados de la pantalla.
+ * @version 1.0
+ * @author Agustin
+ */
 function reset() {
   Object.assign(form, emptyHeader())
   savedHeader.value = JSON.stringify(form)
@@ -172,11 +202,21 @@ function reset() {
   uncertain.value = false; uncertainMessage.value = ''; confirmIssue.value = false
 }
 
+/**
+ * Gestiona una respuesta de sesi?n inv?lida.
+ * @version 1.0
+ * @author Agustin
+ */
 function unauthorized(error) {
   if (error.status !== 401 || error.code !== 'NEX-USR-010') return false
   clearSession(); router.push('/login'); return true
 }
 
+/**
+ * Carga los datos iniciales de la compa??a activa.
+ * @version 1.0
+ * @author Agustin
+ */
 async function loadInitial() {
   const version = ++generation
   loadError.value = ''; missingProfile.value = false
@@ -196,6 +236,11 @@ async function loadInitial() {
   } finally { if (version === generation) loading.value = false }
 }
 
+/**
+ * Carga los datos de una factura en la pantalla.
+ * @version 1.0
+ * @author Agustin
+ */
 function applyInvoice(result) {
   invoice.value = result
   for (const key of Object.keys(form)) form[key] = result[key] ?? (key.endsWith('_date') || key.startsWith('service_date_') ? '' : result[key])
@@ -203,10 +248,20 @@ function applyInvoice(result) {
   itemOpen.value = false; errors.value = {}; itemErrors.value = {}
 }
 
+/**
+ * Retoma un borrador de factura seleccionado.
+ * @version 1.0
+ * @author Agustin
+ */
 async function resumeDraft(id) {
   if (!id || busy.value || !allowDiscard()) return
   await fetchInvoice(id)
 }
+/**
+ * Consulta una factura y actualiza el formulario.
+ * @version 1.0
+ * @author Agustin
+ */
 async function fetchInvoice(id) {
   const version = generation
   busy.value = true; errorMessage.value = ''; notice.value = ''
@@ -218,9 +273,24 @@ async function fetchInvoice(id) {
     if (version === generation && !unauthorized(error)) errorMessage.value = error.status === 403 ? 'No tenés permiso para consultar esta factura.' : error.status === 404 ? 'No se encontró la factura.' : 'No se pudo consultar la factura. Intentá nuevamente.'
   } finally { busy.value = false }
 }
+/**
+ * Comprueba el estado de la factura actual.
+ * @version 1.0
+ * @author Agustin
+ */
 function checkInvoice() { if (invoice.value && allowDiscard()) fetchInvoice(invoice.value.id) }
+/**
+ * Inicia una nueva factura tras confirmar los cambios pendientes.
+ * @version 1.0
+ * @author Agustin
+ */
 function newInvoice() { if (!allowDiscard()) return; reset(); loadInitial() }
 
+/**
+ * Presenta los errores devueltos por el servidor.
+ * @version 1.0
+ * @author Agustin
+ */
 function displayError(error, target) {
   if (unauthorized(error)) return
   if (error.status === 400) {
@@ -234,6 +304,11 @@ function displayError(error, target) {
   else errorMessage.value = 'No se pudo completar la operación. Intentá nuevamente.'
 }
 
+/**
+ * Valida y guarda la cabecera del borrador.
+ * @version 1.0
+ * @author Agustin
+ */
 async function saveHeader() {
   if (busy.value || uncertain.value || itemOpen.value || !activeCompany.value) return
   errors.value = {}; errorMessage.value = ''; notice.value = ''
@@ -254,8 +329,23 @@ async function saveHeader() {
   } finally { busy.value = false }
 }
 
+/**
+ * Prepara el formulario para agregar un ?tem.
+ * @version 1.0
+ * @author Agustin
+ */
 function addItem() { if (itemOpen.value && !allowDiscard()) return; Object.assign(item, emptyItem()); itemId.value = null; itemErrors.value = {}; itemOpen.value = true }
+/**
+ * Carga un ?tem existente en el formulario de edici?n.
+ * @version 1.0
+ * @author Agustin
+ */
 function editItem(data) { if (itemOpen.value && !allowDiscard()) return; for (const key of Object.keys(item)) item[key] = data[key]; itemId.value = data.id; itemErrors.value = {}; itemOpen.value = true }
+/**
+ * Valida y guarda el ?tem del borrador.
+ * @version 1.0
+ * @author Agustin
+ */
 async function saveItem() {
   if (busy.value || uncertain.value) return
   itemErrors.value = {}; errorMessage.value = ''; notice.value = ''
@@ -279,6 +369,11 @@ async function saveItem() {
     else displayError(error, itemErrors)
   } finally { busy.value = false }
 }
+/**
+ * Elimina un ?tem del borrador.
+ * @version 1.0
+ * @author Agustin
+ */
 async function removeItem(entry) {
   if (busy.value || uncertain.value || !window.confirm('¿Quitar este ítem del borrador?')) return
   const version = generation; const companyId = activeCompany.value.id; const invoiceId = invoice.value.id
@@ -295,6 +390,11 @@ async function removeItem(entry) {
     else displayError(error, itemErrors)
   } finally { busy.value = false }
 }
+/**
+ * Solicita la emisi?n interna de la factura.
+ * @version 1.0
+ * @author Agustin
+ */
 async function emitInvoice() {
   if (busy.value || uncertain.value || !invoice.value || headerDirty.value || itemOpen.value) return
   const version = generation; const companyId = activeCompany.value.id; const invoiceId = invoice.value.id

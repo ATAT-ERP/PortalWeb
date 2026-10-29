@@ -75,6 +75,11 @@ let loadId = 0
 let companyVersion = 0
 let mounted = true
 
+/**
+ * Restablece el formulario y sus mensajes.
+ * @version 1.0
+ * @author Agustin
+ */
 function resetForm() {
   Object.assign(form, { vat_condition: null, gross_income: '', business_start_date: '' })
   Object.assign(fieldErrors, { vat_condition: '', gross_income: '', business_start_date: '' })
@@ -92,6 +97,11 @@ watch(activeCompany, () => {
 
 onBeforeUnmount(() => { mounted = false; loadId++; companyVersion++ })
 
+/**
+ * Gestiona una respuesta de sesi?n inv?lida.
+ * @version 1.0
+ * @author Agustin
+ */
 function handleUnauthorized(error) {
   if (error.status !== 401 || error.code !== 'NEX-USR-010') return false
   clearSession()
@@ -99,6 +109,11 @@ function handleUnauthorized(error) {
   return true
 }
 
+/**
+ * Carga los datos del perfil fiscal en el formulario.
+ * @version 1.0
+ * @author Agustin
+ */
 function showProfile(profile) {
   form.vat_condition = profile.vat_condition
   form.gross_income = profile.gross_income
@@ -106,6 +121,11 @@ function showProfile(profile) {
   profileState.value = 'existing'
 }
 
+/**
+ * Consulta el perfil fiscal de la compa??a activa.
+ * @version 1.0
+ * @author Agustin
+ */
 async function loadProfile() {
   const request = ++loadId
   loadError.value = ''
@@ -130,6 +150,11 @@ async function loadProfile() {
   }
 }
 
+/**
+ * Valida y guarda el perfil fiscal.
+ * @version 1.0
+ * @author Agustin
+ */
 async function saveProfile() {
   if (isSaving.value || !activeCompany.value) return
   Object.assign(fieldErrors, { vat_condition: '', gross_income: '', business_start_date: '' })
