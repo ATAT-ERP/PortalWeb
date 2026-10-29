@@ -152,6 +152,7 @@
       <main class="content-area">
         <router-view />
       </main>
+      <AppFooter />
     </div>
   </div>
 </template>
@@ -161,6 +162,7 @@ import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Building2, ChevronDown, ChevronRight, Cloud, FileText, Home, LogOut, Menu, Receipt, ReceiptText, UserRound } from '@lucide/vue'
 import Select from 'primevue/select'
+import AppFooter from './AppFooter.vue'
 import { logout } from '../../services/user.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, companies, isLoadingCompanies, loadCompanies, selectCompany } from '../../stores/company.store'

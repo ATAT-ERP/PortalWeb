@@ -4,7 +4,9 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  margin-top: 1.5rem;
+  align-self: flex-start;
+  flex-shrink: 0;
+  margin-top: auto;
   border-radius: .5rem;
   background: var(--color-text-primary);
   color: var(--color-text-on-dark);

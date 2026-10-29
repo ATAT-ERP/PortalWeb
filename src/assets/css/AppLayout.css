@@ -413,13 +413,31 @@
   flex-direction: column;
   min-width: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   margin-left: var(--rail-width);
 }
 
 .content-area {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
-  padding: 1.75rem;
+  padding: 1.75rem 1.75rem 1.25rem;
+}
+
+.content-area > :has(> .back-link) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}
+
+.content-area > :has(> .back-link) > :has(+ .back-link) {
+  margin-bottom: 1.5rem;
+}
+
+.main-column > .app-footer {
+  flex-shrink: 0;
 }
 
 .mobile-nav-bar {
