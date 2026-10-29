@@ -65,7 +65,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { Building2, Cloud, File, FileImage, FileSpreadsheet, FileText, History, LayoutGrid } from '@lucide/vue'
+import { Building2, Cloud, File, FileImage, FileSpreadsheet, FileText, History, LayoutGrid, Receipt } from '@lucide/vue'
 import { getDocuments } from '../../services/document.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, companies, companiesError, isLoadingCompanies } from '../../stores/company.store'
@@ -74,7 +74,8 @@ import '../../assets/css/HomePage.css'
 const router = useRouter()
 const quickLinks = [
   { label: 'Cloud', to: '/documents', icon: Cloud },
-  { label: 'Compañías', to: '/companies', icon: Building2 }
+  { label: 'Compañías', to: '/companies', icon: Building2 },
+  { label: 'Facturación', to: '/billing', icon: Receipt }
 ]
 const fileIcons = { image: FileImage, pdf: FileText, spreadsheet: FileSpreadsheet, document: FileText, other: File }
 const documents = ref([])

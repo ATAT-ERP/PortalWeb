@@ -59,6 +59,11 @@ const router = createRouter({
           component: () => import('../pages/documents/DocumentsPage.vue')
         },
         {
+          path: 'billing',
+          name: 'billing-home',
+          component: () => import('../pages/billing/BillingHomePage.vue')
+        },
+        {
           path: 'billing/invoices',
           name: 'invoices',
           component: () => import('../pages/billing/InvoicesPage.vue')
