@@ -1,148 +1,58 @@
-.dashboard {
+﻿.dashboard {
+  container: dashboard / inline-size;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.welcome-card {
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 1.5rem 1.75rem;
-  box-shadow: var(--shadow-card);
+.dashboard-header h1 { margin: 0 0 .35rem; color: var(--color-text-primary); font-size: 1.4rem; }
+.dashboard-header p { margin: 0; color: var(--color-text-secondary); font-size: .9rem; }
+.dashboard-card { min-width: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); }
+.dashboard-grid { display: grid; }
+.dashboard-grid > section { min-width: 0; padding: 1.35rem; }
+.dashboard-company { background: color-mix(in srgb, var(--color-accent) 7%, var(--color-background)); }
+.dashboard-recent { border-top: 1px solid var(--color-border); }
+.dashboard-card h2, .dashboard-quick h2 { margin: 0; color: var(--color-text-primary); font-size: 1rem; }
+.dashboard-section-header { display: flex; align-items: center; gap: .75rem; }
+.dashboard-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; color: var(--color-text-secondary); background: var(--color-background); }
+.dashboard-company .dashboard-icon { color: var(--color-accent); background: var(--color-accent-background); }
+.dashboard-state, .dashboard-error { margin: .9rem 0 0; color: var(--color-text-secondary); font-size: .88rem; line-height: 1.5; }
+.dashboard-error { color: var(--color-danger); }
+
+.dashboard-company-name { margin: 1rem 0 0; color: var(--color-text-primary); font-size: 1.3rem; font-weight: 700; overflow-wrap: anywhere; }
+.dashboard-company-details { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin: .85rem 0 0; }
+.dashboard-company-details:empty { display: none; }
+.dashboard-company-details div { min-width: 0; }
+.dashboard-company-details dt { color: var(--color-text-secondary); font-size: .78rem; }
+.dashboard-company-details dd { margin: .25rem 0 0; font-size: .88rem; font-weight: 600; overflow-wrap: anywhere; }
+.dashboard-documents { display: grid; gap: .45rem; list-style: none; margin: .9rem 0 0; padding: 0; }
+.dashboard-documents li { display: flex; align-items: center; gap: .7rem; min-width: 0; padding: .5rem .65rem; border-radius: 9px; background: var(--color-background); font-size: .88rem; }
+.dashboard-file-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 8px; color: var(--color-text-secondary); background: var(--color-border); }
+.dashboard-file-pdf { color: #a84850; background: #f7e8e9; }
+.dashboard-file-spreadsheet { color: #397458; background: #e6f1eb; }
+.dashboard-file-image { color: #526da1; background: #e9eef8; }
+.dashboard-file-document { color: #4c6b82; background: #e8eff3; }
+.dashboard-file-name { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: .2rem; }
+.dashboard-file-name strong, .dashboard-file-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashboard-file-name:focus strong, .dashboard-file-name:focus span { overflow-wrap: anywhere; white-space: normal; }
+.dashboard-file-name:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.dashboard-file-name span, .dashboard-documents time { color: var(--color-text-secondary); font-size: .8rem; }
+.dashboard-documents time { flex-shrink: 0; text-align: right; }
+
+.dashboard-quick-header { display: flex; align-items: center; gap: .65rem; color: var(--color-text-secondary); }
+.dashboard-quick-header::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }
+.dashboard-links { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; margin-top: .85rem; }
+.dashboard-link { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; width: 136px; min-height: 112px; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface-raised); color: var(--color-text-primary); font-size: .88rem; text-align: center; text-decoration: none; }
+.dashboard-link:hover { background: var(--color-background); box-shadow: var(--shadow-card); }
+.dashboard-link > svg { color: var(--color-text-secondary); }
+.dashboard-link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+
+@container dashboard (min-width: 760px) {
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
+  .dashboard-recent { border-top: 0; border-left: 1px solid var(--color-border); }
 }
 
-.welcome-text h1 {
-  margin: 0 0 0.35rem;
-  font-size: 1.4rem;
-  font-weight: 650;
-  color: var(--color-text-primary);
-}
-
-.welcome-text p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-}
-
-.panel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-.panel {
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 1.4rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  box-shadow: var(--shadow-card);
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.panel-icon {
-  color: var(--color-accent);
-  flex-shrink: 0;
-}
-
-.panel h2 {
-  margin: 0;
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.panel-content {
-  background: var(--color-background);
-  border: 1px dashed var(--color-border);
-  border-radius: 10px;
-  padding: 1rem;
-}
-
-.panel-empty {
-  margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.5;
-  color: var(--color-text-secondary);
-}
-
-/* Tarjeta Mi Compañía (Estilo Imagen) */
-.company-card {
-  background: var(--color-surface-raised, #ffffff);
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 14px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-card, 0 1px 3px rgba(0,0,0,0.05));
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.company-card-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.company-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: #10b981;
-  color: #ffffff;
-  flex-shrink: 0;
-}
-
-.company-card-title h2 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 650;
-  color: var(--color-text-primary, #0f172a);
-}
-
-.company-card-title p {
-  margin: 0.15rem 0 0;
-  font-size: 0.88rem;
-  color: var(--color-text-secondary, #64748b);
-}
-
-.company-card-body {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem 2rem;
-}
-
-@media (max-width: 640px) {
-  .company-card-body {
-    grid-template-columns: 1fr;
-  }
-}
-
-.info-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.info-label {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.info-value {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #0f172a;
+@container dashboard (max-width: 480px) {
+  .dashboard-documents li { flex-wrap: wrap; }
+  .dashboard-documents time { margin-left: 2.8rem; text-align: left; }
 }
