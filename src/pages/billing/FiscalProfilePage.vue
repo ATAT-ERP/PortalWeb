@@ -48,20 +48,12 @@ import { Building2 } from '@lucide/vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import { vatConditions } from '../../constants/billing.constants'
 import { createFiscalProfile, getFiscalProfile, updateFiscalProfile } from '../../services/billing.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/FiscalProfilePage.css'
 
-const vatConditions = [
-  { value: 1, label: 'IVA Responsable Inscripto' },
-  { value: 4, label: 'IVA Sujeto Exento' },
-  { value: 5, label: 'Consumidor Final' },
-  { value: 6, label: 'Responsable Monotributo' },
-  { value: 13, label: 'Monotributista Social' },
-  { value: 15, label: 'IVA No Alcanzado' },
-  { value: 16, label: 'Monotributo Trabajador Independiente Promovido' }
-]
 const router = useRouter()
 const form = reactive({ vat_condition: null, gross_income: '', business_start_date: '' })
 const fieldErrors = reactive({ vat_condition: '', gross_income: '', business_start_date: '' })

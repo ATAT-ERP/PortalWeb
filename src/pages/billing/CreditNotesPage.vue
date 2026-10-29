@@ -68,18 +68,15 @@ import DataTable from 'primevue/datatable'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import { creditNoteTypes as types, taxTreatments as treatments, vatRates as rates } from '../../constants/billing.constants'
 import { addCreditNoteInvoices, createCreditNote, createCreditNoteItem, deleteCreditNoteInvoice, deleteCreditNoteItem, getCreditNote, getCreditNoteItems, getCreditNotes, getInvoices, getPointsOfSale, issueCreditNote, updateCreditNoteItem } from '../../services/billing.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, selectCompany } from '../../stores/company.store'
 import '../../assets/css/CreditNotesPage.css'
 
 
-const choices = entries => entries.map(([value, label]) => ({ value, label }))
-const types = choices([[3, 'Nota de crédito A'], [8, 'Nota de crédito B'], [13, 'Nota de crédito C']])
 const typeLabels = Object.fromEntries(types.map(entry => [entry.value, entry.label]))
 const homologous = { 3: 1, 8: 6, 13: 11 }
-const treatments = choices([['taxed', 'Gravado'], ['exempt', 'Exento'], ['untaxed', 'No gravado'], ['not_discriminated', 'No discriminado']])
-const rates = choices([[3, '0%'], [9, '2,5%'], [8, '5%'], [4, '10,5%'], [5, '21%'], [6, '27%']])
 const treatmentLabels = Object.fromEntries(treatments.map(entry => [entry.value, entry.label]))
 const rateLabels = Object.fromEntries(rates.map(entry => [entry.value, entry.label]))
 const itemFields = [{ key: 'description', label: 'Descripción', required: true }, { key: 'quantity', label: 'Cantidad', required: true }, { key: 'unit_price', label: 'Precio unitario', required: true }, { key: 'discount', label: 'Descuento (%)' }, { key: 'tax_treatment', label: 'Tratamiento fiscal', required: true, options: treatments }, { key: 'vat_rate', label: 'Alícuota IVA', options: rates }]

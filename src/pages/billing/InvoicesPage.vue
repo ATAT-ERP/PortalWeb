@@ -139,6 +139,7 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
+import { creditNoteTypes, invoiceTypes, taxTreatments, vatConditions as vatConditionOptions, vatRates as vatRateOptions } from '../../constants/billing.constants'
 import { generateCreditNoteRepresentation, generateInvoiceRepresentation, getCreditNote, getCreditNoteItems, getCreditNoteRepresentation, getCreditNotes, getInvoice, getInvoiceRepresentation, getInvoices, getPointsOfSale } from '../../services/billing.service'
 import { downloadDocument } from '../../services/document.service'
 import { clearSession } from '../../services/session.service'
@@ -146,18 +147,16 @@ import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/InvoicesPage.css'
 
 const statuses = [{ label: 'Borrador', value: 'draft' }, { label: 'Emitida', value: 'issued' }, { label: 'Cancelada', value: 'cancelled' }]
-const statusLabels = { draft: 'Borrador', issued: 'Emitida', cancelled: 'Cancelada' }
+const statusLabels = Object.fromEntries(statuses.map(option => [option.value, option.label]))
 const statusSeverity = { draft: 'secondary', issued: 'success', cancelled: 'danger' }
-const invoiceTypes = [{ label: 'Factura A', value: 1 }, { label: 'Factura B', value: 6 }, { label: 'Factura C', value: 11 }]
-const creditNoteTypes = [{ label: 'Nota de crédito A', value: 3 }, { label: 'Nota de crédito B', value: 8 }, { label: 'Nota de crédito C', value: 13 }]
-const creditTypeLabels = { 3: 'Nota de crédito A', 8: 'Nota de crédito B', 13: 'Nota de crédito C' }
+const creditTypeLabels = Object.fromEntries(creditNoteTypes.map(option => [option.value, option.label]))
 const documentKinds = [{ label: 'Todos', value: 'all' }, { label: 'Facturas', value: 'invoice' }, { label: 'Notas de crédito', value: 'credit' }]
 const documentKind = ref('all')
 const detailKind = ref('invoice')
 const documentLabels = { 80: 'CUIT', 86: 'CUIL', 87: 'CDI', 96: 'DNI' }
-const vatConditions = { 1: 'IVA Responsable Inscripto', 4: 'IVA Sujeto Exento', 5: 'Consumidor Final', 6: 'Responsable Monotributo', 13: 'Monotributista Social', 15: 'IVA No Alcanzado', 16: 'Monotributo Trabajador Independiente Promovido' }
-const vatRates = { 3: '0%', 9: '2,5%', 8: '5%', 4: '10,5%', 5: '21%', 6: '27%' }
-const treatments = { taxed: 'Gravado', exempt: 'Exento', untaxed: 'No gravado', not_discriminated: 'No discriminado' }
+const vatConditions = Object.fromEntries(vatConditionOptions.map(option => [option.value, option.label]))
+const vatRates = Object.fromEntries(vatRateOptions.map(option => [option.value, option.label]))
+const treatments = Object.fromEntries(taxTreatments.map(option => [option.value, option.label]))
 const emptyFilters = () => ({ receiver: '', number: '', status: null, invoice_type: null, point_of_sale: null, issue_date_from: '', issue_date_to: '' })
 const filters = reactive(emptyFilters())
 const router = useRouter()

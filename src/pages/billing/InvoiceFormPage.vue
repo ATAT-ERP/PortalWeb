@@ -88,6 +88,7 @@ import DataTable from 'primevue/datatable'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import { invoiceTypes, taxTreatments as treatments, vatConditions, vatRates as rates } from '../../constants/billing.constants'
 import { createInvoice, createInvoiceItem, deleteInvoiceItem, getInvoice, getInvoices, getPointsOfSale, issueInvoice, updateInvoice, updateInvoiceItem } from '../../services/billing.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, selectCompany } from '../../stores/company.store'
@@ -99,14 +100,11 @@ import '../../assets/css/InvoiceFormPage.css'
  * @author Agustin
  */
 const options = entries => entries.map(([value, label]) => ({ value, label }))
-const vatConditions = options([[1, 'IVA Responsable Inscripto'], [4, 'IVA Sujeto Exento'], [5, 'Consumidor Final'], [6, 'Responsable Monotributo'], [13, 'Monotributista Social'], [15, 'IVA No Alcanzado'], [16, 'Monotributo Trabajador Independiente Promovido']])
-const treatments = options([['taxed', 'Gravado'], ['exempt', 'Exento'], ['untaxed', 'No gravado'], ['not_discriminated', 'No discriminado']])
-const rates = options([[3, '0%'], [9, '2,5%'], [8, '5%'], [4, '10,5%'], [5, '21%'], [6, '27%']])
 const treatmentLabels = Object.fromEntries(treatments.map(option => [option.value, option.label]))
 const rateLabels = Object.fromEntries(rates.map(option => [option.value, option.label]))
 const headerFields = [
   { key: 'point_of_sale', label: 'Punto de venta', required: true, options: 'points' },
-  { key: 'invoice_type', label: 'Tipo de factura', required: true, options: options([[1, 'Factura A'], [6, 'Factura B'], [11, 'Factura C']]) },
+  { key: 'invoice_type', label: 'Tipo de factura', required: true, options: invoiceTypes },
   { key: 'concept', label: 'Concepto', required: true, options: options([[1, 'Productos'], [2, 'Servicios'], [3, 'Productos y Servicios']]) },
   { key: 'service_date_from', label: 'Servicio desde', type: 'date' }, { key: 'service_date_to', label: 'Servicio hasta', type: 'date' }, { key: 'due_date', label: 'Vencimiento', type: 'date' },
   { key: 'receiver_name', label: 'Nombre o razón social del receptor', required: true, maxlength: 255 },
