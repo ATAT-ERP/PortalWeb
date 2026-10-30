@@ -1,21 +1,11 @@
 <template>
   <div class="deadlines-page">
-    <header class="deadlines-header">
-      <span class="deadlines-header-icon" aria-hidden="true"><CalendarDays :size="24" /></span>
-      <div>
+    <section class="deadlines-month-summary" :aria-label="`Resumen del mes visible: ${monthLabel}`">
+      <header class="deadlines-header">
+        <span class="deadlines-header-icon" aria-hidden="true"><CalendarDays :size="21" /></span>
         <h1>Vencimientos</h1>
-        <p>Agenda fiscal y recordatorios</p>
-      </div>
-      <Button class="deadlines-new-button" type="button" aria-label="Nuevo vencimiento" title="Nuevo vencimiento" :disabled="isLoading || isSaving" @click="openCreate">
-        <Plus :size="18" aria-hidden="true" />
-      </Button>
-    </header>
-
-    <section class="deadlines-indicators-section" aria-label="Resumen del mes visible">
-      <div class="deadlines-indicators-heading">
-        <h2>Resumen</h2>
-        <span>{{ monthLabel }}</span>
-      </div>
+      </header>
+      <p class="deadlines-summary-period">Mes visible · {{ monthLabel }}</p>
       <div class="deadlines-indicators">
         <article class="deadlines-indicator indicator-pending">
           <span class="deadlines-indicator-icon"><ClipboardList :size="21" aria-hidden="true" /></span>
@@ -49,7 +39,7 @@
           <Select input-id="deadline-filter-status" v-model="filters.status" :options="statusFilterOptions" option-label="label" option-value="value" :disabled="isLoading" />
         </label>
         <div class="deadlines-filter-actions">
-          <Button type="submit" size="small" :disabled="isLoading"><Search :size="15" aria-hidden="true" /> Aplicar</Button>
+          <Button type="submit" size="small" severity="secondary" outlined :disabled="isLoading"><Search :size="15" aria-hidden="true" /> Aplicar</Button>
           <Button type="button" size="small" severity="secondary" text :disabled="isLoading || !hasFilters" @click="clearFilters">Limpiar</Button>
           <Button
             type="button"
@@ -132,6 +122,9 @@
               <h2 id="selected-day-title">{{ selectedDateLabel }}</h2>
               <p>{{ selectedDayDeadlines.length }} {{ selectedDayDeadlines.length === 1 ? 'tarea' : 'tareas' }}</p>
             </div>
+            <Button type="button" class="deadlines-day-create" severity="secondary" outlined aria-label="Nuevo vencimiento para el día seleccionado" title="Nuevo vencimiento" :disabled="isSaving" @click="openCreate">
+              <Plus :size="17" aria-hidden="true" />
+            </Button>
           </header>
           <div class="deadlines-day-summary" aria-label="Resumen de estados para el día">
             <span :aria-label="`${selectedDayCounts.pending} pendientes`"><i class="deadlines-marker marker-pending" aria-hidden="true"></i>{{ selectedDayCounts.pending }}</span>
@@ -148,9 +141,6 @@
           <div v-else-if="!selectedDayDeadlines.length" class="deadlines-day-empty">
             <span class="deadlines-empty-icon" aria-hidden="true"><CalendarDays :size="20" /></span>
             <p>{{ hasFilters ? 'No hay tareas que coincidan con los filtros para este día.' : 'No hay vencimientos para este día.' }}</p>
-            <Button type="button" class="deadlines-empty-create" severity="secondary" outlined size="small" aria-label="Nuevo vencimiento para el día seleccionado" title="Nuevo vencimiento" :disabled="isSaving" @click="openCreate">
-              <Plus :size="17" aria-hidden="true" />
-            </Button>
           </div>
           <ul v-else class="deadlines-day-list">
             <li v-for="deadline in selectedDayDeadlines" :key="deadline.id" :class="['deadlines-day-task', deadlineTaskClass(deadline)]">
@@ -161,13 +151,13 @@
               <p class="deadlines-task-company">{{ companyName(deadline.company) }}</p>
               <p v-if="deadline.period" class="deadlines-task-period">Período: {{ deadline.period }}</p>
               <div class="deadlines-task-actions">
-                <Button type="button" size="small" severity="secondary" text :disabled="isSaving || editingLoading" :aria-label="`Editar ${deadline.name}`" :title="canWrite(deadline) ? 'Editar tarea' : 'Consultar tarea; la compañía está inactiva'" @click="openEdit(deadline)">
+                <Button type="button" class="task-action task-action-edit" size="small" severity="secondary" text :disabled="isSaving || editingLoading" :aria-label="`Editar ${deadline.name}`" :title="canWrite(deadline) ? 'Editar tarea' : 'Consultar tarea; la compañía está inactiva'" @click="openEdit(deadline)">
                   <Pencil :size="16" aria-hidden="true" />
                 </Button>
-                <Button type="button" size="small" severity="secondary" text :disabled="isSaving || !canWrite(deadline)" :aria-label="deadline.status === 'pending' ? `Completar ${deadline.name}` : `Reabrir ${deadline.name}`" :title="canWrite(deadline) ? (deadline.status === 'pending' ? 'Completar tarea' : 'Reabrir tarea') : writeRestriction(deadline)" @click="toggleStatus(deadline)">
+                <Button type="button" :class="['task-action', deadline.status === 'pending' ? 'task-action-complete' : 'task-action-reopen']" size="small" severity="secondary" text :disabled="isSaving || !canWrite(deadline)" :aria-label="deadline.status === 'pending' ? `Completar ${deadline.name}` : `Reabrir ${deadline.name}`" :title="canWrite(deadline) ? (deadline.status === 'pending' ? 'Completar tarea' : 'Reabrir tarea') : writeRestriction(deadline)" @click="toggleStatus(deadline)">
                   <component :is="deadline.status === 'pending' ? Check : RotateCcw" :size="16" aria-hidden="true" />
                 </Button>
-                <Button type="button" size="small" severity="danger" text :disabled="isSaving || !canWrite(deadline)" :aria-label="`Eliminar ${deadline.name}`" :title="canWrite(deadline) ? 'Eliminar tarea' : writeRestriction(deadline)" @click="askDelete(deadline)">
+                <Button type="button" class="task-action task-action-delete" size="small" severity="danger" text :disabled="isSaving || !canWrite(deadline)" :aria-label="`Eliminar ${deadline.name}`" :title="canWrite(deadline) ? 'Eliminar tarea' : writeRestriction(deadline)" @click="askDelete(deadline)">
                   <Trash2 :size="16" aria-hidden="true" />
                 </Button>
               </div>
