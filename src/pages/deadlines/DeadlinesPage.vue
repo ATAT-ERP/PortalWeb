@@ -1,11 +1,11 @@
 <template>
   <div class="deadlines-page">
-    <section class="deadlines-month-summary" :aria-label="`Resumen del mes visible: ${monthLabel}`">
+    <section class="deadlines-month-summary" :aria-label="`Vencimientos de ${monthLabel}`">
       <header class="deadlines-header">
         <span class="deadlines-header-icon" aria-hidden="true"><CalendarDays :size="21" /></span>
         <h1>Vencimientos</h1>
+        <span class="deadlines-header-period"><span aria-hidden="true">·</span> {{ monthLabel }}</span>
       </header>
-      <p class="deadlines-summary-period">Mes visible · {{ monthLabel }}</p>
       <div class="deadlines-indicators">
         <article class="deadlines-indicator indicator-pending">
           <span class="deadlines-indicator-icon"><ClipboardList :size="21" aria-hidden="true" /></span>
@@ -13,7 +13,7 @@
         </article>
         <article class="deadlines-indicator indicator-soon">
           <span class="deadlines-indicator-icon"><Clock3 :size="21" aria-hidden="true" /></span>
-          <div><strong>{{ dueSoonCount }}</strong><span class="deadlines-indicator-label">Próximas a vencer</span></div>
+          <div><strong>{{ dueSoonCount }}</strong><span class="deadlines-indicator-label">Próximas</span></div>
         </article>
         <article class="deadlines-indicator indicator-overdue">
           <span class="deadlines-indicator-icon"><AlertTriangle :size="21" aria-hidden="true" /></span>
