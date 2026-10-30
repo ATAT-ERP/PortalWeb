@@ -365,16 +365,34 @@
 .deadlines-day-empty {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.8rem;
-  padding: 1.5rem 0.25rem;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1.75rem 0.5rem;
   color: var(--color-text-secondary);
   font-size: 0.85rem;
+  text-align: center;
+}
+
+.deadlines-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: var(--color-background-highlight-soft);
+  color: var(--color-text-secondary);
 }
 
 .deadlines-day-empty p {
   margin: 0;
   line-height: 1.5;
+}
+
+.deadlines-empty-create {
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
 }
 
 .deadlines-day-list {
@@ -391,9 +409,20 @@
   min-width: 0;
   padding: 0.75rem;
   border: 1px solid var(--color-border);
+  border-left-width: 3px;
   border-radius: 0.6rem;
   background: var(--color-surface);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
+
+.deadlines-day-task:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.task-pending { border-left-color: #4c78a8; }
+.task-soon { border-left-color: #d99b22; }
+.task-overdue { border-left-color: var(--color-danger); }
+.task-completed { border-left-color: #4d8a61; }
 
 .deadlines-task-heading {
   display: flex;
@@ -425,9 +454,18 @@
 }
 
 .deadlines-task-actions .p-button {
-  width: 2rem;
-  height: 2rem;
+  width: 2.2rem;
+  height: 2.2rem;
   padding: 0;
+}
+
+.deadlines-task-actions .p-button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.deadlines-task-actions .p-button:disabled {
+  opacity: 0.45;
 }
 
 .deadlines-filters {
@@ -602,20 +640,31 @@
 
 .deadlines-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem 1rem;
+}
+
+.deadlines-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.deadlines-form-group-notes,
+.deadlines-form > .deadlines-dialog-actions {
+  grid-column: 1 / -1;
 }
 
 .deadlines-form-field {
-  margin-top: 0.375rem;
   color: var(--color-text-secondary);
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-.deadlines-form > .p-inputtext,
-.deadlines-form > .p-select,
-.deadlines-form > .p-textarea {
+.deadlines-form-group > .p-inputtext,
+.deadlines-form-group > .p-select,
+.deadlines-form-group > .p-textarea {
   width: 100%;
 }
 
@@ -700,6 +749,10 @@
 
   .deadlines-filters {
     grid-template-columns: 1fr;
+  }
+
+  .deadlines-form {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .deadlines-date-filters {

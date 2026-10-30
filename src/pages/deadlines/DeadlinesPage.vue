@@ -146,13 +146,14 @@
             <button class="deadlines-clear-button" type="button" @click="loadInitial">Reintentar</button>
           </div>
           <div v-else-if="!selectedDayDeadlines.length" class="deadlines-day-empty">
+            <span class="deadlines-empty-icon" aria-hidden="true"><CalendarDays :size="20" /></span>
             <p>{{ hasFilters ? 'No hay tareas que coincidan con los filtros para este día.' : 'No hay vencimientos para este día.' }}</p>
-            <Button type="button" severity="secondary" outlined size="small" :disabled="isSaving" @click="openCreate">
-              <Plus :size="15" aria-hidden="true" /> Nuevo vencimiento
+            <Button type="button" class="deadlines-empty-create" severity="secondary" outlined size="small" aria-label="Nuevo vencimiento para el día seleccionado" title="Nuevo vencimiento" :disabled="isSaving" @click="openCreate">
+              <Plus :size="17" aria-hidden="true" />
             </Button>
           </div>
           <ul v-else class="deadlines-day-list">
-            <li v-for="deadline in selectedDayDeadlines" :key="deadline.id" class="deadlines-day-task">
+            <li v-for="deadline in selectedDayDeadlines" :key="deadline.id" :class="['deadlines-day-task', deadlineTaskClass(deadline)]">
               <div class="deadlines-task-heading">
                 <strong>{{ deadline.name }}</strong>
                 <span :class="['deadlines-status', statusClass(deadline)]">{{ statusLabel(deadline) }}</span>
@@ -160,13 +161,13 @@
               <p class="deadlines-task-company">{{ companyName(deadline.company) }}</p>
               <p v-if="deadline.period" class="deadlines-task-period">Período: {{ deadline.period }}</p>
               <div class="deadlines-task-actions">
-                <Button type="button" size="small" severity="secondary" text :disabled="isSaving || editingLoading" :aria-label="`Editar ${deadline.name}`" @click="openEdit(deadline)">
+                <Button type="button" size="small" severity="secondary" text :disabled="isSaving || editingLoading" :aria-label="`Editar ${deadline.name}`" :title="canWrite(deadline) ? 'Editar tarea' : 'Consultar tarea; la compañía está inactiva'" @click="openEdit(deadline)">
                   <Pencil :size="16" aria-hidden="true" />
                 </Button>
-                <Button type="button" size="small" severity="secondary" text :disabled="isSaving || !canWrite(deadline)" :aria-label="deadline.status === 'pending' ? `Completar ${deadline.name}` : `Reabrir ${deadline.name}`" :title="writeRestriction(deadline)" @click="toggleStatus(deadline)">
+                <Button type="button" size="small" severity="secondary" text :disabled="isSaving || !canWrite(deadline)" :aria-label="deadline.status === 'pending' ? `Completar ${deadline.name}` : `Reabrir ${deadline.name}`" :title="canWrite(deadline) ? (deadline.status === 'pending' ? 'Completar tarea' : 'Reabrir tarea') : writeRestriction(deadline)" @click="toggleStatus(deadline)">
                   <component :is="deadline.status === 'pending' ? Check : RotateCcw" :size="16" aria-hidden="true" />
                 </Button>
-                <Button type="button" size="small" severity="danger" text :disabled="isSaving || !canWrite(deadline)" :aria-label="`Eliminar ${deadline.name}`" :title="writeRestriction(deadline)" @click="askDelete(deadline)">
+                <Button type="button" size="small" severity="danger" text :disabled="isSaving || !canWrite(deadline)" :aria-label="`Eliminar ${deadline.name}`" :title="canWrite(deadline) ? 'Eliminar tarea' : writeRestriction(deadline)" @click="askDelete(deadline)">
                   <Trash2 :size="16" aria-hidden="true" />
                 </Button>
               </div>
@@ -176,36 +177,48 @@
       </div>
     </section>
 
-    <Dialog v-model:visible="formVisible" modal :header="editingDeadline ? 'Editar vencimiento' : 'Nuevo vencimiento'" :style="{ width: 'min(620px, 95vw)' }" :closable="!isSaving" @hide="resetForm">
+    <Dialog v-model:visible="formVisible" modal :header="editingDeadline ? 'Editar vencimiento' : 'Nuevo vencimiento'" :style="{ width: 'min(680px, 95vw)' }" :closable="!isSaving" @hide="resetForm">
       <p v-if="formError" class="deadlines-feedback deadlines-feedback-error" role="alert">{{ formError }}</p>
       <p v-if="editingDeadline && !canWrite(editingDeadline)" class="deadlines-feedback deadlines-feedback-warning" role="status">
         Esta compañía está inactiva. La tarea se puede consultar, pero el backend no permite modificarla ni eliminarla.
       </p>
       <p v-if="editingLoading" class="deadlines-form-state" role="status">Cargando tarea...</p>
       <form v-else class="deadlines-form" @submit.prevent="saveDeadline" novalidate>
-        <label class="deadlines-form-field" for="deadline-company">Compañía o persona *</label>
-        <Select id="deadline-company" v-model="form.company" :options="formCompanies" option-label="name" option-value="id" placeholder="Seleccioná un cliente" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.company" @update:model-value="clearFieldError('company')" />
-        <small v-if="fieldErrors.company" class="deadlines-field-error">{{ fieldErrors.company }}</small>
+        <div class="deadlines-form-group">
+          <label class="deadlines-form-field" for="deadline-company">Compañía o persona *</label>
+          <Select input-id="deadline-company" v-model="form.company" :options="formCompanies" option-label="name" option-value="id" placeholder="Seleccioná un cliente" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.company" @update:model-value="clearFieldError('company')" />
+          <small v-if="fieldErrors.company" class="deadlines-field-error">{{ fieldErrors.company }}</small>
+        </div>
 
-        <label class="deadlines-form-field" for="deadline-name">Nombre o concepto *</label>
-        <InputText id="deadline-name" v-model="form.name" maxlength="255" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.name" @input="clearFieldError('name')" />
-        <small v-if="fieldErrors.name" class="deadlines-field-error">{{ fieldErrors.name }}</small>
+        <div class="deadlines-form-group">
+          <label class="deadlines-form-field" for="deadline-name">Nombre o concepto *</label>
+          <InputText id="deadline-name" v-model="form.name" maxlength="255" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.name" @input="clearFieldError('name')" />
+          <small v-if="fieldErrors.name" class="deadlines-field-error">{{ fieldErrors.name }}</small>
+        </div>
 
-        <label class="deadlines-form-field" for="deadline-period">Período de referencia</label>
-        <InputText id="deadline-period" v-model="form.period" maxlength="255" placeholder="Opcional" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.period" @input="clearFieldError('period')" />
-        <small v-if="fieldErrors.period" class="deadlines-field-error">{{ fieldErrors.period }}</small>
+        <div class="deadlines-form-group">
+          <label class="deadlines-form-field" for="deadline-date">Fecha de vencimiento *</label>
+          <InputText id="deadline-date" v-model="form.due_date" type="date" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.due_date" @input="clearFieldError('due_date')" />
+          <small v-if="fieldErrors.due_date" class="deadlines-field-error">{{ fieldErrors.due_date }}</small>
+        </div>
 
-        <label class="deadlines-form-field" for="deadline-date">Fecha de vencimiento *</label>
-        <InputText id="deadline-date" v-model="form.due_date" type="date" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.due_date" @input="clearFieldError('due_date')" />
-        <small v-if="fieldErrors.due_date" class="deadlines-field-error">{{ fieldErrors.due_date }}</small>
+        <div class="deadlines-form-group">
+          <label class="deadlines-form-field" for="deadline-status">Estado</label>
+          <Select input-id="deadline-status" v-model="form.status" :options="statusOptions" option-label="label" option-value="value" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.status" @update:model-value="clearFieldError('status')" />
+          <small v-if="fieldErrors.status" class="deadlines-field-error">{{ fieldErrors.status }}</small>
+        </div>
 
-        <label class="deadlines-form-field" for="deadline-status">Estado</label>
-        <Select id="deadline-status" v-model="form.status" :options="statusOptions" option-label="label" option-value="value" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.status" @update:model-value="clearFieldError('status')" />
-        <small v-if="fieldErrors.status" class="deadlines-field-error">{{ fieldErrors.status }}</small>
+        <div class="deadlines-form-group">
+          <label class="deadlines-form-field" for="deadline-period">Período de referencia</label>
+          <InputText id="deadline-period" v-model="form.period" maxlength="255" placeholder="Opcional" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.period" @input="clearFieldError('period')" />
+          <small v-if="fieldErrors.period" class="deadlines-field-error">{{ fieldErrors.period }}</small>
+        </div>
 
-        <label class="deadlines-form-field" for="deadline-notes">Observaciones</label>
-        <Textarea id="deadline-notes" v-model="form.notes" rows="3" auto-resize placeholder="Opcional" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.notes" @input="clearFieldError('notes')" />
-        <small v-if="fieldErrors.notes" class="deadlines-field-error">{{ fieldErrors.notes }}</small>
+        <div class="deadlines-form-group deadlines-form-group-notes">
+          <label class="deadlines-form-field" for="deadline-notes">Observaciones</label>
+          <Textarea id="deadline-notes" v-model="form.notes" rows="3" auto-resize placeholder="Opcional" :disabled="isSaving || !canEditForm" :invalid="!!fieldErrors.notes" @input="clearFieldError('notes')" />
+          <small v-if="fieldErrors.notes" class="deadlines-field-error">{{ fieldErrors.notes }}</small>
+        </div>
 
         <div class="deadlines-dialog-actions">
           <Button type="button" label="Cancelar" severity="secondary" outlined :disabled="isSaving" @click="formVisible = false" />
@@ -521,8 +534,6 @@ async function saveDeadline() {
     status: form.status,
     notes: form.notes.trim() || null
   }
-  const savedDate = data.due_date
-
   isSaving.value = true
   formError.value = ''
   fieldErrors.value = {}
@@ -536,9 +547,6 @@ async function saveDeadline() {
       await createDeadline(data)
       successMessage.value = 'Vencimiento creado correctamente.'
     }
-    const dueDate = dateFromKey(savedDate)
-    displayedMonth.value = new Date(dueDate.getFullYear(), dueDate.getMonth(), 1)
-    selectedDate.value = savedDate
     formVisible.value = false
     await loadDeadlines()
   } catch (error) {
@@ -664,6 +672,12 @@ function statusClass(deadline) {
   if (deadline.overdue) return 'deadlines-status-overdue'
   if (deadline.due_soon) return 'deadlines-status-soon'
   return deadline.status === 'completed' ? 'deadlines-status-completed' : 'deadlines-status-pending'
+}
+
+function deadlineTaskClass(deadline) {
+  if (deadline.overdue) return 'task-overdue'
+  if (deadline.due_soon) return 'task-soon'
+  return deadline.status === 'completed' ? 'task-completed' : 'task-pending'
 }
 
 </script>
