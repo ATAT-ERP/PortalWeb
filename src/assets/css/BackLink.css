@@ -1,0 +1,17 @@
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  align-self: flex-start;
+  flex-shrink: 0;
+  margin-top: auto;
+  border-radius: .5rem;
+  background: var(--color-text-primary);
+  color: var(--color-text-on-dark);
+  text-decoration: none;
+}
+
+.back-link:hover { background: var(--color-text-primary-hover); }
+.back-link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }

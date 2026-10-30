@@ -59,9 +59,39 @@ const router = createRouter({
           component: () => import('../pages/documents/DocumentsPage.vue')
         },
         {
+          path: 'deadlines',
+          name: 'deadlines',
+          component: () => import('../pages/deadlines/DeadlinesPage.vue')
+        },
+        {
+          path: 'billing',
+          name: 'billing-home',
+          component: () => import('../pages/billing/BillingHomePage.vue')
+        },
+        {
           path: 'billing/invoices',
           name: 'invoices',
           component: () => import('../pages/billing/InvoicesPage.vue')
+        },
+        {
+          path: 'billing/invoice-form',
+          name: 'invoice-form',
+          component: () => import('../pages/billing/InvoiceFormPage.vue')
+        },
+        {
+          path: 'billing/credit-notes',
+          name: 'credit-notes',
+          component: () => import('../pages/billing/CreditNotesPage.vue')
+        },
+        {
+          path: 'billing/fiscal-profile',
+          name: 'fiscal-profile',
+          component: () => import('../pages/billing/FiscalProfilePage.vue')
+        },
+        {
+          path: 'billing/points-of-sale',
+          name: 'points-of-sale',
+          component: () => import('../pages/billing/PointsOfSalePage.vue')
         }
         // Los módulos futuros se agregan acá como nuevas rutas hijas,
         // y quedan protegidos automáticamente sin tocar nada más.

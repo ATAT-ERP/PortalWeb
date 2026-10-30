@@ -88,7 +88,7 @@
             <span class="nav-label nav-link-label">{{ item.label }}</span>
           </RouterLink>
 
-          <div v-if="item.children && item.children.length && isGroupOpen(item)" class="nav-submenu">
+          <div v-if="item.children && item.children.length && isGroupOpen(item)" class="nav-submenu" :class="{ 'billing-submenu': item.label === 'Facturación' }">
             <template v-for="child in item.children" :key="child.label">
               <button v-if="child.disabled" type="button" class="nav-link nav-sublink nav-link-disabled" :title="child.label" disabled>
                 <span class="nav-icon-wrap">
@@ -152,6 +152,7 @@
       <main class="content-area">
         <router-view />
       </main>
+      <AppFooter />
     </div>
   </div>
 </template>
@@ -159,8 +160,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Building2, ChevronDown, ChevronRight, Cloud, FileText, Home, LogOut, Menu, ReceiptText, UserRound } from '@lucide/vue'
+import { Building2, CalendarDays, ChevronDown, ChevronRight, Cloud, FileText, Home, LogOut, Menu, Receipt, ReceiptText, UserRound } from '@lucide/vue'
 import Select from 'primevue/select'
+import AppFooter from './AppFooter.vue'
 import { logout } from '../../services/user.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, companies, isLoadingCompanies, loadCompanies, selectCompany } from '../../stores/company.store'
@@ -178,11 +180,14 @@ const loggingOut = ref(false)
 const navItems = [
   { label: 'Inicio', to: '/home', icon: Home },
   { label: 'Cloud', to: '/documents', icon: Cloud },
+  { label: 'Vencimientos', to: '/deadlines', icon: CalendarDays },
   {
-    label: 'Facturación', icon: ReceiptText, children: [
-      { label: 'Facturas', icon: FileText, disabled: true },
+    label: 'Facturación', icon: Receipt, section: '/billing', children: [
+      { label: 'Facturas', to: '/billing/invoice-form', icon: FileText },
       { label: 'Comprobantes', to: '/billing/invoices', icon: ReceiptText },
-      { label: 'Notas de crédito', icon: FileText, disabled: true }
+      { label: 'Notas de crédito', to: '/billing/credit-notes', icon: FileText },
+      { label: 'Perfil fiscal', to: '/billing/fiscal-profile', icon: Building2 },
+      { label: 'Puntos de venta', to: '/billing/points-of-sale', icon: Building2 }
     ]
   }
 ]
@@ -199,6 +204,7 @@ function isRouteActive(path) {
 
 function isNavItemActive(item) {
   if (item.to) return isRouteActive(item.to)
+  if (item.section && isRouteActive(item.section)) return true
   return item.children && item.children.some((child) => child.to && isRouteActive(child.to))
 }
 

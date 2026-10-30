@@ -54,7 +54,9 @@ async function request(path, options = {}) {
     error.code =
       (typeof data === 'object' && data !== null ? data.code : undefined) ||
       (typeof detail === 'object' && detail !== null ? detail.code : undefined)
-    error.errors = typeof data === 'object' && data !== null ? data.errors : undefined
+    error.errors = typeof data === 'object' && data !== null
+      ? data.errors ?? (response.status === 400 && !data.detail && !data.message ? data : undefined)
+      : undefined
 
     throw error
   }

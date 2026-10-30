@@ -1,0 +1,26 @@
+.billing-home {
+  container: billing-home / inline-size;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.billing-home-header { margin-bottom: 1.5rem; }
+.billing-home-header h1 { margin: 0; color: var(--color-text-primary); font-size: 1.6rem; }
+.billing-home-header p { margin: .4rem 0 0; color: var(--color-text-secondary); line-height: 1.5; }
+.billing-home-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.billing-home-card { display: flex; align-items: center; gap: 1rem; grid-column: span 2; min-width: 0; min-height: 112px; padding: 1.25rem; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); color: var(--color-text-primary); text-decoration: none; transition: border-color .15s ease, box-shadow .15s ease; }
+.billing-home-card:last-child { grid-column: 2 / span 2; }
+.billing-home-card:hover { border-color: var(--color-accent); box-shadow: var(--shadow-card); }
+.billing-home-card:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.billing-home-icon, .billing-home-arrow { flex-shrink: 0; color: var(--color-text-secondary); }
+.billing-home-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: .35rem; }
+.billing-home-copy strong { font-size: 1rem; }
+.billing-home-copy span { color: var(--color-text-secondary); font-size: .875rem; line-height: 1.4; }
+
+@container billing-home (max-width: 640px) {
+  .billing-home-grid { grid-template-columns: minmax(0, 1fr); }
+  .billing-home-card, .billing-home-card:last-child { grid-column: auto; }
+  .billing-home-header h1 { font-size: 1.35rem; }
+}
+
+@media (prefers-reduced-motion: reduce) { .billing-home-card { transition: none; } }

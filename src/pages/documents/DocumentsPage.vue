@@ -127,12 +127,14 @@
         </form>
       </section>
     </div>
+    <BackLink to="/home" label="Volver a Inicio" />
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import BackLink from '../../components/BackLink.vue'
 import { Download, FileUp, FolderOpen, Info, Search, Upload } from '@lucide/vue'
 import { downloadDocument, getDocuments, uploadDocument } from '../../services/document.service'
 import { clearSession } from '../../services/session.service'

@@ -1,0 +1,857 @@
+.deadlines-page {
+  width: min(100%, 76rem);
+  margin: 0 auto;
+}
+
+.deadlines-month-summary {
+  margin-bottom: 1.15rem;
+  padding: 0.8rem 1rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.deadlines-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.55rem;
+}
+
+.deadlines-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  border-radius: 0.6rem;
+  background: var(--color-accent-background);
+  color: var(--color-accent);
+}
+
+.deadlines-header h1 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.15rem;
+}
+
+.deadlines-summary-period {
+  margin: 0 0 0.45rem;
+  color: var(--color-text-secondary);
+  font-size: 0.76rem;
+  text-transform: capitalize;
+}
+
+.deadlines-indicators {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+}
+
+.deadlines-card {
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.deadlines-indicator {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  min-height: 2.65rem;
+  padding: 0.15rem 0.75rem;
+}
+
+.deadlines-indicator + .deadlines-indicator {
+  border-left: 1px solid var(--color-border);
+}
+
+.deadlines-indicator > div {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.4rem;
+  min-width: 0;
+}
+
+.deadlines-indicator-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.deadlines-indicator-label {
+  color: var(--color-text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.3;
+}
+
+.deadlines-indicator strong {
+  color: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.indicator-pending {
+  color: #426b91;
+}
+
+.indicator-soon {
+  color: #815700;
+}
+
+.indicator-overdue {
+  color: var(--color-danger);
+}
+
+.indicator-completed {
+  color: #3f6c50;
+}
+
+.deadlines-card {
+  overflow: hidden;
+}
+
+.deadlines-calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(17rem, 1fr);
+}
+
+.deadlines-calendar-panel,
+.deadlines-day-panel {
+  min-width: 0;
+  padding: 1.125rem;
+}
+
+.deadlines-calendar-header,
+.deadlines-month-controls {
+  display: flex;
+  align-items: center;
+}
+
+.deadlines-calendar-header {
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.deadlines-month-controls {
+  gap: 0.2rem;
+}
+
+.deadlines-month-controls h2 {
+  min-width: 10rem;
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.deadlines-weekdays,
+.deadlines-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.deadlines-weekdays {
+  margin-bottom: 0.35rem;
+}
+
+.deadlines-weekdays span {
+  padding: 0.4rem 0.2rem;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.deadlines-calendar-day {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 5rem;
+  padding: 0.45rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.55rem;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.deadlines-calendar-day:hover {
+  background: var(--color-background);
+}
+
+.deadlines-calendar-day:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 1px;
+}
+
+.deadlines-calendar-day.is-outside-month {
+  background: var(--color-background);
+  color: var(--color-text-disabled);
+}
+
+.deadlines-calendar-day.is-today:not(.is-selected) {
+  border-color: var(--color-accent);
+}
+
+.deadlines-calendar-day.is-selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-background);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+.deadlines-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  font-size: 0.82rem;
+}
+
+.deadlines-calendar-day.is-today .deadlines-day-number {
+  background: var(--color-accent);
+  color: var(--color-text-on-dark);
+  font-weight: 700;
+}
+
+.deadlines-day-count {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.deadlines-day-markers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.deadlines-marker {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+}
+
+.marker-pending { background: #4c78a8; }
+.marker-soon { background: #d99b22; }
+.marker-overdue { background: var(--color-danger); }
+.marker-completed { background: #4d8a61; }
+
+.deadlines-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.9rem;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+}
+
+.deadlines-calendar-legend span,
+.deadlines-day-summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.deadlines-day-panel {
+  border-left: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-background) 55%, var(--color-surface));
+}
+
+.deadlines-day-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.deadlines-day-header h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  text-transform: capitalize;
+}
+
+.deadlines-day-header p {
+  margin: 0.35rem 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.deadlines-day-create {
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  border-color: var(--color-border);
+  border-radius: 0.6rem;
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+.deadlines-day-create:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background: var(--color-accent-background);
+  color: var(--color-accent);
+}
+
+.deadlines-day-create:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.deadlines-day-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  margin: 0.9rem 0;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.deadlines-day-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1.75rem 0.5rem;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.deadlines-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: var(--color-background-highlight-soft);
+  color: var(--color-text-secondary);
+}
+
+.deadlines-day-empty p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.deadlines-day-list {
+  display: grid;
+  gap: 0.65rem;
+  max-height: 35rem;
+  margin: 0;
+  padding: 0 0.15rem 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.deadlines-day-task {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-left-width: 3px;
+  border-radius: 0.6rem;
+  background: var(--color-surface);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.deadlines-day-task:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.task-pending {
+  border-color: #dce7f0;
+  border-left-color: #4c78a8;
+  background: #f7fafc;
+}
+
+.task-soon {
+  border-color: #f0e4c7;
+  border-left-color: #d99b22;
+  background: #fdfaf2;
+}
+
+.task-overdue {
+  border-color: #efdadd;
+  border-left-color: var(--color-danger);
+  background: #fcf6f6;
+}
+
+.task-completed {
+  border-color: #e2e9e4;
+  border-left-color: #7da68a;
+  background: #f7faf7;
+}
+
+.deadlines-task-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.deadlines-task-heading strong {
+  min-width: 0;
+  color: var(--color-text-primary);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.deadlines-task-company,
+.deadlines-task-period {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.deadlines-task-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.1rem;
+  margin-top: 0.35rem;
+}
+
+.deadlines-task-actions .p-button {
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.deadlines-task-actions .task-action-edit {
+  border-color: var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+}
+
+.deadlines-task-actions .task-action-edit:hover:not(:disabled) {
+  border-color: var(--color-border);
+  background: var(--color-background-highlight-soft);
+  color: var(--color-text-primary);
+}
+
+.deadlines-task-actions .task-action-complete {
+  border-color: #e8f1ec;
+  background: #e8f1ec;
+  color: #3f6c50;
+}
+
+.deadlines-task-actions .task-action-complete:hover:not(:disabled) {
+  border-color: #3f6c50;
+  background: #e8f1ec;
+}
+
+.deadlines-task-actions .task-action-reopen {
+  border-color: var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+}
+
+.deadlines-task-actions .task-action-reopen:hover:not(:disabled) {
+  border-color: var(--color-border);
+  background: var(--color-background-highlight-soft);
+  color: var(--color-text-primary);
+}
+
+.deadlines-task-actions .task-action-delete {
+  border-color: var(--color-danger-background-strong);
+  background: var(--color-danger-background);
+  color: var(--color-danger);
+}
+
+.deadlines-task-actions .task-action-delete:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  background: var(--color-danger-background-strong);
+}
+
+.deadlines-task-actions .p-button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.deadlines-task-actions .p-button:disabled {
+  opacity: 0.45;
+}
+
+.deadlines-filters {
+  display: grid;
+  grid-template-columns: minmax(13rem, 1.3fr) minmax(9rem, 0.8fr) auto;
+  align-items: end;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.deadlines-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.deadlines-field > span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.deadlines-field > span svg {
+  color: var(--color-text-secondary);
+}
+
+.deadlines-field .p-select,
+.deadlines-field .p-inputtext {
+  width: 100%;
+  min-height: 2.3rem;
+  font-size: 0.8rem;
+}
+
+.deadlines-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.deadlines-filter-actions > .p-button {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.3rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.deadlines-filter-actions > .deadlines-date-filter-toggle {
+  width: 2.3rem;
+  padding: 0;
+}
+
+.deadlines-date-filter-toggle.has-date-filter {
+  color: var(--color-accent);
+}
+
+.deadlines-date-filters {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr) minmax(12rem, 1.2fr);
+  align-items: end;
+  gap: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.deadlines-date-filters > p {
+  margin: 0 0 0.55rem;
+  color: var(--color-text-secondary);
+  font-size: 0.74rem;
+}
+
+.deadlines-clear-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.deadlines-clear-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.deadlines-state {
+  margin: 0;
+  padding: 1.5rem 1.125rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.deadlines-state-error {
+  color: var(--color-danger);
+}
+
+.deadlines-state-error p {
+  margin: 0 0 0.75rem;
+}
+
+.deadlines-feedback {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.deadlines-feedback-success {
+  background: #e8f1ec;
+  color: #3f6c50;
+}
+
+.deadlines-feedback-error {
+  background: var(--color-danger-background);
+  color: var(--color-danger);
+}
+
+.deadlines-feedback-warning {
+  background: #fbf1d8;
+  color: #815700;
+}
+
+.deadlines-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--color-background-highlight-soft);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.deadlines-status-overdue {
+  background: var(--color-danger-background);
+  color: var(--color-danger);
+}
+
+.deadlines-status-soon {
+  background: #fbf1d8;
+  color: #815700;
+}
+
+.deadlines-status-completed {
+  background: #e8f1ec;
+  color: #3f6c50;
+}
+
+.deadlines-status-pending {
+  background: #e8f0f7;
+  color: #426b91;
+}
+
+.deadlines-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem 1rem;
+}
+
+.deadlines-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.deadlines-form-group-notes,
+.deadlines-form > .deadlines-dialog-actions {
+  grid-column: 1 / -1;
+}
+
+.deadlines-form-field {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.deadlines-form-group > .p-inputtext,
+.deadlines-form-group > .p-select,
+.deadlines-form-group > .p-textarea {
+  width: 100%;
+}
+
+.deadlines-field-error {
+  color: var(--color-danger);
+  font-size: 0.8rem;
+}
+
+.deadlines-form-state {
+  color: var(--color-text-secondary);
+}
+
+.deadlines-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 950px) {
+  .deadlines-calendar-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deadlines-day-panel {
+    border-top: 1px solid var(--color-border);
+    border-left: 0;
+  }
+
+  .deadlines-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deadlines-filter-actions {
+    grid-column: 1 / -1;
+  }
+
+  .deadlines-date-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deadlines-date-filters > p {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .deadlines-indicators {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deadlines-indicator + .deadlines-indicator {
+    border-left: 0;
+  }
+
+  .deadlines-indicator:nth-child(even) {
+    border-left: 1px solid var(--color-border);
+  }
+
+  .deadlines-indicator:nth-child(n + 3) {
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.55rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .deadlines-month-summary {
+    padding: 0.7rem;
+  }
+
+  .deadlines-indicator {
+    grid-template-columns: 1.4rem minmax(0, 1fr);
+    gap: 0.4rem;
+    padding: 0.45rem 0.35rem;
+  }
+
+  .deadlines-indicator > div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .deadlines-indicator-label {
+    font-size: 0.7rem;
+  }
+
+  .deadlines-indicator-icon {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .deadlines-indicator-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .deadlines-indicator:nth-child(even) {
+    padding-left: 0.6rem;
+  }
+
+  .deadlines-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .deadlines-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deadlines-date-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .deadlines-date-filters > p {
+    grid-column: auto;
+    margin: 0;
+  }
+
+  .deadlines-filter-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .deadlines-calendar-panel,
+  .deadlines-day-panel {
+    padding: 0.8rem;
+  }
+
+  .deadlines-calendar-header {
+    gap: 0.25rem;
+  }
+
+  .deadlines-month-controls {
+    gap: 0;
+  }
+
+  .deadlines-month-controls h2 {
+    min-width: 0;
+    font-size: 0.92rem;
+  }
+
+  .deadlines-weekdays,
+  .deadlines-calendar-grid {
+    gap: 0.2rem;
+  }
+
+  .deadlines-calendar-day {
+    min-height: 3.8rem;
+    padding: 0.2rem;
+  }
+
+  .deadlines-day-number {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+
+  .deadlines-calendar-legend {
+    gap: 0.4rem 0.6rem;
+  }
+
+  .deadlines-filter-actions > .p-button { flex: 0 0 auto; }
+}
