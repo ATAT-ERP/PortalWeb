@@ -163,24 +163,28 @@
         <Button type="button" label="Eliminar" severity="danger" :loading="isSaving" :disabled="isSaving" @click="confirmDelete" />
       </div>
     </Dialog>
+
+    <BackLink :to="backTarget" label="Volver" />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { CalendarDays, Check, Pencil, Plus, RotateCcw, Search, Trash2 } from '@lucide/vue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
+import BackLink from '../../components/BackLink.vue'
 import { getCompanies } from '../../services/company.service'
 import { createDeadline, deleteDeadline, getDeadline, getDeadlines, patchDeadline, updateDeadline } from '../../services/deadline.service'
 import { clearSession } from '../../services/session.service'
 import '../../assets/css/DeadlinesPage.css'
 
 const router = useRouter()
+const route = useRoute()
 const deadlines = ref([])
 const companies = ref([])
 const isLoading = ref(false)
@@ -205,6 +209,13 @@ const statusOptions = [
   { label: 'Completada', value: 'completed' }
 ]
 const hasFilters = computed(() => Object.values(filters).some(Boolean))
+const backTarget = computed(() => {
+  const previous = router.options.history.state.back
+  if (typeof previous !== 'string' || !previous.startsWith('/')) return '/home'
+  const previousRoute = router.resolve(previous)
+  if (previousRoute.path === route.path || !previousRoute.matched.some((record) => record.meta.requiresAuth)) return '/home'
+  return { path: previousRoute.path, query: previousRoute.query, hash: previousRoute.hash }
+})
 const activeCompanies = computed(() => companies.value.filter((company) => company.is_active))
 const formCompanies = computed(() => {
   if (!editingDeadline.value) return activeCompanies.value
