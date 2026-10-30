@@ -105,7 +105,7 @@
               type="button"
               :aria-label="calendarDayLabel(day)"
               :aria-pressed="day.date === selectedDate"
-              :class="['deadlines-calendar-day', { 'is-outside-month': !day.inMonth, 'is-today': day.isToday, 'is-selected': day.isSelected, 'has-deadlines': day.counts.total }]"
+              :class="['deadlines-calendar-day', { 'is-outside-month': !day.inMonth, 'is-today': day.isToday, 'is-selected': day.isSelected }]"
               @click="selectDay(day)"
             >
               <span class="deadlines-day-number">{{ day.day }}</span>
@@ -134,10 +134,10 @@
             </div>
           </header>
           <div class="deadlines-day-summary" aria-label="Resumen de estados para el día">
-            <span class="summary-pending" :aria-label="`${selectedDayCounts.pending} pendientes`"><i class="deadlines-marker marker-pending" aria-hidden="true"></i>{{ selectedDayCounts.pending }}</span>
-            <span class="summary-soon" :aria-label="`${selectedDayCounts.dueSoon} próximas a vencer`"><i class="deadlines-marker marker-soon" aria-hidden="true"></i>{{ selectedDayCounts.dueSoon }}</span>
-            <span class="summary-overdue" :aria-label="`${selectedDayCounts.overdue} vencidas`"><i class="deadlines-marker marker-overdue" aria-hidden="true"></i>{{ selectedDayCounts.overdue }}</span>
-            <span class="summary-completed" :aria-label="`${selectedDayCounts.completed} completadas`"><i class="deadlines-marker marker-completed" aria-hidden="true"></i>{{ selectedDayCounts.completed }}</span>
+            <span :aria-label="`${selectedDayCounts.pending} pendientes`"><i class="deadlines-marker marker-pending" aria-hidden="true"></i>{{ selectedDayCounts.pending }}</span>
+            <span :aria-label="`${selectedDayCounts.dueSoon} próximas a vencer`"><i class="deadlines-marker marker-soon" aria-hidden="true"></i>{{ selectedDayCounts.dueSoon }}</span>
+            <span :aria-label="`${selectedDayCounts.overdue} vencidas`"><i class="deadlines-marker marker-overdue" aria-hidden="true"></i>{{ selectedDayCounts.overdue }}</span>
+            <span :aria-label="`${selectedDayCounts.completed} completadas`"><i class="deadlines-marker marker-completed" aria-hidden="true"></i>{{ selectedDayCounts.completed }}</span>
           </div>
 
           <p v-if="isLoading" class="deadlines-state" role="status">Cargando vencimientos...</p>
