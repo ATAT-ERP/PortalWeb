@@ -1,98 +1,144 @@
 <template>
-  <div class="app-shell">
-    <div
-      v-if="sidebarOpen"
-      class="backdrop"
-      @click="sidebarOpen = false"
-    ></div>
+  <div class="app-shell" @keydown.esc.window="sidebarOpen = false">
+    <div v-if="sidebarOpen" class="backdrop" @click="sidebarOpen = false"></div>
 
-    <aside class="sidebar" :class="{ open: sidebarOpen }">
+    <aside
+      class="sidebar"
+      :class="{ open: sidebarOpen, expanded: companySelectOpen }"
+      aria-label="Navegación principal"
+    >
       <div class="sidebar-top">
-        <div class="layout-brand-row">
-          <span class="layout-logo-mark">AT</span>
-          <span class="layout-brand-name">A.T.A.T. ERP</span>
-        </div>
+        <div class="company-selector" :title="companyLabel">
+          <Select
+            ref="companySelectRef"
+            :model-value="activeCompany"
+            :options="companies"
+            option-label="name"
+            data-key="id"
+            :placeholder="companyLabel"
+            :loading="isLoadingCompanies"
+            :aria-label="`Empresa activa: ${companyLabel}`"
+            panel-class="company-select-panel"
+            class="company-select"
+            @update:model-value="handleCompanySelect"
+            @show="companySelectOpen = true"
+            @hide="companySelectOpen = false"
+          >
+            <template #value="{ value }">
+              <span class="company-select-value">
+                <span class="company-icon-wrap" aria-hidden="true">
+                  <Building2 class="company-icon" />
+                </span>
+                <span class="nav-label company-select-content">
+                  <span class="company-select-info">
+                    <span class="company-select-tag">Empresa activa</span>
+                    <span class="company-name">{{ value ? value.name : companyLabel }}</span>
+                  </span>
+                </span>
+              </span>
+            </template>
 
-        <!-- Selector de Empresa Activa (Exacto a la imagen) -->
-        <div class="company-selector">
-          <button type="button" class="company-select-btn" :disabled="isLoadingCompanies || companies.length === 0" @click="dropdownOpen = !dropdownOpen">
-            <div class="company-select-info">
-              <span class="company-select-tag">Empresa activa</span>
-              <div class="company-select-value">
-                <span :class="['company-dot', { inactive: !activeCompany }]"></span>
-                <span class="company-name">{{ companyLabel }}</span>
-              </div>
-            </div>
-            <svg class="chevron-icon" :class="{ open: dropdownOpen }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
+            <template #dropdownicon>
+              <ChevronDown class="company-chevron" aria-hidden="true" />
+            </template>
 
-          <!-- Menú desplegable flotante -->
-          <div v-if="dropdownOpen" class="company-dropdown-menu">
-            <button
-              v-for="company in companies"
-              :key="company.id"
-              type="button"
-              :class="['dropdown-option', { active: activeCompany && company.id === activeCompany.id }]"
-              @click="handleCompanySelect(company)"
-            >
-              <span :class="['company-dot', { inactive: !activeCompany || company.id !== activeCompany.id }]"></span>
-              <span class="option-name">{{ company.name }}</span>
-              <svg v-if="activeCompany && company.id === activeCompany.id" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="check-icon">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </button>
-          </div>
+            <template #footer>
+              <RouterLink
+                to="/companies"
+                class="company-manage-link"
+                @click="handleManageCompanies"
+              >
+                <Building2 aria-hidden="true" />
+                Administrar compañías
+              </RouterLink>
+            </template>
+          </Select>
         </div>
       </div>
 
-      <nav class="nav-list">
-        <router-link
-          to="/home"
-          class="nav-link"
-          :class="{ active: route.path === '/home' }"
-          @click="sidebarOpen = false"
-        >
-          <Home class="nav-icon" aria-hidden="true" />
-          Inicio
-        </router-link>
+      <nav class="nav-list" aria-label="Secciones">
+        <template v-for="item in navItems" :key="item.label">
+          <button
+            v-if="item.children && item.children.length"
+            type="button"
+            class="nav-link nav-group-toggle"
+            :class="{ active: isNavItemActive(item) }"
+            :title="item.label"
+            :aria-expanded="isGroupOpen(item)"
+            @click="toggleGroup(item)"
+          >
+            <span class="nav-icon-wrap">
+              <component :is="item.icon" class="nav-icon" aria-hidden="true" />
+            </span>
+            <span class="nav-label nav-link-label">{{ item.label }}</span>
+            <ChevronDown v-if="isGroupOpen(item)" class="nav-group-chevron" aria-hidden="true" />
+            <ChevronRight v-else class="nav-group-chevron" aria-hidden="true" />
+          </button>
+          <RouterLink
+            v-else
+            :to="item.to"
+            class="nav-link"
+            :class="{ active: isRouteActive(item.to) }"
+            :title="item.label"
+            @click="sidebarOpen = false"
+          >
+            <span class="nav-icon-wrap">
+              <component :is="item.icon" class="nav-icon" aria-hidden="true" />
+            </span>
+            <span class="nav-label nav-link-label">{{ item.label }}</span>
+          </RouterLink>
 
-        <router-link
-          to="/cuenta"
-          class="nav-link"
-          :class="{ active: route.path === '/cuenta' }"
-          @click="sidebarOpen = false"
-        >
-          <UserRound class="nav-icon" aria-hidden="true" />
-          Mi cuenta
-        </router-link>
-
-        <router-link
-          to="/companies"
-          class="nav-link"
-          :class="{ active: route.path.startsWith('/companies') }"
-          @click="sidebarOpen = false"
-        >
-          <Building2 class="nav-icon" aria-hidden="true" />
-          Compañías
-        </router-link>
-
-        <router-link to="/documents" class="nav-link" :class="{ active: route.path.startsWith('/documents') }"
-          @click="sidebarOpen = false">
-          <FileText class="nav-icon" aria-hidden="true" />
-          Documentos
-        </router-link>
+          <div v-if="item.children && item.children.length && isGroupOpen(item)" class="nav-submenu" :class="{ 'billing-submenu': item.label === 'Facturación' }">
+            <template v-for="child in item.children" :key="child.label">
+              <button v-if="child.disabled" type="button" class="nav-link nav-sublink nav-link-disabled" :title="child.label" disabled>
+                <span class="nav-icon-wrap">
+                  <component :is="child.icon" class="nav-icon" aria-hidden="true" />
+                </span>
+                <span class="nav-label nav-link-label">{{ child.label }}</span>
+              </button>
+              <RouterLink
+                v-else
+                :to="child.to"
+                class="nav-link nav-sublink"
+                :class="{ active: isRouteActive(child.to) }"
+                :title="child.label"
+                @click="sidebarOpen = false"
+              >
+                <span class="nav-icon-wrap">
+                  <component :is="child.icon" class="nav-icon" aria-hidden="true" />
+                </span>
+                <span class="nav-label nav-link-label">{{ child.label }}</span>
+              </RouterLink>
+            </template>
+          </div>
+        </template>
       </nav>
 
-      <button type="button" class="logout-btn" @click="handleLogout" :disabled="loggingOut">
-        <LogOut class="nav-icon" aria-hidden="true" />
-        {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
-      </button>
+      <div class="sidebar-bottom">
+        <RouterLink
+          to="/cuenta"
+          class="nav-link"
+          :class="{ active: isRouteActive('/cuenta') }"
+          title="Mi cuenta"
+          @click="sidebarOpen = false"
+        >
+          <span class="nav-icon-wrap">
+            <UserRound class="nav-icon" aria-hidden="true" />
+          </span>
+          <span class="nav-label nav-link-label">Mi cuenta</span>
+        </RouterLink>
+
+        <button type="button" class="logout-btn" :disabled="loggingOut" @click="handleLogout">
+          <span class="nav-icon-wrap">
+            <LogOut class="nav-icon" aria-hidden="true" />
+          </span>
+          <span class="nav-label nav-link-label">{{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}</span>
+        </button>
+      </div>
     </aside>
 
     <div class="main-column">
-      <header class="topbar">
+      <div class="mobile-nav-bar">
         <button
           type="button"
           class="menu-toggle"
@@ -101,26 +147,22 @@
         >
           <Menu aria-hidden="true" />
         </button>
-
-        <div class="topbar-spacer"></div>
-
-        <router-link to="/cuenta" class="user-info">
-          <span class="user-avatar">{{ userInitials }}</span>
-          <span class="user-name">{{ user.name }}</span>
-        </router-link>
-      </header>
+      </div>
 
       <main class="content-area">
         <router-view />
       </main>
+      <AppFooter />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Building2, FileText, Home, UserRound, LogOut, Menu } from '@lucide/vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { Building2, CalendarDays, ChevronDown, ChevronRight, Cloud, FileText, Home, LogOut, Menu, Receipt, ReceiptText, UserRound } from '@lucide/vue'
+import Select from 'primevue/select'
+import AppFooter from './AppFooter.vue'
 import { logout } from '../../services/user.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany, companies, isLoadingCompanies, loadCompanies, selectCompany } from '../../stores/company.store'
@@ -130,25 +172,58 @@ const route = useRoute()
 const router = useRouter()
 
 const sidebarOpen = ref(false)
-const dropdownOpen = ref(false)
+const companySelectOpen = ref(false)
+const companySelectRef = ref(null)
+const expandedGroups = ref(new Map())
 const loggingOut = ref(false)
 
-const user = ref({ name: 'Usuario' })
-
-const userInitials = computed(() =>
-  user.value.name
-    .split(' ')
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-)
+const navItems = [
+  { label: 'Inicio', to: '/home', icon: Home },
+  { label: 'Cloud', to: '/documents', icon: Cloud },
+  { label: 'Vencimientos', to: '/deadlines', icon: CalendarDays },
+  {
+    label: 'Facturación', icon: Receipt, section: '/billing', children: [
+      { label: 'Facturas', to: '/billing/invoice-form', icon: FileText },
+      { label: 'Comprobantes', to: '/billing/invoices', icon: ReceiptText },
+      { label: 'Notas de crédito', to: '/billing/credit-notes', icon: FileText },
+      { label: 'Perfil fiscal', to: '/billing/fiscal-profile', icon: Building2 },
+      { label: 'Puntos de venta', to: '/billing/points-of-sale', icon: Building2 }
+    ]
+  }
+]
 
 const companyLabel = computed(() => {
   if (isLoadingCompanies.value) return 'Cargando compañías...'
   if (activeCompany.value) return activeCompany.value.name
   return companies.value.length ? 'Seleccioná una compañía' : 'Sin compañías'
 })
+
+function isRouteActive(path) {
+  return route.path === path || route.path.startsWith(`${path}/`)
+}
+
+function isNavItemActive(item) {
+  if (item.to) return isRouteActive(item.to)
+  if (item.section && isRouteActive(item.section)) return true
+  return item.children && item.children.some((child) => child.to && isRouteActive(child.to))
+}
+
+function isGroupOpen(item) {
+  return expandedGroups.value.has(item.label)
+    ? expandedGroups.value.get(item.label)
+    : isNavItemActive(item)
+}
+
+function toggleGroup(item) {
+  const groups = new Map(expandedGroups.value)
+  groups.set(item.label, !isGroupOpen(item))
+  expandedGroups.value = groups
+}
+
+function handleManageCompanies() {
+  sidebarOpen.value = false
+  companySelectRef.value.hide()
+}
 
 onMounted(async () => {
   try {
@@ -163,7 +238,6 @@ onMounted(async () => {
 
 function handleCompanySelect(company) {
   selectCompany(company)
-  dropdownOpen.value = false
 }
 
 async function handleLogout() {
@@ -171,7 +245,7 @@ async function handleLogout() {
   try {
     await logout()
   } catch (error) {
-    // Si la llamada falla igual limpiamos la sesión local
+    // Si la llamada remota falla igual limpiamos la sesión local
   } finally {
     clearSession()
     loggingOut.value = false
