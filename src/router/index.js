@@ -92,6 +92,11 @@ const router = createRouter({
           path: 'billing/points-of-sale',
           name: 'points-of-sale',
           component: () => import('../pages/billing/PointsOfSalePage.vue')
+        },
+        {
+          path: 'accounting/chart-of-accounts',
+          name: 'chart-of-accounts',
+          component: () => import('../pages/accounting/ChartOfAccountsPage.vue')
         }
         // Los módulos futuros se agregan acá como nuevas rutas hijas,
         // y quedan protegidos automáticamente sin tocar nada más.
