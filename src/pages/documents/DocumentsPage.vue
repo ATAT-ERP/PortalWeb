@@ -65,15 +65,21 @@
                 <td class="documents-nowrap">{{ formatSize(document.size) }}</td>
                 <td class="documents-nowrap">{{ formatDate(document.created_at) }}</td>
                 <td>
-                  <button
-                    type="button"
-                    class="documents-download-button"
-                    :disabled="downloadingDocumentId === document.id"
-                    @click="handleDownload(document)"
-                  >
-                    <Download :size="16" aria-hidden="true" />
-                    <span>{{ downloadingDocumentId === document.id ? 'Descargando...' : 'Descargar' }}</span>
-                  </button>
+                  <div class="documents-file-actions">
+                    <button v-if="isExcelDocument(document)" type="button" class="documents-download-button" @click="openExcelPreview(document)">
+                      <Eye :size="16" aria-hidden="true" />
+                      <span>Vista previa</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="documents-download-button"
+                      :disabled="downloadingDocumentId === document.id"
+                      @click="handleDownload(document)"
+                    >
+                      <Download :size="16" aria-hidden="true" />
+                      <span>{{ downloadingDocumentId === document.id ? 'Descargando...' : 'Descargar' }}</span>
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -127,21 +133,93 @@
         </form>
       </section>
     </div>
+
+    <Dialog
+      v-model:visible="previewVisible"
+      class="documents-excel-dialog"
+      modal
+      :style="{ width: 'min(1000px, 95vw)', maxHeight: '90vh' }"
+    >
+      <template #header>
+        <div class="documents-preview-dialog-header">
+          <span class="documents-preview-dialog-icon" aria-hidden="true"><FileSpreadsheet :size="21" /></span>
+          <div>
+            <strong>{{ previewDocument ? previewDocument.original_name : '' }}</strong>
+            <span>Vista previa de Excel</span>
+          </div>
+        </div>
+      </template>
+      <div v-if="previewDocument" class="documents-excel-preview">
+        <p v-if="previewLoadingSheets" class="documents-preview-state" role="status">Cargando hojas...</p>
+        <div v-else-if="previewSheetsError" class="documents-preview-error" role="alert">
+          <p>{{ previewSheetsError }}</p>
+          <button type="button" class="documents-download-button" @click="loadPreviewSheets(previewDocument, previewRequestId)">Reintentar</button>
+        </div>
+        <p v-else-if="!previewSheets.length" class="documents-preview-state">Este libro no contiene hojas para mostrar.</p>
+        <div v-else class="documents-preview-content">
+          <div class="documents-preview-toolbar">
+            <label class="documents-preview-sheet-field" for="documents-preview-sheet">
+              <span>Hoja</span>
+              <Select
+                input-id="documents-preview-sheet"
+                v-model="selectedPreviewSheet"
+                :options="previewSheets"
+                :disabled="previewLoadingSheets"
+                @update:model-value="handlePreviewSheetChange"
+              />
+            </label>
+            <p v-if="previewLoadingRows" class="documents-preview-count" role="status">Cargando filas...</p>
+            <p v-else-if="!previewSheetError" class="documents-preview-count">{{ visiblePreviewRows.length }} de {{ previewRows.length }} filas</p>
+          </div>
+
+          <p v-if="previewSheetError" class="documents-preview-error" role="alert">
+            {{ previewSheetError }}
+            <button type="button" class="documents-download-button" @click="loadPreviewSheet(selectedPreviewSheet, previewRequestId)">Reintentar</button>
+          </p>
+          <template v-else-if="!previewLoadingRows">
+            <div class="documents-preview-table-wrapper" tabindex="0" aria-label="Datos de la hoja seleccionada">
+              <table class="documents-preview-table">
+                <caption class="documents-sr-only">Datos de {{ selectedPreviewSheet }}</caption>
+                <thead>
+                  <tr>
+                    <th class="documents-preview-row-number" scope="col">Fila</th>
+                    <th v-for="columnIndex in previewColumnCount" :key="columnIndex" scope="col">{{ columnLabel(columnIndex - 1) }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, rowIndex) in visiblePreviewRows" :key="rowIndex">
+                    <th class="documents-preview-row-number" scope="row">{{ rowIndex + 1 }}</th>
+                    <td v-for="columnIndex in previewColumnCount" :key="columnIndex" :class="{ 'is-number': typeof row[columnIndex - 1] === 'number' }">
+                      <span class="documents-preview-cell-value">{{ row[columnIndex - 1] ?? '' }}</span>
+                    </td>
+                  </tr>
+                  <tr v-if="!previewRows.length"><td class="documents-preview-empty-cell" :colspan="previewColumnCount + 1">Esta hoja no tiene filas para mostrar.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
+        </div>
+      </div>
+    </Dialog>
+
     <BackLink to="/home" label="Volver a Inicio" />
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackLink from '../../components/BackLink.vue'
-import { Download, FileUp, FolderOpen, Info, Search, Upload } from '@lucide/vue'
-import { downloadDocument, getDocuments, uploadDocument } from '../../services/document.service'
+import { Download, Eye, FileSpreadsheet, FileUp, FolderOpen, Info, Search, Upload } from '@lucide/vue'
+import Dialog from 'primevue/dialog'
+import Select from 'primevue/select'
+import { downloadDocument, getDocumentSheet, getDocumentSheets, getDocuments, uploadDocument } from '../../services/document.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/DocumentsPage.css'
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024
+const PREVIEW_ROW_LIMIT = 100
 
 const MIME_LABELS = {
   'application/pdf': 'PDF',
@@ -162,8 +240,21 @@ const documents = ref([])
 const isLoadingDocuments = ref(false)
 const listError = ref('')
 const downloadingDocumentId = ref(null)
+const previewVisible = ref(false)
+const previewDocument = ref(null)
+const previewSheets = ref([])
+const selectedPreviewSheet = ref(null)
+const previewRows = ref([])
+const previewLoadingSheets = ref(false)
+const previewLoadingRows = ref(false)
+const previewSheetsError = ref('')
+const previewSheetError = ref('')
+const visiblePreviewRows = computed(() => previewRows.value.slice(0, PREVIEW_ROW_LIMIT))
+const previewColumnCount = computed(() => previewRows.value.reduce((count, row) => Math.max(count, row.length), 0))
 const searchQuery = ref('')
 let documentLoadId = 0
+let previewRequestId = 0
+let previewSheetRequestId = 0
 let searchTimeout
 
 watch(activeCompany, () => {
@@ -171,6 +262,10 @@ watch(activeCompany, () => {
   window.clearTimeout(searchTimeout)
   loadDocuments()
 }, { immediate: true })
+
+watch(previewVisible, (visible) => {
+  if (!visible) closeExcelPreview()
+})
 
 async function loadDocuments() {
   const loadId = ++documentLoadId
@@ -273,6 +368,112 @@ async function handleDownload(document) {
   } finally {
     downloadingDocumentId.value = null
   }
+}
+
+function isExcelDocument(document) {
+  return document.original_name.toLowerCase().endsWith('.xlsx')
+}
+
+function openExcelPreview(document) {
+  const requestId = ++previewRequestId
+  previewVisible.value = true
+  previewDocument.value = document
+  previewSheets.value = []
+  selectedPreviewSheet.value = null
+  previewRows.value = []
+  previewSheetsError.value = ''
+  previewSheetError.value = ''
+  previewLoadingRows.value = false
+  loadPreviewSheets(document, requestId)
+}
+
+async function loadPreviewSheets(document, requestId) {
+  ++previewSheetRequestId
+  previewSheets.value = []
+  selectedPreviewSheet.value = null
+  previewRows.value = []
+  previewSheetsError.value = ''
+  previewSheetError.value = ''
+  previewLoadingSheets.value = true
+  previewLoadingRows.value = false
+
+  try {
+    const result = await getDocumentSheets(document.id)
+    if (!isCurrentPreview(requestId, document.id)) return
+
+    previewSheets.value = result.sheets
+    previewLoadingSheets.value = false
+    if (!result.sheets.length) return
+
+    selectedPreviewSheet.value = result.sheets[0]
+    await loadPreviewSheet(result.sheets[0], requestId)
+  } catch (error) {
+    if (!isCurrentPreview(requestId, document.id)) return
+    if (handleUnauthorizedError(error)) return
+
+    previewSheetsError.value = error instanceof Error ? error.message : 'No se pudieron cargar las hojas del archivo.'
+  } finally {
+    if (isCurrentPreview(requestId, document.id)) previewLoadingSheets.value = false
+  }
+}
+
+function handlePreviewSheetChange(sheetName) {
+  selectedPreviewSheet.value = sheetName
+  loadPreviewSheet(sheetName, previewRequestId)
+}
+
+async function loadPreviewSheet(sheetName, requestId) {
+  const document = previewDocument.value
+  if (!document || !sheetName) return
+
+  const sheetRequestId = ++previewSheetRequestId
+  previewRows.value = []
+  previewSheetError.value = ''
+  previewLoadingRows.value = true
+
+  try {
+    const result = await getDocumentSheet(document.id, sheetName)
+    if (!isCurrentPreview(requestId, document.id) || sheetRequestId !== previewSheetRequestId || selectedPreviewSheet.value !== sheetName) return
+
+    previewRows.value = result.rows
+  } catch (error) {
+    if (!isCurrentPreview(requestId, document.id) || sheetRequestId !== previewSheetRequestId || selectedPreviewSheet.value !== sheetName) return
+    if (handleUnauthorizedError(error)) return
+
+    previewSheetError.value = error instanceof Error ? error.message : 'No se pudo leer la hoja seleccionada.'
+  } finally {
+    if (isCurrentPreview(requestId, document.id) && sheetRequestId === previewSheetRequestId) previewLoadingRows.value = false
+  }
+}
+
+function isCurrentPreview(requestId, documentId) {
+  return previewVisible.value && previewRequestId === requestId && previewDocument.value.id === documentId
+}
+
+function closeExcelPreview() {
+  ++previewRequestId
+  ++previewSheetRequestId
+  previewDocument.value = null
+  previewSheets.value = []
+  selectedPreviewSheet.value = null
+  previewRows.value = []
+  previewLoadingSheets.value = false
+  previewLoadingRows.value = false
+  previewSheetsError.value = ''
+  previewSheetError.value = ''
+}
+
+function columnLabel(index) {
+  let number = index + 1
+  let label = ''
+
+  while (number > 0) {
+    const remainder = (number - 1) % 26
+    label = String.fromCharCode(65 + remainder) + label
+    number = Math.floor((number - 1) / 26)
+  }
+
+  return label
 }
 
 function handleUnauthorizedError(error) {

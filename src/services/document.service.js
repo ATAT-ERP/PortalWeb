@@ -44,3 +44,24 @@ export function getDocuments(companyId, query = '') {
 export function downloadDocument(id) {
   return api.get(`/cloud/files/${id}/download/`, { auth: true })
 }
+
+/**
+ * Obtiene los nombres de hojas de un archivo XLSX.
+ *
+ * @param {string} id Identificador UUID del documento.
+ * @returns {Promise<{sheets: string[]}>} Hojas devueltas por NexusBack.
+ */
+export function getDocumentSheets(id) {
+  return api.get(`/cloud/files/${id}/sheets/`, { auth: true })
+}
+
+/**
+ * Obtiene las filas de una hoja de un archivo XLSX.
+ *
+ * @param {string} id Identificador UUID del documento.
+ * @param {string} sheetName Nombre de la hoja.
+ * @returns {Promise<{name: string, rows: unknown[][]}>} Filas devueltas por NexusBack.
+ */
+export function getDocumentSheet(id, sheetName) {
+  return api.get(`/cloud/files/${id}/sheets/${encodeURIComponent(sheetName)}/`, { auth: true })
+}
