@@ -4,103 +4,162 @@
       <span class="deadlines-header-icon" aria-hidden="true"><CalendarDays :size="24" /></span>
       <div>
         <h1>Vencimientos</h1>
-        <p>Consultá las tareas y obligaciones de todos tus clientes.</p>
+        <p>Agenda fiscal y recordatorios</p>
       </div>
-      <Button class="deadlines-new-button" type="button" :disabled="isLoading || isSaving" @click="openCreate">
-        <Plus :size="16" aria-hidden="true" /> Nuevo vencimiento
+      <Button class="deadlines-new-button" type="button" aria-label="Nuevo vencimiento" title="Nuevo vencimiento" :disabled="isLoading || isSaving" @click="openCreate">
+        <Plus :size="18" aria-hidden="true" />
       </Button>
     </header>
 
-    <section class="deadlines-indicators" aria-label="Resumen de vencimientos">
-      <article class="deadlines-indicator">
-        <span class="deadlines-indicator-label">Pendientes</span>
-        <strong>{{ pendingCount }}</strong>
-      </article>
-      <article class="deadlines-indicator deadlines-indicator-soon">
-        <span class="deadlines-indicator-label">Próximas a vencer</span>
-        <strong>{{ dueSoonCount }}</strong>
-      </article>
-      <article class="deadlines-indicator deadlines-indicator-overdue">
-        <span class="deadlines-indicator-label">Vencidas</span>
-        <strong>{{ overdueCount }}</strong>
-      </article>
+    <section class="deadlines-indicators-section" aria-label="Resumen del mes visible">
+      <div class="deadlines-indicators-heading">
+        <h2>Resumen</h2>
+        <span>{{ monthLabel }}</span>
+      </div>
+      <div class="deadlines-indicators">
+        <article class="deadlines-indicator indicator-pending">
+          <span class="deadlines-indicator-icon"><ClipboardList :size="21" aria-hidden="true" /></span>
+          <div><strong>{{ pendingCount }}</strong><span class="deadlines-indicator-label">Pendientes</span></div>
+        </article>
+        <article class="deadlines-indicator indicator-soon">
+          <span class="deadlines-indicator-icon"><Clock3 :size="21" aria-hidden="true" /></span>
+          <div><strong>{{ dueSoonCount }}</strong><span class="deadlines-indicator-label">Próximas a vencer</span></div>
+        </article>
+        <article class="deadlines-indicator indicator-overdue">
+          <span class="deadlines-indicator-icon"><AlertTriangle :size="21" aria-hidden="true" /></span>
+          <div><strong>{{ overdueCount }}</strong><span class="deadlines-indicator-label">Vencidas</span></div>
+        </article>
+        <article class="deadlines-indicator indicator-completed">
+          <span class="deadlines-indicator-icon"><CheckCircle2 :size="21" aria-hidden="true" /></span>
+          <div><strong>{{ completedCount }}</strong><span class="deadlines-indicator-label">Completadas</span></div>
+        </article>
+      </div>
     </section>
 
-    <section class="deadlines-card" aria-labelledby="deadlines-list-title">
+    <section class="deadlines-card" aria-label="Calendario y tareas de vencimientos">
       <p v-if="successMessage" class="deadlines-feedback deadlines-feedback-success" role="status">{{ successMessage }}</p>
       <p v-if="actionError" class="deadlines-feedback deadlines-feedback-error" role="alert">{{ actionError }}</p>
-      <form class="deadlines-filters" @submit.prevent="loadDeadlines">
-        <label class="deadlines-field">
-          <span>Compañía o cliente</span>
-          <select v-model="filters.company_id" :disabled="isLoading">
-            <option value="">Todos los clientes</option>
-            <option v-for="company in companies" :key="company.id" :value="company.id">
-              {{ company.name }}{{ company.is_active ? '' : ' (inactiva)' }}
-            </option>
-          </select>
+      <form class="deadlines-filters" @submit.prevent="applyFilters">
+        <label class="deadlines-field" for="deadline-filter-company">
+          <span><Building2 :size="14" aria-hidden="true" /> Cliente</span>
+          <Select input-id="deadline-filter-company" v-model="filters.company_id" :options="companyFilterOptions" option-label="label" option-value="value" placeholder="Todos los clientes" :disabled="isLoading" />
         </label>
-        <label class="deadlines-field">
-          <span>Estado</span>
-          <select v-model="filters.status" :disabled="isLoading">
-            <option value="">Todos</option>
-            <option value="pending">Pendiente</option>
-            <option value="completed">Completada</option>
-          </select>
-        </label>
-        <label class="deadlines-field">
-          <span>Vence desde</span>
-          <input v-model="filters.due_date_from" type="date" :disabled="isLoading" />
-        </label>
-        <label class="deadlines-field">
-          <span>Vence hasta</span>
-          <input v-model="filters.due_date_to" type="date" :disabled="isLoading" />
+        <label class="deadlines-field" for="deadline-filter-status">
+          <span><CircleDot :size="14" aria-hidden="true" /> Estado</span>
+          <Select input-id="deadline-filter-status" v-model="filters.status" :options="statusFilterOptions" option-label="label" option-value="value" :disabled="isLoading" />
         </label>
         <div class="deadlines-filter-actions">
-          <button class="deadlines-button" type="submit" :disabled="isLoading">
-            <Search :size="16" aria-hidden="true" /> Aplicar filtros
-          </button>
-          <button class="deadlines-clear-button" type="button" :disabled="isLoading || !hasFilters" @click="clearFilters">
-            Limpiar
-          </button>
+          <Button type="submit" size="small" :disabled="isLoading"><Search :size="15" aria-hidden="true" /> Aplicar</Button>
+          <Button type="button" size="small" severity="secondary" text :disabled="isLoading || !hasFilters" @click="clearFilters">Limpiar</Button>
+          <Button
+            type="button"
+            class="deadlines-date-filter-toggle"
+            :class="{ 'has-date-filter': hasDateFilters }"
+            severity="secondary"
+            text
+            rounded
+            :aria-label="showDateFilters ? 'Ocultar filtros de fechas' : 'Mostrar filtros de fechas'"
+            :title="showDateFilters ? 'Ocultar filtros de fechas' : 'Mostrar filtros de fechas'"
+            :aria-expanded="showDateFilters"
+            aria-controls="deadline-date-filters"
+            @click="showDateFilters = !showDateFilters"
+          >
+            <SlidersHorizontal :size="17" aria-hidden="true" />
+          </Button>
+        </div>
+        <div v-show="showDateFilters" id="deadline-date-filters" class="deadlines-date-filters">
+          <label class="deadlines-field" for="deadline-filter-date-from">
+            <span><CalendarDays :size="14" aria-hidden="true" /> Desde</span>
+            <InputText id="deadline-filter-date-from" v-model="filters.due_date_from" type="date" :disabled="isLoading" />
+          </label>
+          <label class="deadlines-field" for="deadline-filter-date-to">
+            <span><CalendarDays :size="14" aria-hidden="true" /> Hasta</span>
+            <InputText id="deadline-filter-date-to" v-model="filters.due_date_to" type="date" :disabled="isLoading" />
+          </label>
+          <p>El rango se aplica dentro del mes visible.</p>
         </div>
       </form>
 
-      <div class="deadlines-list-header">
-        <h2 id="deadlines-list-title">Tareas</h2>
-        <span v-if="!isLoading && !loadError" class="deadlines-result-count">
-          {{ deadlines.length }} {{ deadlines.length === 1 ? 'resultado' : 'resultados' }}
-        </span>
-      </div>
+      <div class="deadlines-calendar-layout">
+        <section class="deadlines-calendar-panel" aria-label="Calendario mensual">
+          <header class="deadlines-calendar-header">
+            <div class="deadlines-month-controls">
+              <Button type="button" severity="secondary" text rounded aria-label="Mes anterior" @click="moveMonth(-1)">
+                <ChevronLeft :size="18" aria-hidden="true" />
+              </Button>
+              <h2>{{ monthLabel }}</h2>
+              <Button type="button" severity="secondary" text rounded aria-label="Mes siguiente" @click="moveMonth(1)">
+                <ChevronRight :size="18" aria-hidden="true" />
+              </Button>
+            </div>
+            <Button type="button" severity="secondary" outlined size="small" :disabled="selectedDate === todayKey" @click="goToCurrentMonth">Hoy</Button>
+          </header>
 
-      <p v-if="isLoading" class="deadlines-state" role="status">Cargando vencimientos...</p>
-      <div v-else-if="loadError || companiesError" class="deadlines-state deadlines-state-error" role="alert">
-        <p>{{ loadError || companiesError }}</p>
-        <button class="deadlines-clear-button" type="button" @click="loadInitial">Reintentar</button>
-      </div>
-      <p v-else-if="deadlines.length === 0" class="deadlines-state">
-        {{ hasFilters ? 'No hay tareas que coincidan con los filtros.' : 'Todavía no hay tareas ni vencimientos.' }}
-      </p>
-      <div v-else class="deadlines-table-wrap">
-        <table class="deadlines-table">
-          <caption class="deadlines-sr-only">Tareas y vencimientos</caption>
-          <thead>
-            <tr>
-              <th scope="col">Tarea</th>
-              <th scope="col">Compañía o cliente</th>
-              <th scope="col">Período</th>
-              <th scope="col">Vencimiento</th>
-              <th scope="col">Estado</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="deadline in deadlines" :key="deadline.id" :class="deadlineRowClass(deadline)">
-              <td><strong>{{ deadline.name }}</strong></td>
-              <td>{{ companyName(deadline.company) }}</td>
-              <td>{{ deadline.period || '—' }}</td>
-              <td>{{ formatDate(deadline.due_date) }}</td>
-              <td><span :class="['deadlines-status', statusClass(deadline)]">{{ statusLabel(deadline) }}</span></td>
-              <td class="deadlines-row-actions">
+          <div class="deadlines-weekdays" aria-hidden="true">
+            <span v-for="weekday in weekdays" :key="weekday">{{ weekday }}</span>
+          </div>
+          <div class="deadlines-calendar-grid" role="group" :aria-label="`Calendario de ${monthLabel}`">
+            <button
+              v-for="day in calendarDays"
+              :key="day.date"
+              type="button"
+              :aria-label="calendarDayLabel(day)"
+              :aria-pressed="day.date === selectedDate"
+              :class="['deadlines-calendar-day', { 'is-outside-month': !day.inMonth, 'is-today': day.isToday, 'is-selected': day.isSelected, 'has-deadlines': day.counts.total }]"
+              @click="selectDay(day)"
+            >
+              <span class="deadlines-day-number">{{ day.day }}</span>
+              <span v-if="day.counts.total" class="deadlines-day-count">{{ day.counts.total }}</span>
+              <span v-if="day.counts.total" class="deadlines-day-markers" aria-hidden="true">
+                <i v-if="day.counts.pending" class="deadlines-marker marker-pending"></i>
+                <i v-if="day.counts.dueSoon" class="deadlines-marker marker-soon"></i>
+                <i v-if="day.counts.overdue" class="deadlines-marker marker-overdue"></i>
+                <i v-if="day.counts.completed" class="deadlines-marker marker-completed"></i>
+              </span>
+            </button>
+          </div>
+          <div class="deadlines-calendar-legend" aria-label="Referencias de estado">
+            <span><i class="deadlines-marker marker-pending"></i>Pendiente</span>
+            <span><i class="deadlines-marker marker-soon"></i>Próxima</span>
+            <span><i class="deadlines-marker marker-overdue"></i>Vencida</span>
+            <span><i class="deadlines-marker marker-completed"></i>Completada</span>
+          </div>
+        </section>
+
+        <aside class="deadlines-day-panel" aria-labelledby="selected-day-title">
+          <header class="deadlines-day-header">
+            <div>
+              <h2 id="selected-day-title">{{ selectedDateLabel }}</h2>
+              <p>{{ selectedDayDeadlines.length }} {{ selectedDayDeadlines.length === 1 ? 'tarea' : 'tareas' }}</p>
+            </div>
+          </header>
+          <div class="deadlines-day-summary" aria-label="Resumen de estados para el día">
+            <span class="summary-pending" :aria-label="`${selectedDayCounts.pending} pendientes`"><i class="deadlines-marker marker-pending" aria-hidden="true"></i>{{ selectedDayCounts.pending }}</span>
+            <span class="summary-soon" :aria-label="`${selectedDayCounts.dueSoon} próximas a vencer`"><i class="deadlines-marker marker-soon" aria-hidden="true"></i>{{ selectedDayCounts.dueSoon }}</span>
+            <span class="summary-overdue" :aria-label="`${selectedDayCounts.overdue} vencidas`"><i class="deadlines-marker marker-overdue" aria-hidden="true"></i>{{ selectedDayCounts.overdue }}</span>
+            <span class="summary-completed" :aria-label="`${selectedDayCounts.completed} completadas`"><i class="deadlines-marker marker-completed" aria-hidden="true"></i>{{ selectedDayCounts.completed }}</span>
+          </div>
+
+          <p v-if="isLoading" class="deadlines-state" role="status">Cargando vencimientos...</p>
+          <div v-else-if="loadError || companiesError" class="deadlines-state deadlines-state-error" role="alert">
+            <p>{{ loadError || companiesError }}</p>
+            <button class="deadlines-clear-button" type="button" @click="loadInitial">Reintentar</button>
+          </div>
+          <div v-else-if="!selectedDayDeadlines.length" class="deadlines-day-empty">
+            <p>{{ hasFilters ? 'No hay tareas que coincidan con los filtros para este día.' : 'No hay vencimientos para este día.' }}</p>
+            <Button type="button" severity="secondary" outlined size="small" :disabled="isSaving" @click="openCreate">
+              <Plus :size="15" aria-hidden="true" /> Nuevo vencimiento
+            </Button>
+          </div>
+          <ul v-else class="deadlines-day-list">
+            <li v-for="deadline in selectedDayDeadlines" :key="deadline.id" class="deadlines-day-task">
+              <div class="deadlines-task-heading">
+                <strong>{{ deadline.name }}</strong>
+                <span :class="['deadlines-status', statusClass(deadline)]">{{ statusLabel(deadline) }}</span>
+              </div>
+              <p class="deadlines-task-company">{{ companyName(deadline.company) }}</p>
+              <p v-if="deadline.period" class="deadlines-task-period">Período: {{ deadline.period }}</p>
+              <div class="deadlines-task-actions">
                 <Button type="button" size="small" severity="secondary" text :disabled="isSaving || editingLoading" :aria-label="`Editar ${deadline.name}`" @click="openEdit(deadline)">
                   <Pencil :size="16" aria-hidden="true" />
                 </Button>
@@ -110,10 +169,10 @@
                 <Button type="button" size="small" severity="danger" text :disabled="isSaving || !canWrite(deadline)" :aria-label="`Eliminar ${deadline.name}`" :title="writeRestriction(deadline)" @click="askDelete(deadline)">
                   <Trash2 :size="16" aria-hidden="true" />
                 </Button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </li>
+          </ul>
+        </aside>
       </div>
     </section>
 
@@ -171,7 +230,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { CalendarDays, Check, Pencil, Plus, RotateCcw, Search, Trash2 } from '@lucide/vue'
+import { AlertTriangle, Building2, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight, CircleDot, ClipboardList, Clock3, Pencil, Plus, RotateCcw, Search, SlidersHorizontal, Trash2 } from '@lucide/vue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
@@ -196,6 +255,7 @@ const formError = ref('')
 const deleteError = ref('')
 const formVisible = ref(false)
 const deleteVisible = ref(false)
+const showDateFilters = ref(false)
 const isSaving = ref(false)
 const editingLoading = ref(false)
 const formLoadFailed = ref(false)
@@ -204,11 +264,62 @@ const deadlineToDelete = ref(null)
 const fieldErrors = ref({})
 const filters = reactive({ company_id: '', status: '', due_date_from: '', due_date_to: '' })
 const form = reactive({ company: '', name: '', period: '', due_date: '', status: 'pending', notes: '' })
+const now = new Date()
+const todayKey = dateKey(now)
+const displayedMonth = ref(new Date(now.getFullYear(), now.getMonth(), 1))
+const selectedDate = ref(todayKey)
+const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 const statusOptions = [
   { label: 'Pendiente', value: 'pending' },
   { label: 'Completada', value: 'completed' }
 ]
+const statusFilterOptions = [{ label: 'Todos', value: '' }, ...statusOptions]
 const hasFilters = computed(() => Object.values(filters).some(Boolean))
+const hasDateFilters = computed(() => Boolean(filters.due_date_from || filters.due_date_to))
+const companyFilterOptions = computed(() => [
+  { label: 'Todos los clientes', value: '' },
+  ...companies.value.map((company) => ({
+    label: `${company.name}${company.is_active ? '' : ' (inactiva)'}`,
+    value: company.id
+  }))
+])
+const monthLabel = computed(() => new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' }).format(displayedMonth.value))
+const selectedDateLabel = computed(() => new Intl.DateTimeFormat('es-AR', { dateStyle: 'full' }).format(dateFromKey(selectedDate.value)))
+const isCurrentMonth = computed(() => displayedMonth.value.getFullYear() === now.getFullYear() && displayedMonth.value.getMonth() === now.getMonth())
+const dayCounts = computed(() => {
+  const countsByDate = Object.create(null)
+  for (const deadline of deadlines.value) {
+    const counts = countsByDate[deadline.due_date] || (countsByDate[deadline.due_date] = emptyDayCounts())
+    counts.total++
+    if (deadline.status === 'completed') counts.completed++
+    else if (deadline.overdue) counts.overdue++
+    else if (deadline.due_soon) counts.dueSoon++
+    else counts.pending++
+  }
+  return countsByDate
+})
+const calendarDays = computed(() => {
+  const year = displayedMonth.value.getFullYear()
+  const month = displayedMonth.value.getMonth()
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const cellCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7
+
+  return Array.from({ length: cellCount }, (_, index) => {
+    const date = new Date(year, month, index - firstWeekday + 1)
+    const key = dateKey(date)
+    return {
+      date: key,
+      day: date.getDate(),
+      inMonth: date.getMonth() === month,
+      isToday: key === todayKey,
+      isSelected: key === selectedDate.value,
+      counts: dayCounts.value[key] || emptyDayCounts()
+    }
+  })
+})
+const selectedDayDeadlines = computed(() => deadlines.value.filter((deadline) => deadline.due_date === selectedDate.value))
+const selectedDayCounts = computed(() => dayCounts.value[selectedDate.value] || emptyDayCounts())
 const backTarget = computed(() => {
   const previous = router.options.history.state.back
   if (typeof previous !== 'string' || !previous.startsWith('/')) return '/home'
@@ -228,6 +339,7 @@ const canEditForm = computed(() => !formLoadFailed.value && (!editingDeadline.va
 const pendingCount = computed(() => deadlines.value.filter((deadline) => deadline.status === 'pending').length)
 const dueSoonCount = computed(() => deadlines.value.filter((deadline) => deadline.due_soon).length)
 const overdueCount = computed(() => deadlines.value.filter((deadline) => deadline.overdue).length)
+const completedCount = computed(() => deadlines.value.filter((deadline) => deadline.status === 'completed').length)
 let requestId = 0
 
 onMounted(loadInitial)
@@ -253,8 +365,14 @@ async function loadDeadlines() {
   isLoading.value = true
   loadError.value = ''
 
+  const queryFilters = visibleMonthFilters()
+  if (!queryFilters) {
+    isLoading.value = false
+    return
+  }
+
   try {
-    const result = await getDeadlines(filters)
+    const result = await getDeadlines(queryFilters)
     if (currentRequest === requestId) deadlines.value = result
   } catch (error) {
     if (currentRequest !== requestId || handleUnauthorized(error)) return
@@ -273,8 +391,83 @@ function clearFilters() {
   loadDeadlines()
 }
 
+function applyFilters() {
+  const dateToPositionCalendar = filters.due_date_from || filters.due_date_to
+  if (dateToPositionCalendar) {
+    const date = dateFromKey(dateToPositionCalendar)
+    displayedMonth.value = new Date(date.getFullYear(), date.getMonth(), 1)
+    selectedDate.value = dateKey(date)
+  }
+  loadDeadlines()
+}
+
+function visibleMonthFilters() {
+  if (filters.due_date_from && filters.due_date_to && filters.due_date_from > filters.due_date_to) {
+    return { ...filters }
+  }
+
+  const year = displayedMonth.value.getFullYear()
+  const month = displayedMonth.value.getMonth()
+  let dueDateFrom = dateKey(new Date(year, month, 1))
+  let dueDateTo = dateKey(new Date(year, month + 1, 0))
+  if (filters.due_date_from > dueDateFrom) dueDateFrom = filters.due_date_from
+  if (filters.due_date_to && filters.due_date_to < dueDateTo) dueDateTo = filters.due_date_to
+  if (dueDateFrom > dueDateTo) return null
+
+  return { ...filters, due_date_from: dueDateFrom, due_date_to: dueDateTo }
+}
+
+function moveMonth(offset) {
+  const current = displayedMonth.value
+  const next = new Date(current.getFullYear(), current.getMonth() + offset, 1)
+  const selectedDay = Number(selectedDate.value.slice(8, 10))
+  const finalDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
+  displayedMonth.value = next
+  selectedDate.value = dateKey(new Date(next.getFullYear(), next.getMonth(), Math.min(selectedDay, finalDay)))
+  loadDeadlines()
+}
+
+function goToCurrentMonth() {
+  const monthChanged = !isCurrentMonth.value
+  displayedMonth.value = new Date(now.getFullYear(), now.getMonth(), 1)
+  selectedDate.value = todayKey
+  if (monthChanged) loadDeadlines()
+}
+
+function selectDay(day) {
+  selectedDate.value = day.date
+  if (!day.inMonth) {
+    const date = dateFromKey(day.date)
+    displayedMonth.value = new Date(date.getFullYear(), date.getMonth(), 1)
+    loadDeadlines()
+  }
+}
+
+function calendarDayLabel(day) {
+  const date = dateFromKey(day.date)
+  const dateLabel = new Intl.DateTimeFormat('es-AR', { dateStyle: 'full' }).format(date)
+  return day.counts.total ? `${dateLabel}, ${day.counts.total} ${day.counts.total === 1 ? 'tarea' : 'tareas'}` : dateLabel
+}
+
+function emptyDayCounts() {
+  return { total: 0, pending: 0, dueSoon: 0, overdue: 0, completed: 0 }
+}
+
+function dateKey(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function dateFromKey(value) {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 function openCreate() {
   resetForm()
+  form.due_date = selectedDate.value
   actionError.value = ''
   successMessage.value = ''
   editingDeadline.value = null
@@ -328,6 +521,7 @@ async function saveDeadline() {
     status: form.status,
     notes: form.notes.trim() || null
   }
+  const savedDate = data.due_date
 
   isSaving.value = true
   formError.value = ''
@@ -342,6 +536,9 @@ async function saveDeadline() {
       await createDeadline(data)
       successMessage.value = 'Vencimiento creado correctamente.'
     }
+    const dueDate = dateFromKey(savedDate)
+    displayedMonth.value = new Date(dueDate.getFullYear(), dueDate.getMonth(), 1)
+    selectedDate.value = savedDate
     formVisible.value = false
     await loadDeadlines()
   } catch (error) {
@@ -457,10 +654,6 @@ function companyName(companyId) {
   return company ? company.name : companyId
 }
 
-function formatDate(value) {
-  return new Intl.DateTimeFormat('es-AR', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`))
-}
-
 function statusLabel(deadline) {
   if (deadline.overdue) return 'Vencida'
   if (deadline.due_soon) return 'Próxima a vencer'
@@ -473,9 +666,4 @@ function statusClass(deadline) {
   return deadline.status === 'completed' ? 'deadlines-status-completed' : 'deadlines-status-pending'
 }
 
-function deadlineRowClass(deadline) {
-  if (deadline.overdue) return 'deadlines-row-overdue'
-  if (deadline.due_soon) return 'deadlines-row-soon'
-  return deadline.status === 'completed' ? 'deadlines-row-completed' : ''
-}
 </script>
