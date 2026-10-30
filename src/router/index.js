@@ -59,6 +59,11 @@ const router = createRouter({
           component: () => import('../pages/documents/DocumentsPage.vue')
         },
         {
+          path: 'deadlines',
+          name: 'deadlines',
+          component: () => import('../pages/deadlines/DeadlinesPage.vue')
+        },
+        {
           path: 'billing',
           name: 'billing-home',
           component: () => import('../pages/billing/BillingHomePage.vue')
