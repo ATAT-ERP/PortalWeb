@@ -40,6 +40,9 @@
               <Search :size="16" aria-hidden="true" /> Buscar
             </Button>
             <Button type="button" label="Limpiar" severity="secondary" outlined :disabled="isLoading" @click="clearFilters" />
+            <Button type="button" severity="secondary" outlined :disabled="isLoading || isExporting || (reportType === 'general-ledger' && !accountId)" :loading="isExporting" @click="exportReport">
+              <Download :size="16" aria-hidden="true" /> {{ isExporting ? 'Descargando...' : 'Descargar CSV' }}
+            </Button>
           </div>
         </form>
 
@@ -47,6 +50,8 @@
           {{ accountsError }}
           <button type="button" class="reports-retry" @click="loadAccounts">Reintentar</button>
         </div>
+
+        <p v-if="exportError" class="reports-message reports-message-error" role="alert">{{ exportError }}</p>
 
         <p v-if="isLoading" class="reports-state" role="status">Cargando reporte...</p>
 
@@ -114,13 +119,13 @@
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Building2, ChartColumn, Search } from '@lucide/vue'
+import { Building2, ChartColumn, Download, Search } from '@lucide/vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import { getAccounts, getDailyJournal, getGeneralLedger, getTrialBalance } from '../../services/accounting.service'
+import { exportDailyJournal, exportGeneralLedger, exportTrialBalance, getAccounts, getDailyJournal, getGeneralLedger, getTrialBalance } from '../../services/accounting.service'
 import { clearSession } from '../../services/session.service'
 import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/AccountingReportsPage.css'
@@ -141,6 +146,8 @@ const accountsError = ref('')
 const rows = ref([])
 const isLoading = ref(false)
 const reportError = ref('')
+const isExporting = ref(false)
+const exportError = ref('')
 let reportRequest = 0
 let accountsRequest = 0
 
@@ -238,6 +245,7 @@ async function loadReport() {
   const request = ++reportRequest
   rows.value = []
   reportError.value = ''
+  exportError.value = ''
   if (!activeCompany.value || (reportType.value === 'general-ledger' && !accountId.value)) {
     isLoading.value = false
     return
@@ -271,5 +279,46 @@ function clearFilters() {
   filters.accounting_date_from = ''
   filters.accounting_date_to = ''
   loadReport()
+}
+
+/**
+ * Descarga en CSV el reporte elegido con los filtros actuales.
+ * El nombre del archivo replica el que arma NexusBack, porque el navegador no puede leer su encabezado.
+ * @version 1.0
+ * @author Uziel
+ */
+async function exportReport() {
+  if (isExporting.value || !activeCompany.value) return
+  const companyId = activeCompany.value.id
+  exportError.value = ''
+  isExporting.value = true
+  try {
+    let file
+    let filename
+    if (reportType.value === 'daily-journal') {
+      file = await exportDailyJournal(companyId, filters)
+      filename = `libro-diario-${companyId}.csv`
+    } else if (reportType.value === 'general-ledger') {
+      file = await exportGeneralLedger(companyId, accountId.value, filters)
+      filename = `libro-mayor-${companyId}-${accountId.value}.csv`
+    } else {
+      file = await exportTrialBalance(companyId, filters)
+      filename = `sumas-y-saldos-${companyId}.csv`
+    }
+    const url = URL.createObjectURL(file)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    if (handleUnauthorized(error)) return
+    if (error.status === 400) exportError.value = 'Revisá las fechas ingresadas e intentá nuevamente.'
+    else if (error.status === 403) exportError.value = 'No tenés permiso para descargar los reportes de esta compañía.'
+    else if (error.status === 404) exportError.value = 'La cuenta seleccionada ya no existe. Elegí otra cuenta.'
+    else exportError.value = 'No se pudo descargar el reporte. Intentá nuevamente.'
+  } finally {
+    isExporting.value = false
+  }
 }
 </script>

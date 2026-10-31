@@ -13,7 +13,8 @@ function buildUrl(path) {
 /**
  * Ejecuta una solicitud contra la base configurada de NexusBack.
  *
- * Con `auth: true` agrega el Bearer de la sesión actual. Devuelve `null` para
+ * Con `auth: true` agrega el Bearer de la sesión actual. Con `responseType: 'blob'`
+ * devuelve el archivo recibido sin transformarlo. Devuelve `null` para
  * respuestas 204/205 y normaliza errores HTTP con `message`, `status`, `code`
  * y `errors`.
  *
@@ -23,7 +24,7 @@ function buildUrl(path) {
  * @author Agustin
  */
 async function request(path, options = {}) {
-  const { auth, body, headers, ...requestOptions } = options
+  const { auth, body, headers, responseType, ...requestOptions } = options
   const hasJsonBody = body !== undefined && !(body instanceof FormData)
   const response = await fetch(buildUrl(path), {
     ...requestOptions,
@@ -37,6 +38,7 @@ async function request(path, options = {}) {
   })
 
   if (response.status === 204 || response.status === 205) return null
+  if (response.ok && responseType === 'blob') return response.blob()
 
   const contentType = response.headers.get('content-type') ?? ''
   const data = contentType.includes('application/json') ? await response.json() : await response.text()

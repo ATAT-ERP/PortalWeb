@@ -68,3 +68,45 @@ export function getTrialBalance(companyId, filters = {}) {
   const query = params.toString()
   return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/reports/trial-balance/${query ? `?${query}` : ''}`, { auth: true })
 }
+
+/**
+ * Descarga el Libro Diario en CSV con filtros de fecha opcionales.
+ * @version 1.0
+ * @author Uziel
+ */
+export function exportDailyJournal(companyId, filters = {}) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== '' && value !== null) params.set(key, value)
+  }
+  const query = params.toString()
+  return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/reports/daily-journal/export/${query ? `?${query}` : ''}`, { auth: true, responseType: 'blob' })
+}
+
+/**
+ * Descarga el Libro Mayor de una cuenta en CSV con filtros de fecha opcionales.
+ * @version 1.0
+ * @author Uziel
+ */
+export function exportGeneralLedger(companyId, accountId, filters = {}) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== '' && value !== null) params.set(key, value)
+  }
+  const query = params.toString()
+  return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/reports/general-ledger/${encodeURIComponent(accountId)}/export/${query ? `?${query}` : ''}`, { auth: true, responseType: 'blob' })
+}
+
+/**
+ * Descarga el balance de Sumas y Saldos en CSV con filtros de fecha opcionales.
+ * @version 1.0
+ * @author Uziel
+ */
+export function exportTrialBalance(companyId, filters = {}) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== '' && value !== null) params.set(key, value)
+  }
+  const query = params.toString()
+  return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/reports/trial-balance/export/${query ? `?${query}` : ''}`, { auth: true, responseType: 'blob' })
+}
