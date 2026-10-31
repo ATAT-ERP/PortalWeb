@@ -160,7 +160,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { BookOpen, Building2, CalendarDays, ChevronDown, ChevronRight, Cloud, FileText, Home, LogOut, Menu, Receipt, ReceiptText, UserRound } from '@lucide/vue'
+import { BookOpen, Building2, CalendarDays, ChartColumn, ChevronDown, ChevronRight, Cloud, FileText, Home, LogOut, Menu, Receipt, ReceiptText, UserRound } from '@lucide/vue'
 import Select from 'primevue/select'
 import AppFooter from './AppFooter.vue'
 import { logout } from '../../services/user.service'
@@ -182,6 +182,7 @@ const navItems = [
   { label: 'Cloud', to: '/documents', icon: Cloud },
   { label: 'Vencimientos', to: '/deadlines', icon: CalendarDays },
   { label: 'Plan de cuentas', to: '/accounting/chart-of-accounts', icon: BookOpen },
+  { label: 'Reportes contables', to: '/accounting/reports', icon: ChartColumn },
   {
     label: 'Facturación', icon: Receipt, section: '/billing', children: [
       { label: 'Facturas', to: '/billing/invoice-form', icon: FileText },
