@@ -189,15 +189,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  padding-bottom: 2.9rem;
-}
-
-.login-form > .login-field:last-of-type {
   padding-bottom: 1.1rem;
-}
-
-.login-form > .login-field:last-of-type {
-  padding-bottom: 0.4rem;
 }
 
 .login-field-label {
@@ -360,7 +352,7 @@
 .login-forgot-row {
   display: flex;
   justify-content: center;
-  margin-top: -2.55rem;
+  margin-top: -0.5rem;
 }
 
 .login-forgot-link {
