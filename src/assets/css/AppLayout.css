@@ -165,6 +165,7 @@
 
 .company-name {
   overflow: hidden;
+  color: var(--color-navigation-text);
   font-size: 0.82rem;
   font-weight: 600;
   text-overflow: ellipsis;
