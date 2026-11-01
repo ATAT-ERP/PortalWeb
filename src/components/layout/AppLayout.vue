@@ -182,7 +182,7 @@ const navItems = [
   { label: 'Cloud', to: '/documents', icon: Cloud },
   { label: 'Vencimientos', to: '/deadlines', icon: CalendarDays },
   { label: 'Plan de cuentas', to: '/accounting/chart-of-accounts', icon: BookOpen },
-  { label: 'Reportes contables', to: '/accounting/reports', icon: ChartColumn },
+  { label: 'Libros y balances', to: '/accounting/reports', icon: ChartColumn },
   {
     label: 'Facturación', icon: Receipt, section: '/billing', children: [
       { label: 'Facturas', to: '/billing/invoice-form', icon: FileText },
