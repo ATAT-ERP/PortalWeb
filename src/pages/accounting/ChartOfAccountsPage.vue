@@ -128,12 +128,14 @@
         </div>
       </form>
     </Dialog>
+
+    <BackLink :to="backTarget" label="Volver" />
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { BookOpen, Building2, FileText, Folder, Pencil, Plus, Power } from '@lucide/vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -142,6 +144,7 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
+import BackLink from '../../components/BackLink.vue'
 import { accountTypes } from '../../constants/accounting.constants'
 import { createAccount, getAccounts, updateAccount } from '../../services/accounting.service'
 import { clearSession } from '../../services/session.service'
@@ -153,6 +156,7 @@ const statusOptions = [{ label: 'Activas', value: 'active' }, { label: 'Inactiva
 const formFields = ['code', 'name', 'account_type']
 
 const router = useRouter()
+const route = useRoute()
 const accounts = ref([])
 const isLoading = ref(false)
 const listError = ref('')
@@ -169,6 +173,14 @@ const formError = ref('')
 const fieldErrors = ref({})
 const form = reactive({ code: '', name: '', account_type: null })
 let listRequest = 0
+
+const backTarget = computed(() => {
+  const previous = router.options.history.state.back
+  if (typeof previous !== 'string' || !previous.startsWith('/')) return '/home'
+  const previousRoute = router.resolve(previous)
+  if (previousRoute.path === route.path || !previousRoute.matched.some((record) => record.meta.requiresAuth)) return '/home'
+  return { path: previousRoute.path, query: previousRoute.query, hash: previousRoute.hash }
+})
 
 // El backend ordena por código como texto; acá se ordena numéricamente (1.2 antes de 1.10).
 const sortedAccounts = computed(() =>

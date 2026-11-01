@@ -114,7 +114,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { Activity, AlertTriangle, Building2, CalendarDays, ClipboardList, Cloud, File, FileImage, FileSpreadsheet, FileText, History, LayoutGrid, Receipt } from '@lucide/vue'
+import { Activity, AlertTriangle, BookOpen, Building2, CalendarDays, ClipboardList, Cloud, File, FileImage, FileSpreadsheet, FileText, History, LayoutGrid, ListTree, Receipt } from '@lucide/vue'
 import { getCompanies } from '../../services/company.service'
 import { getDeadlines } from '../../services/deadline.service'
 import { getDocuments } from '../../services/document.service'
@@ -127,7 +127,9 @@ const quickLinks = [
   { label: 'Cloud', to: '/documents', icon: Cloud },
   { label: 'Vencimientos', to: '/deadlines', icon: CalendarDays },
   { label: 'Compañías', to: '/companies', icon: Building2 },
-  { label: 'Facturación', to: '/billing', icon: Receipt }
+  { label: 'Facturación', to: '/billing', icon: Receipt },
+  { label: 'Plan de cuentas', to: '/accounting/chart-of-accounts', icon: ListTree },
+  { label: 'Libros y balances', to: '/accounting/reports', icon: BookOpen }
 ]
 const fileIcons = { image: FileImage, pdf: FileText, spreadsheet: FileSpreadsheet, document: FileText, other: File }
 const documents = ref([])

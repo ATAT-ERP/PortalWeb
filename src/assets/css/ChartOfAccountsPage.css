@@ -1,5 +1,6 @@
 .chart-page {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 1.5rem;
 }

@@ -3,7 +3,7 @@
     <header class="reports-header">
       <span class="reports-header-icon" aria-hidden="true"><ChartColumn :size="24" /></span>
       <div class="reports-header-text">
-        <h1>Reportes contables</h1>
+        <h1>Libros y balances</h1>
         <p>Consultá el Libro Diario, el Libro Mayor y el balance de Sumas y Saldos de la compañía activa.</p>
       </div>
     </header>
@@ -13,7 +13,7 @@
 
       <div v-if="!activeCompany" class="reports-empty">
         <span class="reports-empty-icon" aria-hidden="true"><Building2 :size="26" /></span>
-        <p class="reports-empty-title">Seleccioná una compañía para consultar sus reportes contables.</p>
+        <p class="reports-empty-title">Seleccioná una compañía para consultar sus libros y balances.</p>
         <RouterLink to="/companies" class="reports-link">Ir a Compañías</RouterLink>
       </div>
 
@@ -46,9 +46,17 @@
           </div>
         </form>
 
-        <div v-if="accountsError" class="reports-message reports-message-error" role="alert">
-          {{ accountsError }}
-          <button type="button" class="reports-retry" @click="loadAccounts">Reintentar</button>
+        <div v-if="reportType === 'general-ledger'" class="reports-account-state">
+          <p v-if="isLoadingAccounts" class="reports-state" role="status">Cargando cuentas...</p>
+          <div v-else-if="accountsError" class="reports-message reports-message-error" role="alert">
+            {{ accountsError }}
+            <button type="button" class="reports-retry" @click="loadAccounts">Reintentar</button>
+          </div>
+          <p v-else-if="accounts.length === 0" class="reports-state">
+            No hay cuentas disponibles para consultar el Libro Mayor.
+            <RouterLink to="/accounting/chart-of-accounts" class="reports-link">Ir a Plan de cuentas</RouterLink>
+          </p>
+          <p v-else-if="!accountId" class="reports-state">Seleccioná una cuenta y luego Buscar para consultar su Libro Mayor.</p>
         </div>
 
         <p v-if="exportError" class="reports-message reports-message-error" role="alert">{{ exportError }}</p>
@@ -59,8 +67,6 @@
           {{ reportError }}
           <button type="button" class="reports-retry" @click="loadReport">Reintentar</button>
         </div>
-
-        <p v-else-if="reportType === 'general-ledger' && !accountId" class="reports-state">Seleccioná una cuenta y luego Buscar para consultar su Libro Mayor.</p>
 
         <DataTable v-else-if="reportType === 'daily-journal'" :value="dailyJournalRows" data-key="id" row-group-mode="subheader" group-rows-by="entry_number" scrollable>
           <template #empty>No hay asientos para el período seleccionado.</template>
@@ -79,7 +85,7 @@
           </Column>
         </DataTable>
 
-        <DataTable v-else-if="reportType === 'general-ledger'" :value="rows" scrollable>
+        <DataTable v-else-if="reportType === 'general-ledger' && !isLoadingAccounts && !accountsError && accounts.length > 0 && accountId" :value="rows" scrollable>
           <template #empty>La cuenta no tiene movimientos en el período seleccionado.</template>
           <Column header="Fecha">
             <template #body="{ data }">{{ formatDate(data.accounting_date) }}</template>
@@ -97,7 +103,7 @@
           </Column>
         </DataTable>
 
-        <DataTable v-else :value="rows" data-key="account" scrollable>
+        <DataTable v-else-if="reportType === 'trial-balance'" :value="rows" data-key="account" scrollable>
           <template #empty>No hay cuentas con movimientos en el período seleccionado.</template>
           <Column field="code" header="Código" />
           <Column field="name" header="Cuenta" />
@@ -113,12 +119,14 @@
         </DataTable>
       </template>
     </section>
+
+    <BackLink :to="backTarget" label="Volver" />
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Building2, ChartColumn, Download, Search } from '@lucide/vue'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -127,6 +135,7 @@ import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import { exportDailyJournal, exportGeneralLedger, exportTrialBalance, getAccounts, getDailyJournal, getGeneralLedger, getTrialBalance } from '../../services/accounting.service'
 import { clearSession } from '../../services/session.service'
+import BackLink from '../../components/BackLink.vue'
 import { activeCompany } from '../../stores/company.store'
 import '../../assets/css/AccountingReportsPage.css'
 
@@ -137,7 +146,8 @@ const reportOptions = [
 ]
 
 const router = useRouter()
-const reportType = ref('daily-journal')
+const route = useRoute()
+const reportType = ref(route.query.report === 'general-ledger' ? 'general-ledger' : 'daily-journal')
 const filters = reactive({ accounting_date_from: '', accounting_date_to: '' })
 const accountId = ref(null)
 const accounts = ref([])
@@ -150,6 +160,14 @@ const isExporting = ref(false)
 const exportError = ref('')
 let reportRequest = 0
 let accountsRequest = 0
+
+const backTarget = computed(() => {
+  const previous = router.options.history.state.back
+  if (typeof previous !== 'string' || !previous.startsWith('/')) return '/home'
+  const previousRoute = router.resolve(previous)
+  if (previousRoute.path === route.path || !previousRoute.matched.some((record) => record.meta.requiresAuth)) return '/home'
+  return { path: previousRoute.path, query: previousRoute.query, hash: previousRoute.hash }
+})
 
 // El backend ordena por código como texto; acá se ordena numéricamente (1.2 antes de 1.10).
 const accountOptions = computed(() =>
