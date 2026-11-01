@@ -28,6 +28,47 @@ export function updateAccount(companyId, accountId, data) {
 }
 
 /**
+ * Consulta los asientos contables de una compañía con filtros opcionales.
+ * @version 1.0
+ * @author Thiago
+ */
+export function getJournalEntries(companyId, filters = {}) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== '' && value !== null) params.set(key, value)
+  }
+  const query = params.toString()
+  return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/${query ? `?${query}` : ''}`, { auth: true })
+}
+
+/**
+ * Consulta el detalle de un asiento con sus movimientos.
+ * @version 1.0
+ * @author Thiago
+ */
+export function getJournalEntry(companyId, entryId) {
+  return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/${encodeURIComponent(entryId)}/`, { auth: true })
+}
+
+/**
+ * Publica un asiento en borrador.
+ * @version 1.0
+ * @author Thiago
+ */
+export function publishJournalEntry(companyId, entryId) {
+  return api.post(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/${encodeURIComponent(entryId)}/publish/`, undefined, { auth: true })
+}
+
+/**
+ * Revierte un asiento publicado generando el asiento espejo.
+ * @version 1.0
+ * @author Thiago
+ */
+export function reverseJournalEntry(companyId, entryId) {
+  return api.post(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/${encodeURIComponent(entryId)}/reverse/`, undefined, { auth: true })
+}
+
+/**
  * Consulta el Libro Diario de una compañía con filtros de fecha opcionales.
  * @version 1.0
  * @author Uziel

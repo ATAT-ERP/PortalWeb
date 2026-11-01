@@ -99,6 +99,11 @@ const router = createRouter({
           component: () => import('../pages/accounting/ChartOfAccountsPage.vue')
         },
         {
+          path: 'accounting/journal-entries',
+          name: 'journal-entries',
+          component: () => import('../pages/accounting/JournalEntriesPage.vue')
+        },
+        {
           path: 'accounting/reports',
           name: 'accounting-reports',
           component: () => import('../pages/accounting/AccountingReportsPage.vue')
