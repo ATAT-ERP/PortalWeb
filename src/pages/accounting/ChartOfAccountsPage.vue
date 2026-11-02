@@ -24,7 +24,7 @@
 
       <div v-else-if="listError" class="chart-message chart-message-error" role="alert">
         {{ listError }}
-        <button type="button" class="chart-retry" @click="loadAccounts">Reintentar</button>
+        <button type="button" class="chart-retry" @click="loadAccounts()">Reintentar</button>
       </div>
 
       <div v-else-if="accounts.length === 0" class="chart-empty">
@@ -264,7 +264,7 @@ function isParent(code) {
  * @version 1.0
  * @author Thiago
  */
-async function loadAccounts() {
+async function loadAccounts(accountCreated = false) {
   const request = ++listRequest
   listError.value = ''
   if (!activeCompany.value) { accounts.value = []; isLoading.value = false; return }
@@ -277,6 +277,7 @@ async function loadAccounts() {
       listError.value = error.status === 403
         ? 'No tenés permiso para consultar el plan de cuentas de esta compañía.'
         : 'No se pudo cargar el plan de cuentas. Intentá nuevamente.'
+      if (accountCreated) listError.value = `La cuenta se creó correctamente, pero no se pudo actualizar el listado. ${listError.value}`
     }
   } finally {
     if (request === listRequest) isLoading.value = false
@@ -333,6 +334,8 @@ async function submitForm() {
   formError.value = ''
   fieldErrors.value = {}
   const companyId = activeCompany.value.id
+  const request = listRequest
+  const creating = !editingAccount.value
   const payload = { code: form.code.trim(), name: form.name.trim(), account_type: form.account_type }
   isSaving.value = true
   try {
@@ -342,15 +345,20 @@ async function submitForm() {
       )
       if (Object.keys(changes).length === 0) { dialogVisible.value = false; return }
       await updateAccount(companyId, editingAccount.value.id, changes)
-      statusMessage.value = 'Cuenta actualizada correctamente.'
     } else {
       await createAccount(companyId, payload)
-      statusMessage.value = 'Cuenta creada correctamente.'
+    }
+    if (request !== listRequest || activeCompany.value?.id !== companyId) return
+    statusMessage.value = creating ? 'Cuenta creada correctamente.' : 'Cuenta actualizada correctamente.'
+    if (creating) {
+      search.value = ''
+      typeFilter.value = null
+      statusFilter.value = null
     }
     dialogVisible.value = false
-    await loadAccounts()
+    await loadAccounts(creating)
   } catch (error) {
-    applyFormError(error)
+    if (request === listRequest && activeCompany.value?.id === companyId) applyFormError(error)
   } finally {
     isSaving.value = false
   }
