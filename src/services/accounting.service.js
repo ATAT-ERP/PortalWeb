@@ -50,6 +50,33 @@ export function getJournalEntry(companyId, entryId) {
   return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/${encodeURIComponent(entryId)}/`, { auth: true })
 }
 
+/** 
+ * Crea un borrador manual con sus movimientos. 
+ * @version 1.0
+ * @author Agustin
+ * */
+export function createJournalEntry(companyId, data) {
+  return api.post(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/`, data, { auth: true })
+}
+
+/** 
+ * Consulta los borradores de una compañía. * 
+ * @version 1.0
+ * @author Agustin 
+ * */
+export function getJournalEntryDrafts(companyId) {
+  return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/drafts/`, { auth: true })
+}
+
+/** 
+ * Consulta el detalle de un borrador. 
+ * @version 1.0
+ * @author Agustin
+ * */
+export function getJournalEntryDraft(companyId, entryId) {
+  return api.get(`/accounting/companies/${encodeURIComponent(companyId)}/journal-entries/drafts/${encodeURIComponent(entryId)}/`, { auth: true })
+}
+
 /**
  * Publica un asiento en borrador.
  * @version 1.0
