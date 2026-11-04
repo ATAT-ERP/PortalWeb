@@ -5,6 +5,7 @@ import { getActiveCompanyId, saveActiveCompanyId } from '../services/session.ser
 export const companies = ref([])
 export const activeCompany = ref(null)
 export const isLoadingCompanies = ref(false)
+export const companiesError = ref(false)
 
 export function selectCompany(company) {
   activeCompany.value = company
@@ -13,6 +14,7 @@ export function selectCompany(company) {
 
 export async function loadCompanies() {
   isLoadingCompanies.value = true
+  companiesError.value = false
 
   try {
     companies.value = await getCompanies()
@@ -28,6 +30,7 @@ export async function loadCompanies() {
       selectCompany(null)
     }
   } catch (error) {
+    companiesError.value = true
     companies.value = []
     selectCompany(null)
     throw error

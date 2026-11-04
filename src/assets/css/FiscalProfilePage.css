@@ -1,0 +1,17 @@
+.fiscal-page { max-width: 900px; margin: 0 auto; }
+.fiscal-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.fiscal-header-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; color: var(--color-accent); background: var(--color-accent-background); flex-shrink: 0; }
+.fiscal-header h1 { margin: 0; font-size: 1.6rem; }
+.fiscal-header p { margin: .35rem 0 0; color: var(--color-text-secondary); }
+.fiscal-card { padding: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-card); }
+.fiscal-card h2 { margin: 0 0 1rem; font-size: 1.1rem; }
+.fiscal-state, .fiscal-intro { color: var(--color-text-secondary); }
+.fiscal-form { display: grid; gap: 1rem; max-width: 480px; margin-top: 1.5rem; }
+.fiscal-field { display: flex; flex-direction: column; gap: .4rem; }
+.fiscal-field label { font-size: .875rem; font-weight: 600; }
+.fiscal-field-error, .fiscal-error { color: var(--color-danger); }
+.fiscal-field-error { font-size: .8rem; }
+.fiscal-form p { margin: 0; }
+.fiscal-success { color: var(--color-text-secondary); }
+.fiscal-form > button { justify-self: start; }
+@media (max-width: 600px) { .fiscal-card { padding: 1rem; } .fiscal-header h1 { font-size: 1.35rem; } }

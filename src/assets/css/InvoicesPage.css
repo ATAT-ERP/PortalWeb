@@ -1,0 +1,21 @@
+.invoices-page { max-width: 1400px; margin: 0 auto; }
+.invoices-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.invoices-header-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; color: var(--color-accent); background: var(--color-accent-background); flex-shrink: 0; }
+.invoices-header h1 { margin: 0; font-size: 1.6rem; }
+.invoices-header p { margin: .35rem 0 0; color: var(--color-text-secondary); }
+.invoices-card { padding: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-card); }
+.invoices-card h2 { margin: 0 0 1.25rem; font-size: 1.1rem; }
+.invoices-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); align-items: end; gap: 1rem; margin-bottom: 1.5rem; }
+.invoices-filters label { display: flex; flex-direction: column; gap: .4rem; font-size: .875rem; font-weight: 600; }
+.invoices-filters input[type='date'] { min-width: 0; width: 100%; padding: .58rem .75rem; font: inherit; font-weight: 400; color: var(--color-text-primary); background: var(--color-surface-input); border: 1px solid var(--color-border); border-radius: 6px; }
+.invoices-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.invoices-state { color: var(--color-text-secondary); }
+.invoices-error { color: var(--color-danger); }
+.invoices-retry { padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+.invoices-pdf-actions { margin-bottom: 1.25rem; }
+.invoice-detail h3 { margin: 1.5rem 0 .75rem; font-size: 1rem; }
+.invoice-detail h3:first-child { margin-top: 0; }
+.invoice-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .9rem 1.5rem; margin: 0; }
+.invoice-detail-grid dt { color: var(--color-text-secondary); font-size: .8rem; }
+.invoice-detail-grid dd { margin: .25rem 0 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .invoices-card { padding: 1rem; } .invoices-header h1 { font-size: 1.35rem; } }

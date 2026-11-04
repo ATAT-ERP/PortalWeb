@@ -1,0 +1,13 @@
+.points-page { max-width: 1200px; margin: 0 auto; }
+.points-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.points-header-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; color: var(--color-accent); background: var(--color-accent-background); flex-shrink: 0; }
+.points-header h1 { margin: 0; font-size: 1.6rem; }
+.points-header p, .points-card-header p { margin: .35rem 0 0; color: var(--color-text-secondary); }
+.points-card { padding: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-card); }
+.points-card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+.points-card-header h2 { margin: 0; font-size: 1.1rem; }
+.points-card-header p { font-size: .875rem; }
+.points-state, .points-success { color: var(--color-text-secondary); }
+.points-error { color: var(--color-danger); }
+.points-error a { color: inherit; }
+@media (max-width: 600px) { .points-card { padding: 1rem; } .points-header h1 { font-size: 1.35rem; } }

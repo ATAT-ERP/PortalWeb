@@ -1,0 +1,21 @@
+<!--
+  ChartNoAxesCombined icon derived from Lucide, licensed under ISC.
+  Copyright (c) 2026 Lucide Icons and Contributors
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <rect x="1" y="1" width="38" height="38" rx="11" fill="#3b4f5e"/>
+  <g stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2">
+    <path d="M10 29v-5M17 29v-9M24 29V13M30 29v-7M9 30h23"/>
+  </g>
+  <path d="m9 21 8-8 5 5L31 9" stroke="#ca6771" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.8"/>
+</svg>

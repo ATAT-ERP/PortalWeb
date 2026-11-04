@@ -1,91 +1,86 @@
-# Portal
+﻿<h1 align="center">PortalWeb</h1>
 
-Frontend web de **A.T.A.T. ERP**. Consume por HTTP/JSON la API REST de **NexusBack**.
+<p align="center">
+  Frontend web de <strong>A.T.A.T. ERP</strong> para contadores y estudios contables.<br>
+  Gestión de compañías y documentos de sus clientes, conectada a la API de NexusBack.
+</p>
 
-## Stack
+<p align="center">
+  <img src="https://img.shields.io/badge/Vue_3-3b4f5e?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3">
+  <img src="https://img.shields.io/badge/Vite-3b4f5e?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Vue_Router-3b4f5e?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue Router">
+  <img src="https://img.shields.io/badge/PrimeVue-a83a42?style=for-the-badge&logo=primevue&logoColor=white" alt="PrimeVue">
+  <img src="https://img.shields.io/badge/Lucide-3b4f5e?style=for-the-badge&logo=lucide&logoColor=white" alt="Lucide">
+</p>
 
-- Vue 3
-- Vite
-- JavaScript
-- Vue Router
-- @lucide/vue
-- npm
-
-## Requisitos
-
-- Node.js compatible con Vite
-- npm
+Vue 3 y Vite forman la base del frontend, con Vue Router para la navegación. La interfaz combina CSS propio, componentes PrimeVue con el tema **Aura** e iconos de Lucide.
 
 ## Instalación y ejecución
 
-1. Creá `.env` a partir de `.env.example` y configurá la URL de NexusBack.
-2. Instalá las dependencias:
+Requiere **Node.js `^20.19.0` o `>=22.12.0`**, npm y acceso a NexusBack.
 
-   ```bash
-   npm install
-   ```
+Desde la raíz del repositorio, instalá las dependencias:
 
-3. Iniciá el entorno de desarrollo:
+```bash
+npm install
+```
 
-   ```bash
-   npm run dev
-   ```
+Prepará `.env` según la sección de configuración e iniciá el frontend:
 
-## Build de producción
+```bash
+npm run dev
+```
+
+Abrí la dirección indicada por Vite, habitualmente `http://localhost:5173`.
+
+Para generar la compilación en `dist/`:
 
 ```bash
 npm run build
 ```
 
-## Vista previa de producción
+Para revisar esa compilación localmente:
 
 ```bash
 npm run preview
 ```
 
-## Instalar una dependencia
-
-El gestor de paquetes oficial de Portal es **npm**. Para incorporar una dependencia futura, usá:
-
-```bash
-npm install nombre-paquete
-```
-
 ## Configuración
 
-La variable `VITE_API_URL` define la base de NexusBack:
+Creá `.env` a partir de `.env.example` y elegí la URL de NexusBack. La base debe incluir `/api`:
 
-```env
-VITE_API_URL=http://localhost:8000/api
+```ini
+# Backend local
+# VITE_API_URL=http://localhost:8000/api
+
+# Backend Render
+VITE_API_URL=https://nexusback-p0xi.onrender.com/api
 ```
 
-NexusBack no usa `/api/v1`. No se versiona el archivo `.env`; sí se incluye `.env.example` como referencia.
+Dejá **una sola asignación activa de `VITE_API_URL`**; el `.env.example` actual incluye ambas sin comentar. Para usar el backend local, descomentá su línea y comentá la de Render.
 
-## Integración users actual
+**Reiniciá Vite después de modificar `.env`.** Si usás una compilación de producción, volvé a generarla con la configuración elegida.
 
-El login real está conectado desde `LoginPage`:
+NexusBack debe estar disponible y permitir por CORS el origen de PortalWeb. Podés ejecutar el frontend localmente contra Render: esa conexión corresponde al backend y no implica que PortalWeb esté publicado.
 
-```text
-LoginPage → userService.login(email, password) → POST /api/users/login/
-          → sessionService.saveSession(response) → /home
-```
+## Funcionalidades actuales
 
-La sesión se persiste por pestaña mediante `sessionStorage`. Las demás operaciones disponibles en `user.service.js` todavía no están conectadas a una interfaz.
+- **Acceso:** página pública, registro, inicio y cierre de sesión.
+- **Mi cuenta:** consulta del perfil, edición de nombre y apellido y cambio de contraseña.
+- **Compañías:** listado, búsqueda, creación, edición y selección de la compañía activa.
+- **Documentos:** carga, listado, búsqueda por nombre y descarga para la compañía activa.
+
+La sesión se guarda por pestaña en `sessionStorage`. Las rutas privadas requieren un token y los servicios consumen la API con autenticación Bearer, sin renovación automática.
+
+## Pendientes
+
+**Accounting y Billing** aún requieren integración visual y no tienen pantallas ni rutas registradas. Inicio conserva datos de ejemplo y espacios pendientes para accesos rápidos y novedades. La recuperación de contraseña y la eliminación de compañías desde la interfaz tampoco están implementadas.
 
 ## Documentación
 
-- [Arquitectura](docs/ARCHITECTURE.md)
-- [Guía de trabajo](docs/WORKFLOW.md)
-- [Integración con NexusBack](docs/nexusback/README.md)
-- [Contrato del módulo users](docs/nexusback/users.md)
+- [Arquitectura del frontend](docs/ARCHITECTURE.md) y [guía de trabajo](docs/WORKFLOW.md).
+- [Integración con NexusBack](docs/nexusback/README.md) y [reglas de integración](docs/nexusback/INTEGRATION_RULES.md).
+- [Contrato de usuarios](docs/nexusback/users.md).
+- [Convenciones para agentes](AGENTS.md).
 
-## Instrucciones para agentes de desarrollo
-
-PortalWeb incluye instrucciones versionadas para asistentes de código y agentes internos.
-
-* `AGENTS.md`: convenciones y reglas generales del repositorio.
-* `.agents/skills/frontend-module/`: guía para crear nuevas páginas, secciones o módulos respetando la arquitectura existente.
-* `.agents/skills/frontend-change/`: guía para modificar funcionalidades existentes sin alterar contratos o patrones fuera de alcance.
-* `CLAUDE.md` y `.gemini/settings.json`: integración con herramientas compatibles.
-
-Estas instrucciones buscan mantener consistencia entre contribuciones y preservar la arquitectura y los contratos actuales del proyecto.
+Algunas referencias en `docs/` todavía describen sólo el login como integrado y restringen Company; requieren actualización frente al estado del código resumido aquí.
